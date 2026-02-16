@@ -29,6 +29,8 @@ import {
   addLessonAction,
   removeLessonAction,
   reorderLessonsAction,
+  addBundleItemAction,
+  removeBundleItemAction,
   syncToStripeAction,
 } from '../actions'
 import {
@@ -38,6 +40,8 @@ import {
   Plus,
   RefreshCw,
   Loader2,
+  Package,
+  Info,
 } from 'lucide-react'
 
 function generateSlug(title: string): string {
@@ -96,24 +100,36 @@ type Product = {
   bundleItems: BundleItem[]
 }
 
+type AvailableProduct = {
+  id: string
+  title: string
+  type: string
+}
+
 type ProductFormProps = {
   mode: 'create' | 'edit'
   initialData?: Product
   availableContentUnits?: ContentUnit[]
+  availableProducts?: AvailableProduct[]
 }
 
 export function ProductForm({
   mode,
   initialData,
   availableContentUnits = [],
+  availableProducts = [],
 }: ProductFormProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [isSyncing, setIsSyncing] = useState(false)
   const slugManuallyEdited = useRef(false)
   const [showLessonDialog, setShowLessonDialog] = useState(false)
+  const [showBundleDialog, setShowBundleDialog] = useState(false)
   const [lessons, setLessons] = useState<CourseLesson[]>(
     initialData?.courseLessons ?? []
+  )
+  const [bundleItems, setBundleItems] = useState<BundleItem[]>(
+    initialData?.bundleItems ?? []
   )
 
   const [formData, setFormData] = useState<ProductFormData>({
@@ -260,6 +276,53 @@ export function ProductForm({
     })
   }
 
+  async function handleAddBundleItem(includedProductId: string) {
+    if (!initialData) return
+
+    startTransition(async () => {
+      try {
+        await addBundleItemAction(initialData.id, includedProductId)
+        const product = availableProducts.find(
+          (p) => p.id === includedProductId
+        )
+        if (product) {
+          setBundleItems((prev) => [
+            ...prev,
+            {
+              id: crypto.randomUUID(),
+              includedProductId: product.id,
+              includedProduct: {
+                id: product.id,
+                title: product.title,
+                type: product.type,
+              },
+            },
+          ])
+        }
+        setShowBundleDialog(false)
+        toast.success('Produkt tilfojet til pakke')
+      } catch {
+        toast.error('Kunne ikke tilfoeje produkt til pakke')
+      }
+    })
+  }
+
+  async function handleRemoveBundleItem(includedProductId: string) {
+    if (!initialData) return
+
+    startTransition(async () => {
+      try {
+        await removeBundleItemAction(initialData.id, includedProductId)
+        setBundleItems((prev) =>
+          prev.filter((item) => item.includedProductId !== includedProductId)
+        )
+        toast.success('Produkt fjernet fra pakke')
+      } catch {
+        toast.error('Kunne ikke fjerne produkt fra pakke')
+      }
+    })
+  }
+
   async function handleSyncToStripe() {
     if (!initialData) return
 
@@ -282,6 +345,27 @@ export function ProductForm({
   const availableLessonUnits = availableContentUnits.filter(
     (unit) => !lessons.some((l) => l.contentUnitId === unit.id)
   )
+
+  // Products not yet added to bundle (excludes bundles and self, already filtered server-side)
+  const availableBundleProducts = availableProducts.filter(
+    (product) =>
+      !bundleItems.some((item) => item.includedProductId === product.id)
+  )
+
+  // For SINGLE type: the linked content unit (first lesson)
+  const singleContentUnit = formData.type === 'SINGLE' ? lessons[0] ?? null : null
+
+  // Content units available for SINGLE type (not yet linked)
+  const availableSingleUnits = availableContentUnits.filter(
+    (unit) => !lessons.some((l) => l.contentUnitId === unit.id)
+  )
+
+  const productTypeLabels: Record<string, string> = {
+    SUBSCRIPTION: 'Abonnement',
+    COURSE: 'Kursus',
+    SINGLE: 'Enkeltstaaende',
+    BUNDLE: 'Pakke',
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
@@ -520,16 +604,169 @@ export function ProductForm({
         </Card>
       )}
 
-      {/* Bundle placeholder */}
-      {formData.type === 'BUNDLE' && (
+      {/* Bundle Items (only for BUNDLE type in edit mode) */}
+      {formData.type === 'BUNDLE' && mode === 'edit' && initialData && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle>Pakkeindhold</CardTitle>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => setShowBundleDialog(true)}
+                disabled={isPending || availableBundleProducts.length === 0}
+              >
+                <Plus className="mr-2 size-4" />
+                Tilfoej produkt
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {bundleItems.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Ingen produkter tilfojet endnu. Tilfoej produkter til denne
+                pakke.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {bundleItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center gap-3 rounded-md border p-3"
+                  >
+                    <Package className="size-4 shrink-0 text-muted-foreground" />
+                    <div className="flex-1">
+                      <div className="text-sm font-medium">
+                        {item.includedProduct.title}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {productTypeLabels[item.includedProduct.type] ??
+                          item.includedProduct.type}
+                      </div>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="size-8 p-0 text-destructive hover:text-destructive"
+                      onClick={() =>
+                        handleRemoveBundleItem(item.includedProductId)
+                      }
+                      disabled={isPending}
+                    >
+                      <X className="size-4" />
+                      <span className="sr-only">Fjern</span>
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Bundle placeholder for create mode */}
+      {formData.type === 'BUNDLE' && mode === 'create' && (
         <Card>
           <CardHeader>
             <CardTitle>Pakkeindhold</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              Bundle items administreres efter oprettelse.
+              Produkter kan tilfojes til pakken efter oprettelse.
             </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Single Content Unit (only for SINGLE type in edit mode) */}
+      {formData.type === 'SINGLE' && mode === 'edit' && initialData && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Indhold</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {singleContentUnit ? (
+              <div className="flex items-center gap-3 rounded-md border p-3">
+                <div className="flex-1">
+                  <div className="text-sm font-medium">
+                    {singleContentUnit.contentUnit.title}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {singleContentUnit.contentUnit.mediaType} &middot; /
+                    {singleContentUnit.contentUnit.slug}
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={async () => {
+                    await handleRemoveLesson(singleContentUnit.contentUnitId)
+                    setShowLessonDialog(true)
+                  }}
+                  disabled={isPending}
+                >
+                  Skift
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  Intet indhold tilknyttet endnu. Vaelg en indholdsenheld til
+                  dette produkt.
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowLessonDialog(true)}
+                  disabled={isPending || availableSingleUnits.length === 0}
+                >
+                  <Plus className="mr-2 size-4" />
+                  Vaelg indhold
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Single placeholder for create mode */}
+      {formData.type === 'SINGLE' && mode === 'create' && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Indhold</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              Indhold kan tilknyttes efter oprettelse af produktet.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Subscription Info */}
+      {formData.type === 'SUBSCRIPTION' && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Abonnement</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-start gap-3 rounded-md border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950">
+              <Info className="mt-0.5 size-4 shrink-0 text-blue-600 dark:text-blue-400" />
+              <div className="space-y-1 text-sm">
+                <p>
+                  Abonnementsproduktet giver adgang til alt indhold markeret med
+                  &quot;Abonnement&quot; adgangsniveau.
+                </p>
+                <p className="text-muted-foreground">
+                  Stripe-synkronisering opretter en gentagende maanedlig pris
+                  baseret paa det angivne beloeb.
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       )}
@@ -603,20 +840,30 @@ export function ProductForm({
         </Button>
       </div>
 
-      {/* Add Lesson Dialog */}
+      {/* Add Lesson / Content Dialog */}
       <Dialog open={showLessonDialog} onOpenChange={setShowLessonDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Tilfoej lektion</DialogTitle>
+            <DialogTitle>
+              {formData.type === 'SINGLE'
+                ? 'Vaelg indhold'
+                : 'Tilfoej lektion'}
+            </DialogTitle>
           </DialogHeader>
           <div className="max-h-[400px] overflow-y-auto">
-            {availableLessonUnits.length === 0 ? (
+            {(formData.type === 'SINGLE'
+              ? availableSingleUnits
+              : availableLessonUnits
+            ).length === 0 ? (
               <p className="py-4 text-center text-sm text-muted-foreground">
                 Intet tilgaengeligt indhold at tilfoeje.
               </p>
             ) : (
               <div className="space-y-2">
-                {availableLessonUnits.map((unit) => (
+                {(formData.type === 'SINGLE'
+                  ? availableSingleUnits
+                  : availableLessonUnits
+                ).map((unit) => (
                   <button
                     key={unit.id}
                     type="button"
@@ -628,6 +875,45 @@ export function ProductForm({
                       <div className="text-sm font-medium">{unit.title}</div>
                       <div className="text-xs text-muted-foreground">
                         {unit.mediaType} &middot; /{unit.slug}
+                      </div>
+                    </div>
+                    <Plus className="size-4 text-muted-foreground" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Bundle Item Dialog */}
+      <Dialog open={showBundleDialog} onOpenChange={setShowBundleDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Tilfoej produkt til pakke</DialogTitle>
+          </DialogHeader>
+          <div className="max-h-[400px] overflow-y-auto">
+            {availableBundleProducts.length === 0 ? (
+              <p className="py-4 text-center text-sm text-muted-foreground">
+                Ingen tilgaengelige produkter at tilfoeje.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {availableBundleProducts.map((product) => (
+                  <button
+                    key={product.id}
+                    type="button"
+                    className="flex w-full items-center gap-3 rounded-md border p-3 text-left transition-colors hover:bg-accent"
+                    onClick={() => handleAddBundleItem(product.id)}
+                    disabled={isPending}
+                  >
+                    <Package className="size-4 shrink-0 text-muted-foreground" />
+                    <div className="flex-1">
+                      <div className="text-sm font-medium">
+                        {product.title}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {productTypeLabels[product.type] ?? product.type}
                       </div>
                     </div>
                     <Plus className="size-4 text-muted-foreground" />

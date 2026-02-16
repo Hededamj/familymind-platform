@@ -69,6 +69,26 @@ export async function reorderLessonsAction(
   revalidatePath(`/admin/products/${productId}/edit`)
 }
 
+export async function addBundleItemAction(
+  bundleProductId: string,
+  includedProductId: string
+) {
+  await requireAdmin()
+  await productService.addProductToBundle(bundleProductId, includedProductId)
+  revalidatePath('/admin/products')
+  revalidatePath(`/admin/products/${bundleProductId}/edit`)
+}
+
+export async function removeBundleItemAction(
+  bundleProductId: string,
+  includedProductId: string
+) {
+  await requireAdmin()
+  await productService.removeProductFromBundle(bundleProductId, includedProductId)
+  revalidatePath('/admin/products')
+  revalidatePath(`/admin/products/${bundleProductId}/edit`)
+}
+
 export async function syncToStripeAction(productId: string) {
   await requireAdmin()
   try {

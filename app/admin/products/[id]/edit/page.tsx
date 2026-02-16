@@ -12,7 +12,7 @@ export default async function EditProductPage({
   await requireAdmin()
   const { id } = await params
 
-  const [product, contentUnits] = await Promise.all([
+  const [product, contentUnits, allProducts] = await Promise.all([
     getProductById(id),
     prisma.contentUnit.findMany({
       select: {
@@ -20,6 +20,18 @@ export default async function EditProductPage({
         title: true,
         slug: true,
         mediaType: true,
+      },
+      orderBy: { title: 'asc' },
+    }),
+    prisma.product.findMany({
+      where: {
+        type: { not: 'BUNDLE' },
+        id: { not: id },
+      },
+      select: {
+        id: true,
+        title: true,
+        type: true,
       },
       orderBy: { title: 'asc' },
     }),
@@ -41,6 +53,7 @@ export default async function EditProductPage({
         mode="edit"
         initialData={product}
         availableContentUnits={contentUnits}
+        availableProducts={allProducts}
       />
     </div>
   )
