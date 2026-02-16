@@ -4,12 +4,15 @@ import Image from 'next/image'
 import { getContentUnit } from '@/lib/services/content.service'
 import { getCurrentUser } from '@/lib/auth'
 import { canAccessContent } from '@/lib/services/entitlement.service'
+import { getContentProgress } from '@/lib/services/progress.service'
 import { getSignedPlaybackUrl, getThumbnailUrl } from '@/lib/bunny'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { VideoPlayer } from './_components/video-player'
+import { MarkCompleteButton } from './_components/mark-complete-button'
+import { TrackStarted } from './_components/track-started'
 
 function difficultyLabel(difficulty: string): string {
   switch (difficulty) {
@@ -83,9 +86,18 @@ export default async function ContentPage({
       playbackUrl = await getSignedPlaybackUrl(content.bunnyVideoId)
     }
 
+    // Check progress for authenticated users
+    const progress = user
+      ? await getContentProgress(user.id, content.id)
+      : null
+    const isCompleted = !!progress?.completedAt
+
     return (
       <div className="flex min-h-screen flex-col px-4 py-8 sm:px-8">
         <div className="mx-auto w-full max-w-3xl">
+          {/* Track content as started for authenticated users */}
+          {user && <TrackStarted contentUnitId={content.id} />}
+
           {/* Back link */}
           <Link
             href="/dashboard"
@@ -169,6 +181,16 @@ export default async function ContentPage({
           {content.description && (
             <div className="prose prose-sm max-w-none text-muted-foreground sm:prose-base">
               <p>{content.description}</p>
+            </div>
+          )}
+
+          {/* Mark as complete button */}
+          {user && (
+            <div className="mt-8 border-t pt-6">
+              <MarkCompleteButton
+                contentUnitId={content.id}
+                isCompleted={isCompleted}
+              />
             </div>
           )}
         </div>
