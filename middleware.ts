@@ -28,7 +28,24 @@ export async function middleware(request: NextRequest) {
   )
 
   // Refresh session - important!
-  await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  const path = request.nextUrl.pathname
+
+  // Protected routes: redirect to login if not authenticated
+  if ((path.startsWith('/dashboard') || path.startsWith('/admin')) && !user) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    url.searchParams.set('redirectTo', path)
+    return NextResponse.redirect(url)
+  }
+
+  // Auth routes: redirect to dashboard if already authenticated
+  if ((path === '/login' || path === '/signup') && user) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/dashboard'
+    return NextResponse.redirect(url)
+  }
 
   return supabaseResponse
 }
