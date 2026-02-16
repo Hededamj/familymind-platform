@@ -7,11 +7,13 @@ import {
   Map,
   Settings,
   ArrowLeft,
+  Tag,
 } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 
 const navItems = [
   { href: '/admin/content', label: 'Indhold', icon: FileText },
+  { href: '/admin/tags', label: 'Tags', icon: Tag },
   { href: '/admin/products', label: 'Produkter', icon: Package },
   { href: '/admin/discounts', label: 'Rabatkoder', icon: Ticket },
   { href: '/admin/journeys', label: 'Rejser', icon: Map },
