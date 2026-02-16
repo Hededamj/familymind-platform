@@ -1,5 +1,13 @@
 import { prisma } from '@/lib/prisma'
 
+const activeEntitlementFilter = {
+  status: 'ACTIVE' as const,
+  OR: [
+    { expiresAt: null },
+    { expiresAt: { gt: new Date() } },
+  ],
+}
+
 export async function createEntitlement(data: {
   userId: string
   productId: string
@@ -13,7 +21,7 @@ export async function createEntitlement(data: {
 
 export async function getUserEntitlements(userId: string) {
   return prisma.entitlement.findMany({
-    where: { userId, status: 'ACTIVE' },
+    where: { userId, ...activeEntitlementFilter },
     include: { product: true },
   })
 }
@@ -35,7 +43,7 @@ export async function canAccessContent(
     const subEntitlement = await prisma.entitlement.findFirst({
       where: {
         userId,
-        status: 'ACTIVE',
+        ...activeEntitlementFilter,
         product: { type: 'SUBSCRIPTION' },
       },
     })
@@ -48,7 +56,7 @@ export async function canAccessContent(
     const entitlement = await prisma.entitlement.findFirst({
       where: {
         userId,
-        status: 'ACTIVE',
+        ...activeEntitlementFilter,
         productId: { in: productIds },
       },
     })
@@ -65,7 +73,7 @@ export async function canAccessContent(
     })
     if (singleProduct) {
       const ent = await prisma.entitlement.findFirst({
-        where: { userId, productId: singleProduct.id, status: 'ACTIVE' },
+        where: { userId, productId: singleProduct.id, ...activeEntitlementFilter },
       })
       if (ent) return true
     }
@@ -75,7 +83,7 @@ export async function canAccessContent(
   const bundleEntitlements = await prisma.entitlement.findMany({
     where: {
       userId,
-      status: 'ACTIVE',
+      ...activeEntitlementFilter,
       product: { type: 'BUNDLE' },
     },
     include: { product: { include: { bundleItems: true } } },
@@ -94,7 +102,7 @@ export async function canAccessContent(
   const user = await prisma.user.findUnique({ where: { id: userId } })
   if (user?.organizationId) {
     const orgEntitlements = await prisma.entitlement.findMany({
-      where: { organizationId: user.organizationId, status: 'ACTIVE' },
+      where: { organizationId: user.organizationId, ...activeEntitlementFilter },
     })
     // If org has any relevant entitlement, grant access
     for (const oe of orgEntitlements) {

@@ -52,6 +52,12 @@ export async function POST(req: Request) {
       })
       if (!product) break
 
+      // Before creating entitlement, check if one already exists for this session
+      const existingEntitlement = await prisma.entitlement.findFirst({
+        where: { userId, productId, source: product.type === 'SUBSCRIPTION' ? 'SUBSCRIPTION' : 'PURCHASE' },
+      })
+      if (existingEntitlement) break // Already processed
+
       if (product.type === 'SUBSCRIPTION') {
         // For subscriptions, store the subscription ID
         await createEntitlement({

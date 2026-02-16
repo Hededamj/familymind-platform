@@ -47,7 +47,10 @@ import {
 function generateSlug(title: string): string {
   return title
     .toLowerCase()
-    .replace(/[^a-z0-9æøå]+/g, '-')
+    .replace(/æ/g, 'ae')
+    .replace(/ø/g, 'oe')
+    .replace(/å/g, 'aa')
+    .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '')
 }
 
@@ -394,7 +397,7 @@ export function ProductForm({
                 onChange={(e) => handleSlugChange(e.target.value)}
                 placeholder="auto-genereret-slug"
                 required
-                pattern="^[a-z0-9æøå-]+$"
+                pattern="^[a-z0-9-]+$"
                 title="Slug skal bestaa af smaa bogstaver, tal og bindestreger"
               />
             </div>

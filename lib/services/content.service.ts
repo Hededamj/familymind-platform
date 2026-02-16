@@ -26,20 +26,21 @@ export async function updateContentUnit(id: string, data: UpdateContentInput) {
   const validated = updateContentUnitSchema.parse(data)
   const { tagIds, ...contentData } = validated
 
-  // If tagIds provided, replace all tags
-  if (tagIds !== undefined) {
-    await prisma.contentUnitTag.deleteMany({ where: { contentUnitId: id } })
-    if (tagIds.length > 0) {
-      await prisma.contentUnitTag.createMany({
-        data: tagIds.map((tagId) => ({ contentUnitId: id, tagId })),
-      })
+  return prisma.$transaction(async (tx) => {
+    if (tagIds !== undefined) {
+      await tx.contentUnitTag.deleteMany({ where: { contentUnitId: id } })
+      if (tagIds.length > 0) {
+        await tx.contentUnitTag.createMany({
+          data: tagIds.map((tagId) => ({ contentUnitId: id, tagId })),
+        })
+      }
     }
-  }
 
-  return prisma.contentUnit.update({
-    where: { id },
-    data: contentData,
-    include: { tags: { include: { tag: true } } },
+    return tx.contentUnit.update({
+      where: { id },
+      data: contentData,
+      include: { tags: { include: { tag: true } } },
+    })
   })
 }
 
