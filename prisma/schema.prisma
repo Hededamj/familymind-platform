@@ -10,3 +10,455 @@ datasource db {
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
+
+// ──────────────────────────────────────────────
+// Enums
+// ──────────────────────────────────────────────
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum MediaType {
+  VIDEO
+  AUDIO
+  PDF
+  TEXT
+}
+
+enum Difficulty {
+  INTRODUCTORY
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum AccessLevel {
+  FREE
+  SUBSCRIPTION
+  PURCHASE
+}
+
+enum ProductType {
+  SUBSCRIPTION
+  COURSE
+  SINGLE
+  BUNDLE
+}
+
+enum EntitlementSource {
+  PURCHASE
+  SUBSCRIPTION
+  GIFT
+  B2B_LICENSE
+}
+
+enum EntitlementStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED_AMOUNT
+}
+
+enum QuestionType {
+  SINGLE_SELECT
+  MULTI_SELECT
+  DATE
+  SLIDER
+}
+
+enum NotificationType {
+  WEEKLY_PLAN
+  MIDWEEK_NUDGE
+  REFLECTION
+  MONTHLY_PROGRESS
+}
+
+enum MilestoneTriggerType {
+  DAYS_ACTIVE
+  PHASE_COMPLETE
+  JOURNEY_COMPLETE
+  CONTENT_COUNT
+  CHECKIN_STREAK
+}
+
+enum JourneyStatus {
+  ACTIVE
+  PAUSED
+  COMPLETED
+  ABANDONED
+}
+
+// ──────────────────────────────────────────────
+// Core Models
+// ──────────────────────────────────────────────
+
+model User {
+  id                  String   @id @default(uuid()) @db.Uuid
+  email               String   @unique
+  name                String?
+  role                UserRole @default(USER)
+  organizationId      String?  @db.Uuid
+  onboardingCompleted Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  organization    Organization?         @relation(fields: [organizationId], references: [id])
+  entitlements    Entitlement[]
+  contentProgress UserContentProgress[]
+  userJourneys    UserJourney[]
+  userProfile     UserProfile?
+}
+
+model Organization {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+
+  users        User[]
+  entitlements Entitlement[]
+}
+
+model ContentUnit {
+  id              String      @id @default(uuid()) @db.Uuid
+  title           String
+  description     String?
+  slug            String      @unique
+  mediaType       MediaType
+  mediaUrl        String?
+  bunnyVideoId    String?
+  thumbnailUrl    String?
+  durationMinutes Int?
+  difficulty      Difficulty  @default(INTRODUCTORY)
+  ageMin          Int? // months
+  ageMax          Int? // months
+  isStandalone    Boolean     @default(false)
+  isFree          Boolean     @default(false)
+  accessLevel     AccessLevel @default(FREE)
+  publishedAt     DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  tags               ContentUnitTag[]
+  courseLessons      CourseLesson[]
+  journeyDayContents JourneyDayContent[]
+  userProgress       UserContentProgress[]
+}
+
+model ContentTag {
+  id   String @id @default(uuid()) @db.Uuid
+  name String @unique
+  slug String @unique
+
+  contentUnits      ContentUnitTag[]
+  onboardingOptions OnboardingOption[]
+}
+
+model ContentUnitTag {
+  contentUnitId String @db.Uuid
+  tagId         String @db.Uuid
+
+  contentUnit ContentUnit @relation(fields: [contentUnitId], references: [id], onDelete: Cascade)
+  tag         ContentTag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([contentUnitId, tagId])
+}
+
+model Product {
+  id               String      @id @default(uuid()) @db.Uuid
+  title            String
+  description      String?
+  slug             String      @unique
+  type             ProductType
+  priceAmountCents Int
+  priceCurrency    String      @default("DKK")
+  stripeProductId  String?
+  stripePriceId    String?
+  isActive         Boolean     @default(true)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  courseLessons     CourseLesson[]
+  bundleItems       BundleItem[]   @relation("BundleProduct")
+  includedInBundles BundleItem[]   @relation("IncludedProduct")
+  entitlements      Entitlement[]
+  discountCodes     DiscountCode[]
+}
+
+model CourseLesson {
+  id            String @id @default(uuid()) @db.Uuid
+  productId     String @db.Uuid
+  contentUnitId String @db.Uuid
+  position      Int
+
+  product     Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  contentUnit ContentUnit @relation(fields: [contentUnitId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, contentUnitId])
+}
+
+model BundleItem {
+  id                String @id @default(uuid()) @db.Uuid
+  bundleProductId   String @db.Uuid
+  includedProductId String @db.Uuid
+
+  bundle          Product @relation("BundleProduct", fields: [bundleProductId], references: [id], onDelete: Cascade)
+  includedProduct Product @relation("IncludedProduct", fields: [includedProductId], references: [id], onDelete: Cascade)
+
+  @@unique([bundleProductId, includedProductId])
+}
+
+model Entitlement {
+  id                   String            @id @default(uuid()) @db.Uuid
+  userId               String            @db.Uuid
+  organizationId       String?           @db.Uuid
+  productId            String            @db.Uuid
+  source               EntitlementSource
+  status               EntitlementStatus @default(ACTIVE)
+  stripeSubscriptionId String?
+  expiresAt            DateTime?
+  createdAt            DateTime          @default(now())
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization? @relation(fields: [organizationId], references: [id])
+  product      Product       @relation(fields: [productId], references: [id])
+}
+
+model DiscountCode {
+  id                  String       @id @default(uuid()) @db.Uuid
+  code                String       @unique
+  type                DiscountType
+  value               Int // percentage or cents
+  maxUses             Int?
+  currentUses         Int          @default(0)
+  validFrom           DateTime     @default(now())
+  validUntil          DateTime?
+  applicableProductId String?      @db.Uuid
+  isActive            Boolean      @default(true)
+
+  applicableProduct Product? @relation(fields: [applicableProductId], references: [id])
+}
+
+model UserContentProgress {
+  id            String    @id @default(uuid()) @db.Uuid
+  userId        String    @db.Uuid
+  contentUnitId String    @db.Uuid
+  completedAt   DateTime?
+  createdAt     DateTime  @default(now())
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contentUnit ContentUnit @relation(fields: [contentUnitId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, contentUnitId])
+}
+
+// ──────────────────────────────────────────────
+// Journey Models
+// ──────────────────────────────────────────────
+
+model Journey {
+  id            String   @id @default(uuid()) @db.Uuid
+  title         String
+  description   String?
+  slug          String   @unique
+  targetAgeMin  Int? // months
+  targetAgeMax  Int? // months
+  estimatedDays Int?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  phases       JourneyPhase[]
+  userJourneys UserJourney[]
+}
+
+model JourneyPhase {
+  id        String @id @default(uuid()) @db.Uuid
+  journeyId String @db.Uuid
+  title     String
+  position  Int
+
+  journey Journey      @relation(fields: [journeyId], references: [id], onDelete: Cascade)
+  days    JourneyDay[]
+}
+
+model JourneyDay {
+  id       String  @id @default(uuid()) @db.Uuid
+  phaseId  String  @db.Uuid
+  position Int
+  title    String?
+
+  phase              JourneyPhase        @relation(fields: [phaseId], references: [id], onDelete: Cascade)
+  contents           JourneyDayContent[]
+  actions            JourneyDayAction[]
+  userCheckIns       UserDayCheckIn[]
+  currentForJourneys UserJourney[]
+}
+
+model JourneyDayContent {
+  id            String @id @default(uuid()) @db.Uuid
+  dayId         String @db.Uuid
+  contentUnitId String @db.Uuid
+  position      Int
+
+  day         JourneyDay  @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  contentUnit ContentUnit @relation(fields: [contentUnitId], references: [id], onDelete: Cascade)
+}
+
+model JourneyDayAction {
+  id               String  @id @default(uuid()) @db.Uuid
+  dayId            String  @db.Uuid
+  actionText       String // "Pr0v dette med dit barn i dag"
+  reflectionPrompt String? // "Hvordan gik det?"
+
+  day JourneyDay @relation(fields: [dayId], references: [id], onDelete: Cascade)
+}
+
+model UserJourney {
+  id           String        @id @default(uuid()) @db.Uuid
+  userId       String        @db.Uuid
+  journeyId    String        @db.Uuid
+  currentDayId String?       @db.Uuid
+  startedAt    DateTime      @default(now())
+  completedAt  DateTime?
+  status       JourneyStatus @default(ACTIVE)
+
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  journey    Journey          @relation(fields: [journeyId], references: [id])
+  currentDay JourneyDay?      @relation(fields: [currentDayId], references: [id])
+  checkIns   UserDayCheckIn[]
+}
+
+model UserDayCheckIn {
+  id              String   @id @default(uuid()) @db.Uuid
+  userJourneyId   String   @db.Uuid
+  dayId           String   @db.Uuid
+  checkInOptionId String   @db.Uuid
+  reflection      String?
+  completedAt     DateTime @default(now())
+
+  userJourney   UserJourney   @relation(fields: [userJourneyId], references: [id], onDelete: Cascade)
+  day           JourneyDay    @relation(fields: [dayId], references: [id])
+  checkInOption CheckInOption @relation(fields: [checkInOptionId], references: [id])
+}
+
+model UserProfile {
+  id                    String    @id @default(uuid()) @db.Uuid
+  userId                String    @unique @db.Uuid
+  responses             Json? // array of {questionId, selectedOptionIds}
+  childAges             Json? // extracted from date question
+  primaryChallengeTagId String?   @db.Uuid
+  completedAt           DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ──────────────────────────────────────────────
+// Admin-Configurable Models
+// ──────────────────────────────────────────────
+
+model SiteSetting {
+  id          String  @id @default(uuid()) @db.Uuid
+  key         String  @unique
+  value       String
+  description String?
+}
+
+model OnboardingQuestion {
+  id           String       @id @default(uuid()) @db.Uuid
+  questionText String
+  questionType QuestionType
+  position     Int
+  isActive     Boolean      @default(true)
+  helperText   String?
+
+  options OnboardingOption[]
+}
+
+model OnboardingOption {
+  id         String  @id @default(uuid()) @db.Uuid
+  questionId String  @db.Uuid
+  label      String
+  value      String
+  tagId      String? @db.Uuid
+  position   Int
+
+  question OnboardingQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  tag      ContentTag?        @relation(fields: [tagId], references: [id])
+}
+
+model RecommendationRule {
+  id         String  @id @default(uuid()) @db.Uuid
+  name       String
+  conditions Json // e.g. {"tagId": "x", "ageMin": 0, "ageMax": 36}
+  targetType String // "JOURNEY" or "PRODUCT"
+  targetId   String  @db.Uuid
+  priority   Int     @default(0)
+  isActive   Boolean @default(true)
+}
+
+model EmailTemplate {
+  id          String   @id @default(uuid()) @db.Uuid
+  templateKey String   @unique
+  subject     String
+  bodyHtml    String
+  description String?
+  isActive    Boolean  @default(true)
+  updatedAt   DateTime @updatedAt
+
+  reEngagementTiers ReEngagementTier[]
+}
+
+model NotificationSchedule {
+  id               String           @id @default(uuid()) @db.Uuid
+  notificationType NotificationType
+  dayOfWeek        Int // 0-6
+  timeOfDay        String // HH:MM
+  isActive         Boolean          @default(true)
+}
+
+model ReEngagementTier {
+  id              String  @id @default(uuid()) @db.Uuid
+  tierNumber      Int     @unique
+  daysInactiveMin Int
+  daysInactiveMax Int
+  emailTemplateId String  @db.Uuid
+  isActive        Boolean @default(true)
+
+  emailTemplate EmailTemplate @relation(fields: [emailTemplateId], references: [id])
+}
+
+model MilestoneDefinition {
+  id                 String               @id @default(uuid()) @db.Uuid
+  name               String
+  triggerType        MilestoneTriggerType
+  triggerValue       Int
+  celebrationTitle   String
+  celebrationMessage String
+  isActive           Boolean              @default(true)
+}
+
+model CheckInOption {
+  id       String  @id @default(uuid()) @db.Uuid
+  label    String
+  value    String
+  emoji    String?
+  position Int
+  isActive Boolean @default(true)
+
+  checkIns UserDayCheckIn[]
+}
+
+model DashboardMessage {
+  id       String  @id @default(uuid()) @db.Uuid
+  stateKey String  @unique
+  heading  String
+  body     String
+  ctaLabel String?
+  ctaUrl   String?
+}
