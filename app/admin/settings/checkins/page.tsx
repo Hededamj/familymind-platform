@@ -1,0 +1,39 @@
+import { requireAdmin } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
+import { Separator } from '@/components/ui/separator'
+import Link from 'next/link'
+import { ArrowLeft } from 'lucide-react'
+import { CheckInsManager } from './_components/checkins-manager'
+
+export default async function CheckInsSettingsPage() {
+  await requireAdmin()
+
+  const options = await prisma.checkInOption.findMany({
+    orderBy: { position: 'asc' },
+  })
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-4">
+        <Link
+          href="/admin/settings"
+          className="text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="size-5" />
+        </Link>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Check-in Muligheder
+          </h1>
+          <p className="text-muted-foreground">
+            Administrer de daglige check-in svarmuligheder
+          </p>
+        </div>
+      </div>
+
+      <Separator />
+
+      <CheckInsManager options={options} />
+    </div>
+  )
+}
