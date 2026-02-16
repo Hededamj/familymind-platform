@@ -120,6 +120,83 @@ async function main() {
     prisma.siteSetting.create({ data: { key: 'notification_max_per_week', value: '3', description: 'Maximum notifications per user per week' } }),
   ])
 
+  // -- Test Journey --
+  const journey = await prisma.journey.create({
+    data: {
+      title: 'Bedre søvnrutiner',
+      description: 'En struktureret rejse mod bedre søvn for hele familien. Lær teknikker og opbyg gode vaner dag for dag.',
+      slug: 'bedre-sovnrutiner',
+      targetAgeMin: 6,   // 6 months
+      targetAgeMax: 72,  // 6 years
+      estimatedDays: 6,
+      isActive: true,
+    },
+  })
+
+  const phase1 = await prisma.journeyPhase.create({
+    data: { journeyId: journey.id, title: 'Grundlaget', position: 1 },
+  })
+
+  const phase2 = await prisma.journeyPhase.create({
+    data: { journeyId: journey.id, title: 'Nye vaner', position: 2 },
+  })
+
+  // Phase 1 days
+  const day1 = await prisma.journeyDay.create({
+    data: { phaseId: phase1.id, title: 'Forstå søvnbehov', position: 1 },
+  })
+  await prisma.journeyDayAction.create({
+    data: { dayId: day1.id, actionText: 'Observer dit barns søvnsignaler i dag', reflectionPrompt: 'Hvilke signaler lagde du mærke til?' },
+  })
+
+  const day2 = await prisma.journeyDay.create({
+    data: { phaseId: phase1.id, title: 'Aftenrutinen', position: 2 },
+  })
+  await prisma.journeyDayAction.create({
+    data: { dayId: day2.id, actionText: 'Skriv jeres nuværende aftenrutine ned', reflectionPrompt: 'Hvad fungerer godt, og hvad kunne forbedres?' },
+  })
+
+  const day3 = await prisma.journeyDay.create({
+    data: { phaseId: phase1.id, title: 'Søvnmiljøet', position: 3 },
+  })
+  await prisma.journeyDayAction.create({
+    data: { dayId: day3.id, actionText: 'Gennemgå dit barns soveværelse — er det mørkt, stille og køligt?', reflectionPrompt: 'Hvad ændrede du ved søvnmiljøet?' },
+  })
+
+  // Phase 2 days
+  const day4 = await prisma.journeyDay.create({
+    data: { phaseId: phase2.id, title: 'Den nye rutine', position: 1 },
+  })
+  await prisma.journeyDayAction.create({
+    data: { dayId: day4.id, actionText: 'Implementer den nye aftenrutine i aften', reflectionPrompt: 'Hvordan reagerede dit barn på den nye rutine?' },
+  })
+
+  const day5 = await prisma.journeyDay.create({
+    data: { phaseId: phase2.id, title: 'Håndter modstand', position: 2 },
+  })
+  await prisma.journeyDayAction.create({
+    data: { dayId: day5.id, actionText: 'Øv dig i rolig bekræftelse når dit barn protesterer', reflectionPrompt: 'Hvilken teknik virkede bedst?' },
+  })
+
+  const day6 = await prisma.journeyDay.create({
+    data: { phaseId: phase2.id, title: 'Fasthold rutinen', position: 3 },
+  })
+  await prisma.journeyDayAction.create({
+    data: { dayId: day6.id, actionText: 'Fortsæt rutinen og bemærk fremskridt', reflectionPrompt: 'Hvad har ændret sig siden dag 1?' },
+  })
+
+  // Add a recommendation rule for this journey
+  await prisma.recommendationRule.create({
+    data: {
+      name: 'Søvnudfordringer → Søvnrejse',
+      conditions: { tagId: tagSleep.id },
+      targetType: 'JOURNEY',
+      targetId: journey.id,
+      priority: 10,
+      isActive: true,
+    },
+  })
+
   console.log('Seed data created successfully')
 }
 
