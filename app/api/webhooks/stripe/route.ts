@@ -1,6 +1,12 @@
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import type Stripe from 'stripe'
 import { getStripe } from '@/lib/stripe'
+import { prisma } from '@/lib/prisma'
+import {
+  createEntitlement,
+  updateEntitlementStatus,
+} from '@/lib/services/entitlement.service'
 
 export async function POST(req: Request) {
   const body = await req.text()
@@ -31,20 +37,88 @@ export async function POST(req: Request) {
     )
   }
 
-  // Handle webhook events — to be implemented in Phase 1a (Task 1.12)
+  // Handle webhook events
   switch (event.type) {
-    case 'checkout.session.completed':
-      // TODO: Create entitlement
+    case 'checkout.session.completed': {
+      const session = event.data.object as Stripe.Checkout.Session
+      const userId = session.metadata?.userId
+      const productId = session.metadata?.productId
+
+      if (!userId || !productId) break
+
+      const product = await prisma.product.findUnique({
+        where: { id: productId },
+        include: { bundleItems: true },
+      })
+      if (!product) break
+
+      if (product.type === 'SUBSCRIPTION') {
+        // For subscriptions, store the subscription ID
+        await createEntitlement({
+          userId,
+          productId,
+          source: 'SUBSCRIPTION',
+          stripeSubscriptionId: session.subscription as string,
+        })
+      } else if (product.type === 'BUNDLE') {
+        // For bundles, create entitlements for the bundle AND each included product
+        await createEntitlement({ userId, productId, source: 'PURCHASE' })
+        for (const item of product.bundleItems) {
+          await createEntitlement({
+            userId,
+            productId: item.includedProductId,
+            source: 'PURCHASE',
+          })
+        }
+      } else {
+        // For COURSE and SINGLE
+        await createEntitlement({ userId, productId, source: 'PURCHASE' })
+      }
+
+      // Increment discount code usage if applicable
+      if (session.total_details?.breakdown?.discounts?.length) {
+        // Discount was applied — we'd need to track which code was used
+        // For now, this will be handled when we enhance the discount system
+      }
+
       break
-    case 'customer.subscription.updated':
-      // TODO: Update entitlement status
+    }
+
+    case 'customer.subscription.updated': {
+      const subscription = event.data.object as Stripe.Subscription
+
+      if (subscription.status === 'active') {
+        await updateEntitlementStatus(subscription.id, 'ACTIVE')
+      } else if (subscription.status === 'past_due') {
+        // Keep active for now, but could flag
+        console.log(`Subscription ${subscription.id} is past due`)
+      } else if (
+        subscription.status === 'canceled' ||
+        subscription.status === 'unpaid'
+      ) {
+        await updateEntitlementStatus(subscription.id, 'CANCELLED')
+      }
+
       break
-    case 'customer.subscription.deleted':
-      // TODO: Mark entitlement as cancelled
+    }
+
+    case 'customer.subscription.deleted': {
+      const subscription = event.data.object as Stripe.Subscription
+      await updateEntitlementStatus(subscription.id, 'CANCELLED')
       break
-    case 'invoice.payment_failed':
-      // TODO: Flag for follow-up
+    }
+
+    case 'invoice.payment_failed': {
+      const invoice = event.data.object as Stripe.Invoice
+      const subscriptionRef =
+        invoice.parent?.subscription_details?.subscription ?? null
+      console.error(
+        `Payment failed for invoice ${invoice.id}, subscription: ${subscriptionRef}`
+      )
+      // Don't immediately revoke — Stripe will retry. Log for monitoring.
       break
+    }
+
     default:
       console.log(`Unhandled event type: ${event.type}`)
   }
