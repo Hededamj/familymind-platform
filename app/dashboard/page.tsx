@@ -10,6 +10,7 @@ import { JourneyDayCard } from './_components/journey-day-card'
 import { CourseProgressCard } from './_components/course-progress-card'
 import { RecommendationSection } from './_components/recommendation-section'
 import { CompletedJourneyCard } from './_components/completed-journey-card'
+import { NotificationBell } from './_components/notification-bell'
 
 export default async function DashboardPage() {
   const user = await requireAuth()
@@ -44,13 +45,16 @@ export default async function DashboardPage() {
               Velkommen tilbage til FamilyMind
             </p>
           </div>
-          <Link
-            href="/dashboard/settings"
-            className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-          >
-            <Settings className="size-4" />
-            <span className="hidden sm:inline">Indstillinger</span>
-          </Link>
+          <div className="flex items-center gap-1">
+            <NotificationBell />
+            <Link
+              href="/dashboard/settings"
+              className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+            >
+              <Settings className="size-4" />
+              <span className="hidden sm:inline">Indstillinger</span>
+            </Link>
+          </div>
         </div>
 
         {/* State-based content */}

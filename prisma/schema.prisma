@@ -86,6 +86,15 @@ enum MilestoneTriggerType {
   CHECKIN_STREAK
 }
 
+enum InAppNotificationType {
+  WEEKLY_PLAN
+  MIDWEEK_NUDGE
+  REFLECTION
+  MILESTONE
+  REENGAGEMENT
+  SYSTEM
+}
+
 enum JourneyStatus {
   ACTIVE
   PAUSED
@@ -112,6 +121,7 @@ model User {
   contentProgress UserContentProgress[]
   userJourneys    UserJourney[]
   userProfile     UserProfile?
+  notifications   Notification[]
 }
 
 model Organization {
@@ -461,4 +471,17 @@ model DashboardMessage {
   body     String
   ctaLabel String?
   ctaUrl   String?
+}
+
+model Notification {
+  id        String                @id @default(uuid()) @db.Uuid
+  userId    String                @db.Uuid
+  type      InAppNotificationType
+  title     String
+  body      String
+  actionUrl String?
+  readAt    DateTime?
+  createdAt DateTime              @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
