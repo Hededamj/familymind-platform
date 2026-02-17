@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Settings, ArrowRight, Compass } from 'lucide-react'
+import { Settings, ArrowRight, Compass, TrendingUp } from 'lucide-react'
 import { redirect } from 'next/navigation'
 import { requireAuth } from '@/lib/auth'
 import { getDashboardState } from '@/lib/services/dashboard.service'
@@ -47,6 +47,13 @@ export default async function DashboardPage() {
           </div>
           <div className="flex items-center gap-1">
             <NotificationBell />
+            <Link
+              href="/dashboard/progress"
+              className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+            >
+              <TrendingUp className="size-4" />
+              <span className="hidden sm:inline">Fremgang</span>
+            </Link>
             <Link
               href="/dashboard/settings"
               className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
