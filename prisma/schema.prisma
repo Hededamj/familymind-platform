@@ -123,6 +123,7 @@ model User {
   userProfile     UserProfile?
   notifications   Notification[]
   notificationLog UserNotificationLog[]
+  cohortMemberships CohortMember[]
 }
 
 model Organization {
@@ -286,6 +287,7 @@ model Journey {
 
   phases       JourneyPhase[]
   userJourneys UserJourney[]
+  cohorts      Cohort[]
 }
 
 model JourneyPhase {
@@ -500,4 +502,36 @@ model UserNotificationLog {
 
   @@index([userId, type, key])
   @@index([userId, type, sentAt])
+}
+
+// ──────────────────────────────────────────────
+// Community / Cohort Models
+// ──────────────────────────────────────────────
+
+model Cohort {
+  id            String   @id @default(uuid()) @db.Uuid
+  journeyId     String   @db.Uuid
+  name          String?
+  maxMembers    Int      @default(25)
+  isOpen        Boolean  @default(true)
+  startDate     DateTime @default(now())
+  createdAt     DateTime @default(now())
+
+  journey Journey       @relation(fields: [journeyId], references: [id], onDelete: Cascade)
+  members CohortMember[]
+
+  @@index([journeyId, isOpen])
+}
+
+model CohortMember {
+  id       String   @id @default(uuid()) @db.Uuid
+  cohortId String   @db.Uuid
+  userId   String   @db.Uuid
+  joinedAt DateTime @default(now())
+
+  cohort Cohort @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([cohortId, userId])
+  @@index([userId])
 }

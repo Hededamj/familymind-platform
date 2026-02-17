@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { assignUserToCohort } from './community.service'
 
 // --- Admin CRUD ---
 
@@ -175,7 +176,7 @@ export async function startJourney(userId: string, journeyId: string) {
     const firstDay = journey.phases[0]?.days[0]
     if (!firstDay) throw new Error('Journey has no days')
 
-    return tx.userJourney.create({
+    const userJourney = await tx.userJourney.create({
       data: {
         userId,
         journeyId,
@@ -183,6 +184,11 @@ export async function startJourney(userId: string, journeyId: string) {
         status: 'ACTIVE',
       },
     })
+
+    // Auto-assign user to a cohort for this journey
+    await assignUserToCohort(userId, journeyId, tx)
+
+    return userJourney
   })
 }
 

@@ -8,6 +8,7 @@ import {
   Settings,
   ArrowLeft,
   Tag,
+  Users,
 } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 
@@ -17,6 +18,7 @@ const navItems = [
   { href: '/admin/products', label: 'Produkter', icon: Package },
   { href: '/admin/discounts', label: 'Rabatkoder', icon: Ticket },
   { href: '/admin/journeys', label: 'Rejser', icon: Map },
+  { href: '/admin/cohorts', label: 'Kohorter', icon: Users },
   { href: '/admin/settings', label: 'Indstillinger', icon: Settings },
 ]
 
