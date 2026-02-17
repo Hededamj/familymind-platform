@@ -88,7 +88,7 @@ export function EmailTemplateManager({
     return (
       <div className="rounded-md border p-12 text-center">
         <p className="text-muted-foreground">
-          Ingen e-mail skabeloner konfigureret endnu. Koer seed-scriptet for
+          Ingen e-mail skabeloner konfigureret endnu. Kør seed-scriptet for
           at oprette standardskabeloner.
         </p>
       </div>
@@ -100,7 +100,7 @@ export function EmailTemplateManager({
       {/* Template variables reference */}
       <div className="rounded-md border bg-muted/30 p-4">
         <h3 className="text-sm font-semibold mb-2">
-          Tilgaengelige skabelonvariabler
+          Tilgængelige skabelonvariabler
         </h3>
         <div className="flex flex-wrap gap-3">
           {TEMPLATE_VARIABLES.map((v) => (

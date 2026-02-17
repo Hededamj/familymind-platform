@@ -108,7 +108,7 @@ export function ReEngagementTierManager({
     return (
       <div className="rounded-md border p-12 text-center">
         <p className="text-muted-foreground">
-          Ingen genaktiveringsniveauer konfigureret endnu. Koer seed-scriptet
+          Ingen genaktiveringsniveauer konfigureret endnu. Kør seed-scriptet
           for at oprette standardniveauer.
         </p>
       </div>
@@ -118,9 +118,9 @@ export function ReEngagementTierManager({
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Genaktiveringsniveauer definerer hvornaar inaktive brugere modtager
-        e-mails baseret paa antal dage uden aktivitet. Niveauerne er faste og
-        kan ikke tilfoej es eller slettes, kun redigeres.
+        Genaktiveringsniveauer definerer hvornår inaktive brugere modtager
+        e-mails baseret på antal dage uden aktivitet. Niveauerne er faste og
+        kan ikke tilføjes eller slettes, kun redigeres.
       </p>
 
       <div className="rounded-md border">

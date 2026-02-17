@@ -38,20 +38,20 @@ type NotificationScheduleManagerProps = {
 }
 
 const DAY_LABELS: Record<number, string> = {
-  0: 'Soendag',
+  0: 'Søndag',
   1: 'Mandag',
   2: 'Tirsdag',
   3: 'Onsdag',
   4: 'Torsdag',
   5: 'Fredag',
-  6: 'Loerdag',
+  6: 'Lørdag',
 }
 
 const TYPE_LABELS: Record<string, string> = {
   WEEKLY_PLAN: 'Ugeplan',
   MIDWEEK_NUDGE: 'Midtugenudge',
   REFLECTION: 'Refleksion',
-  MONTHLY_PROGRESS: 'Maanedlig fremgang',
+  MONTHLY_PROGRESS: 'Månedlig fremgang',
 }
 
 export function NotificationScheduleManager({
@@ -108,7 +108,7 @@ export function NotificationScheduleManager({
     return (
       <div className="rounded-md border p-12 text-center">
         <p className="text-muted-foreground">
-          Ingen notifikationsplaner konfigureret endnu. Koer seed-scriptet for
+          Ingen notifikationsplaner konfigureret endnu. Kør seed-scriptet for
           at oprette standardplaner.
         </p>
       </div>
@@ -118,8 +118,8 @@ export function NotificationScheduleManager({
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Notifikationsplaner styrer hvornaar de forskellige typer beskeder
-        sendes til brugerne. Typerne er faste og kan ikke tilfoej es eller
+        Notifikationsplaner styrer hvornår de forskellige typer beskeder
+        sendes til brugerne. Typerne er faste og kan ikke tilføjes eller
         slettes, kun redigeres.
       </p>
 

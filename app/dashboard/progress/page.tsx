@@ -55,7 +55,7 @@ export default async function ProgressPage() {
           />
           <StatCard
             icon={<BookOpen className="size-5 text-green-500" />}
-            label="Indhold gennemgaet"
+            label="Indhold gennemgået"
             value={allTime.contentConsumed}
           />
           <StatCard
@@ -65,18 +65,18 @@ export default async function ProgressPage() {
           />
           <StatCard
             icon={<Trophy className="size-5 text-amber-500" />}
-            label="Forloeb gennemfoert"
+            label="Forløb gennemført"
             value={allTime.journeysCompleted}
           />
           <StatCard
             icon={<Flame className="size-5 text-orange-500" />}
-            label="Nuvaerende streak"
+            label="Nuværende streak"
             value={allTime.currentStreak}
             suffix={allTime.currentStreak === 1 ? 'dag' : 'dage'}
           />
           <StatCard
             icon={<Star className="size-5 text-yellow-500" />}
-            label="Milepael opnaaet"
+            label="Milepæle opnået"
             value={milestones.length}
           />
         </div>
@@ -86,17 +86,17 @@ export default async function ProgressPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Trophy className="size-5 text-amber-500" />
-              Milepael
+              Milepæle
             </CardTitle>
             <CardDescription>
-              Dine opnaaede milepael og fejringer
+              Dine opnåede milepæle og fejringer
             </CardDescription>
           </CardHeader>
           <CardContent>
             {milestones.length === 0 ? (
               <p className="py-4 text-center text-sm text-muted-foreground">
-                Du har endnu ikke opnaaet nogen milepael. Bliv ved med at
-                vaere aktiv, saa kommer de!
+                Du har endnu ikke opnået nogen milepæle. Bliv ved med at
+                være aktiv, så kommer de!
               </p>
             ) : (
               <div className="space-y-4">
@@ -121,7 +121,7 @@ export default async function ProgressPage() {
                         {milestone.celebrationMessage}
                       </p>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        Opnaaet{' '}
+                        Opnået{' '}
                         {milestone.earnedAt.toLocaleDateString('da-DK', {
                           year: 'numeric',
                           month: 'long',
@@ -141,10 +141,10 @@ export default async function ProgressPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="size-5 text-blue-500" />
-              Maanedlig oversigt
+              Månedlig oversigt
             </CardTitle>
             <CardDescription>
-              Din aktivitet de seneste 6 maaneder
+              Din aktivitet de seneste 6 måneder
             </CardDescription>
           </CardHeader>
           <CardContent>

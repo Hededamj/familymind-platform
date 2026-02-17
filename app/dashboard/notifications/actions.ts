@@ -2,6 +2,7 @@
 
 import { requireAuth } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
+import { prisma } from '@/lib/prisma'
 import {
   getUnreadNotificationCount,
   getUserNotifications,
@@ -26,10 +27,11 @@ export async function getUnreadCountAction() {
 export async function markAsReadAction(notificationId: string) {
   const user = await requireAuth()
 
-  // Verify the notification belongs to this user by fetching it
-  const notifications = await getUserNotifications(user.id, 100)
-  const owns = notifications.some((n) => n.id === notificationId)
-  if (!owns) {
+  // Direct indexed lookup — O(1) and works regardless of notification count
+  const notification = await prisma.notification.findFirst({
+    where: { id: notificationId, userId: user.id },
+  })
+  if (!notification) {
     throw new Error('Ikke autoriseret')
   }
 

@@ -1,24 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { verifyCronSecret } from '@/lib/cron-auth'
 import {
   sendTemplatedEmail,
   createInAppNotification,
 } from '@/lib/services/engagement.service'
 import type { NotificationType } from '@prisma/client'
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-function verifyCronSecret(request: NextRequest): boolean {
-  const secret = request.headers.get('authorization')
-  if (!process.env.CRON_SECRET) {
-    // In development, allow requests without secret
-    console.warn('[cron/engagement] CRON_SECRET not configured, skipping auth')
-    return true
-  }
-  return secret === `Bearer ${process.env.CRON_SECRET}`
-}
 
 /**
  * Check whether we already sent this notification type to this user within
@@ -245,60 +232,64 @@ export async function GET(request: NextRequest) {
     let skipped = 0
     let failed = 0
 
-    // Process users in parallel with Promise.allSettled
-    const sendResults = await Promise.allSettled(
-      userIds.map(async (userId) => {
-        // Check deduplication window
-        const alreadySent = await alreadySentInWindow(
-          userId,
-          schedule.notificationType,
-          config.dedupeWindowHours
-        )
-        if (alreadySent) {
-          return 'skipped' as const
+    // Process users in batches to avoid overwhelming DB connection pool and Resend rate limits
+    const BATCH_SIZE = 20
+    for (let i = 0; i < userIds.length; i += BATCH_SIZE) {
+      const batch = userIds.slice(i, i + BATCH_SIZE)
+      const batchResults = await Promise.allSettled(
+        batch.map(async (userId) => {
+          // Check deduplication window
+          const alreadySent = await alreadySentInWindow(
+            userId,
+            schedule.notificationType,
+            config.dedupeWindowHours
+          )
+          if (alreadySent) {
+            return 'skipped' as const
+          }
+
+          // Send email
+          const emailResult = await sendTemplatedEmail(
+            userId,
+            config.templateKey
+          )
+
+          // Create in-app notification
+          await createInAppNotification(
+            userId,
+            toInAppType(schedule.notificationType),
+            config.inAppTitle,
+            config.inAppBody,
+            config.actionUrl
+          )
+
+          // Log successful send
+          await logNotificationSent(userId, schedule.notificationType)
+
+          return emailResult ? ('sent' as const) : ('failed' as const)
+        })
+      )
+
+      for (const result of batchResults) {
+        if (result.status === 'fulfilled') {
+          switch (result.value) {
+            case 'sent':
+              sent++
+              break
+            case 'skipped':
+              skipped++
+              break
+            case 'failed':
+              failed++
+              break
+          }
+        } else {
+          console.error(
+            `[cron/engagement] Error processing user for ${schedule.notificationType}:`,
+            result.reason
+          )
+          failed++
         }
-
-        // Send email
-        const emailResult = await sendTemplatedEmail(
-          userId,
-          config.templateKey
-        )
-
-        // Create in-app notification
-        await createInAppNotification(
-          userId,
-          toInAppType(schedule.notificationType),
-          config.inAppTitle,
-          config.inAppBody,
-          config.actionUrl
-        )
-
-        // Log successful send
-        await logNotificationSent(userId, schedule.notificationType)
-
-        return emailResult ? ('sent' as const) : ('failed' as const)
-      })
-    )
-
-    for (const result of sendResults) {
-      if (result.status === 'fulfilled') {
-        switch (result.value) {
-          case 'sent':
-            sent++
-            break
-          case 'skipped':
-            skipped++
-            break
-          case 'failed':
-            failed++
-            break
-        }
-      } else {
-        console.error(
-          `[cron/engagement] Error processing user for ${schedule.notificationType}:`,
-          result.reason
-        )
-        failed++
       }
     }
 

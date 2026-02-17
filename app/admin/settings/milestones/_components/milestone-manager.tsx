@@ -34,8 +34,8 @@ type MilestoneManagerProps = {
 
 const TRIGGER_TYPE_LABELS: Record<string, string> = {
   DAYS_ACTIVE: 'Aktive dage',
-  PHASE_COMPLETE: 'Fase gennemfoert',
-  JOURNEY_COMPLETE: 'Rejse gennemfoert',
+  PHASE_COMPLETE: 'Fase gennemført',
+  JOURNEY_COMPLETE: 'Rejse gennemført',
   CONTENT_COUNT: 'Antal indhold',
   CHECKIN_STREAK: 'Check-in-stribe',
 }
@@ -89,10 +89,10 @@ export function MilestoneManager({ milestones }: MilestoneManagerProps) {
           celebrationMessage: editCelebrationMessage.trim(),
           isActive: editActive,
         })
-        toast.success('Milepael opdateret')
+        toast.success('Milepæl opdateret')
         setEditingId(null)
       } catch {
-        toast.error('Kunne ikke opdatere milepael')
+        toast.error('Kunne ikke opdatere milepæl')
       }
     })
   }
@@ -104,7 +104,7 @@ export function MilestoneManager({ milestones }: MilestoneManagerProps) {
           isActive: !m.isActive,
         })
         toast.success(
-          m.isActive ? 'Milepael deaktiveret' : 'Milepael aktiveret'
+          m.isActive ? 'Milepæl deaktiveret' : 'Milepæl aktiveret'
         )
       } catch {
         toast.error('Kunne ikke opdatere status')
@@ -116,8 +116,8 @@ export function MilestoneManager({ milestones }: MilestoneManagerProps) {
     return (
       <div className="rounded-md border p-12 text-center">
         <p className="text-muted-foreground">
-          Ingen milepaalsdefinitioner konfigureret endnu. Koer seed-scriptet
-          for at oprette standardmilep aele.
+          Ingen milepælsdefinitioner konfigureret endnu. Kør seed-scriptet
+          for at oprette standardmilepæle.
         </p>
       </div>
     )
@@ -126,8 +126,8 @@ export function MilestoneManager({ milestones }: MilestoneManagerProps) {
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Milepaalsdefinitioner bruges til at fejre brugernes fremskridt.
-        Hver milepael udloeses naar den angivne trigger-betingelse er opfyldt.
+        Milepælsdefinitioner bruges til at fejre brugernes fremskridt.
+        Hver milepæl udløses når den angivne trigger-betingelse er opfyldt.
       </p>
 
       <div className="space-y-3">
@@ -164,7 +164,7 @@ export function MilestoneManager({ milestones }: MilestoneManagerProps) {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Trigger-vaerdi</Label>
+                    <Label>Trigger-værdi</Label>
                     <Input
                       type="number"
                       min={0}
@@ -232,7 +232,7 @@ export function MilestoneManager({ milestones }: MilestoneManagerProps) {
                       {TRIGGER_TYPE_LABELS[m.triggerType] ?? m.triggerType}
                     </Badge>
                     <Badge variant="outline">
-                      Vaerdi: {m.triggerValue}
+                      Værdi: {m.triggerValue}
                     </Badge>
                     {m.isActive ? (
                       <Badge>Aktiv</Badge>

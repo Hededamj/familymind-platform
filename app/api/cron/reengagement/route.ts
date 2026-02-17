@@ -1,24 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { verifyCronSecret } from '@/lib/cron-auth'
 import {
   sendTemplatedEmail,
   createInAppNotification,
 } from '@/lib/services/engagement.service'
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-function verifyCronSecret(request: NextRequest): boolean {
-  const secret = request.headers.get('authorization')
-  if (!process.env.CRON_SECRET) {
-    console.warn(
-      '[cron/reengagement] CRON_SECRET not configured, skipping auth'
-    )
-    return true
-  }
-  return secret === `Bearer ${process.env.CRON_SECRET}`
-}
 
 /**
  * Compute days since a user's last meaningful activity.
@@ -184,59 +170,63 @@ export async function GET(request: NextRequest) {
     totalProcessed++
   }
 
-  // Process sends in parallel with Promise.allSettled
-  const sendResults = await Promise.allSettled(
-    userTierPairs.map(async ({ userId, tier }) => {
-      // Check if already received this tier
-      const alreadyReceived = await hasReceivedTier(userId, tier.tierNumber)
-      if (alreadyReceived) {
-        tierStats[tier.tierNumber].skipped++
-        return 'skipped' as const
+  // Process sends in batches to avoid overwhelming DB connection pool and Resend rate limits
+  const BATCH_SIZE = 20
+  for (let i = 0; i < userTierPairs.length; i += BATCH_SIZE) {
+    const batch = userTierPairs.slice(i, i + BATCH_SIZE)
+    const batchResults = await Promise.allSettled(
+      batch.map(async ({ userId, tier }) => {
+        // Check if already received this tier
+        const alreadyReceived = await hasReceivedTier(userId, tier.tierNumber)
+        if (alreadyReceived) {
+          tierStats[tier.tierNumber].skipped++
+          return 'skipped' as const
+        }
+
+        // Send the email using the tier's linked template
+        const emailResult = await sendTemplatedEmail(
+          userId,
+          tier.emailTemplate.templateKey
+        )
+
+        // Create in-app notification
+        await createInAppNotification(
+          userId,
+          'REENGAGEMENT',
+          'Vi savner dig!',
+          'Det er et stykke tid siden du sidst var forbi. Kom tilbage og fortsæt dit forløb.',
+          '/dashboard'
+        )
+
+        // Log so we don't re-send this tier
+        await logReengagementSent(userId, tier.tierNumber)
+
+        tierStats[tier.tierNumber].sent++
+
+        return emailResult ? ('sent' as const) : ('failed' as const)
+      })
+    )
+
+    for (const result of batchResults) {
+      if (result.status === 'fulfilled') {
+        switch (result.value) {
+          case 'sent':
+            totalSent++
+            break
+          case 'skipped':
+            totalSkipped++
+            break
+          case 'failed':
+            totalFailed++
+            break
+        }
+      } else {
+        console.error(
+          '[cron/reengagement] Error processing user:',
+          result.reason
+        )
+        totalFailed++
       }
-
-      // Send the email using the tier's linked template
-      const emailResult = await sendTemplatedEmail(
-        userId,
-        tier.emailTemplate.templateKey
-      )
-
-      // Create in-app notification
-      await createInAppNotification(
-        userId,
-        'REENGAGEMENT',
-        'Vi savner dig!',
-        'Det er et stykke tid siden du sidst var forbi. Kom tilbage og fortsæt dit forløb.',
-        '/dashboard'
-      )
-
-      // Log so we don't re-send this tier
-      await logReengagementSent(userId, tier.tierNumber)
-
-      tierStats[tier.tierNumber].sent++
-
-      return emailResult ? ('sent' as const) : ('failed' as const)
-    })
-  )
-
-  for (const result of sendResults) {
-    if (result.status === 'fulfilled') {
-      switch (result.value) {
-        case 'sent':
-          totalSent++
-          break
-        case 'skipped':
-          totalSkipped++
-          break
-        case 'failed':
-          totalFailed++
-          break
-      }
-    } else {
-      console.error(
-        '[cron/reengagement] Error processing user:',
-        result.reason
-      )
-      totalFailed++
     }
   }
 
