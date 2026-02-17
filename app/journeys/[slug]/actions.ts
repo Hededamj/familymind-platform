@@ -2,6 +2,7 @@
 
 import { requireAuth } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
+import { prisma } from '@/lib/prisma'
 import {
   startJourney,
   completeDay,
@@ -32,7 +33,20 @@ export async function completeDayAction(
   reflection?: string,
   journeySlug?: string
 ) {
-  await requireAuth()
+  const user = await requireAuth()
+
+  // Verify the authenticated user owns this journey (prevents IDOR)
+  const userJourney = await prisma.userJourney.findUnique({
+    where: { id: userJourneyId },
+  })
+  if (!userJourney || userJourney.userId !== user.id) {
+    throw new Error('Ikke autoriseret')
+  }
+
+  // Verify this is the current day (prevents skipping ahead)
+  if (userJourney.currentDayId !== dayId) {
+    throw new Error('Du kan kun færdiggøre den aktuelle dag')
+  }
 
   const updatedJourney = await completeDay(
     userJourneyId,
