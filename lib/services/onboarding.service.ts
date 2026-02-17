@@ -14,32 +14,94 @@ export async function getActiveQuestions() {
   })
 }
 
+/**
+ * Save onboarding profile from raw responses.
+ *
+ * The client sends only the raw question responses. Derived fields
+ * (primaryChallengeTagId, childAges) are computed server-side by
+ * looking up the actual questions and options from the database.
+ *
+ * Convention: For SLIDER questions (which have no OnboardingOption rows),
+ * the raw numeric value is stored as a string in selectedOptionIds[0].
+ * For DATE questions, the ISO date string is stored in selectedOptionIds[0].
+ */
 export async function saveOnboardingProfile(userId: string, data: {
   responses: Array<{ questionId: string; selectedOptionIds: string[] }>
-  childAges?: number[]
-  primaryChallengeTagId?: string
 }) {
-  await prisma.userProfile.upsert({
-    where: { userId },
-    update: {
-      responses: data.responses,
-      childAges: data.childAges ?? Prisma.DbNull,
-      primaryChallengeTagId: data.primaryChallengeTagId || null,
-      completedAt: new Date(),
-    },
-    create: {
-      userId,
-      responses: data.responses,
-      childAges: data.childAges ?? Prisma.DbNull,
-      primaryChallengeTagId: data.primaryChallengeTagId || null,
-      completedAt: new Date(),
-    },
-  })
+  // Fetch questions to derive fields server-side
+  const questions = await getActiveQuestions()
 
-  // Mark onboarding as completed
-  await prisma.user.update({
-    where: { id: userId },
-    data: { onboardingCompleted: true },
+  // Derive childAges from SLIDER and DATE responses
+  const childAges: number[] = []
+  for (const q of questions) {
+    const response = data.responses.find((r) => r.questionId === q.id)
+    if (!response) continue
+
+    if (q.questionType === 'SLIDER') {
+      const val = parseInt(response.selectedOptionIds[0] ?? '', 10)
+      if (!isNaN(val) && val >= 0 && val <= 216) {
+        childAges.push(val)
+      }
+    }
+    if (q.questionType === 'DATE') {
+      const dateStr = response.selectedOptionIds[0]
+      if (dateStr) {
+        const birthDate = new Date(dateStr)
+        if (!isNaN(birthDate.getTime())) {
+          const now = new Date()
+          const ageMonths =
+            (now.getFullYear() - birthDate.getFullYear()) * 12 +
+            (now.getMonth() - birthDate.getMonth())
+          if (ageMonths >= 0) {
+            childAges.push(ageMonths)
+          }
+        }
+      }
+    }
+  }
+
+  // Derive primaryChallengeTagId from the first tag-mapped SINGLE_SELECT question
+  let primaryChallengeTagId: string | null = null
+  for (const q of questions) {
+    if (q.questionType === 'SINGLE_SELECT') {
+      const hasTaggedOptions = q.options.some((o) => o.tagId)
+      if (hasTaggedOptions) {
+        const response = data.responses.find((r) => r.questionId === q.id)
+        const selectedOptionId = response?.selectedOptionIds[0]
+        if (selectedOptionId) {
+          const selectedOption = q.options.find((o) => o.id === selectedOptionId)
+          if (selectedOption?.tagId) {
+            primaryChallengeTagId = selectedOption.tagId
+          }
+        }
+        break
+      }
+    }
+  }
+
+  // Wrap in transaction so UserProfile + User update are atomic
+  await prisma.$transaction(async (tx) => {
+    await tx.userProfile.upsert({
+      where: { userId },
+      update: {
+        responses: data.responses,
+        childAges: childAges.length > 0 ? childAges : Prisma.DbNull,
+        primaryChallengeTagId,
+        completedAt: new Date(),
+      },
+      create: {
+        userId,
+        responses: data.responses,
+        childAges: childAges.length > 0 ? childAges : Prisma.DbNull,
+        primaryChallengeTagId,
+        completedAt: new Date(),
+      },
+    })
+
+    await tx.user.update({
+      where: { id: userId },
+      data: { onboardingCompleted: true },
+    })
   })
 }
 

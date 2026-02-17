@@ -49,9 +49,9 @@ function formatMonths(months: number): string {
   const years = Math.floor(months / 12)
   const remaining = months % 12
   if (remaining === 0) {
-    return `${years} ${years === 1 ? 'år' : 'år'}`
+    return `${years} år`
   }
-  return `${years} ${years === 1 ? 'år' : 'år'} og ${remaining} ${remaining === 1 ? 'måned' : 'måneder'}`
+  return `${years} år og ${remaining} ${remaining === 1 ? 'måned' : 'måneder'}`
 }
 
 // ---------- Component ----------
@@ -138,19 +138,13 @@ export function OnboardingWizard({ questions }: Props) {
 
   function handleSubmit() {
     startTransition(async () => {
-      // Build responses array
+      // Build raw responses array — derived fields (childAges,
+      // primaryChallengeTagId) are computed server-side
       const responsesArray = questions.map((q) => {
         if (q.questionType === 'SLIDER') {
-          // For slider, store the value as a "virtual" option id (the raw value)
           return {
             questionId: q.id,
             selectedOptionIds: [String(sliderValues[q.id] ?? 24)],
-          }
-        }
-        if (q.questionType === 'DATE') {
-          return {
-            questionId: q.id,
-            selectedOptionIds: responses[q.id] ?? [],
           }
         }
         return {
@@ -159,53 +153,7 @@ export function OnboardingWizard({ questions }: Props) {
         }
       })
 
-      // Extract childAges from SLIDER questions
-      const childAges: number[] = []
-      for (const q of questions) {
-        if (q.questionType === 'SLIDER') {
-          childAges.push(sliderValues[q.id] ?? 24)
-        }
-        if (q.questionType === 'DATE') {
-          const dateStr = responses[q.id]?.[0]
-          if (dateStr) {
-            const birthDate = new Date(dateStr)
-            const now = new Date()
-            const ageMonths =
-              (now.getFullYear() - birthDate.getFullYear()) * 12 +
-              (now.getMonth() - birthDate.getMonth())
-            if (ageMonths >= 0) {
-              childAges.push(ageMonths)
-            }
-          }
-        }
-      }
-
-      // Extract primaryChallengeTagId from the tag-mapped SINGLE_SELECT question
-      // (the one where options have tags - typically Q2 "biggest challenge")
-      let primaryChallengeTagId: string | undefined
-      for (const q of questions) {
-        if (q.questionType === 'SINGLE_SELECT') {
-          const hasTaggedOptions = q.options.some((o) => o.tagId)
-          if (hasTaggedOptions) {
-            const selectedOptionId = responses[q.id]?.[0]
-            if (selectedOptionId) {
-              const selectedOption = q.options.find(
-                (o) => o.id === selectedOptionId
-              )
-              if (selectedOption?.tagId) {
-                primaryChallengeTagId = selectedOption.tagId
-              }
-            }
-            break // Use the first tag-mapped single-select question
-          }
-        }
-      }
-
-      await submitOnboarding({
-        responses: responsesArray,
-        childAges: childAges.length > 0 ? childAges : undefined,
-        primaryChallengeTagId,
-      })
+      await submitOnboarding({ responses: responsesArray })
     })
   }
 
