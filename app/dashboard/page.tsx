@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Settings, BookOpen, ArrowRight } from 'lucide-react'
 import { requireAuth } from '@/lib/auth'
 import { getUserInProgressCourses } from '@/lib/services/progress.service'
+import { redirect } from 'next/navigation'
 import {
   Card,
   CardContent,
@@ -13,6 +14,12 @@ import { Button } from '@/components/ui/button'
 
 export default async function DashboardPage() {
   const user = await requireAuth()
+
+  // Redirect non-admin users who haven't completed onboarding
+  if (!user.onboardingCompleted && user.role !== 'ADMIN') {
+    redirect('/onboarding')
+  }
+
   const courses = await getUserInProgressCourses(user.id)
 
   const displayName = user.name || user.email.split('@')[0]
