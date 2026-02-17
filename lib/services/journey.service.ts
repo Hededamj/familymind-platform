@@ -15,7 +15,7 @@ export async function createJourney(data: {
 
 export async function updateJourney(id: string, data: Partial<{
   title: string
-  description: string
+  description: string | null
   slug: string
   targetAgeMin: number | null
   targetAgeMax: number | null
@@ -155,26 +155,34 @@ export async function deleteDayAction(id: string) {
 // --- User Journey Progression ---
 
 export async function startJourney(userId: string, journeyId: string) {
-  const journey = await prisma.journey.findUniqueOrThrow({
-    where: { id: journeyId },
-    include: {
-      phases: {
-        include: { days: { orderBy: { position: 'asc' } } },
-        orderBy: { position: 'asc' },
+  return prisma.$transaction(async (tx) => {
+    // Prevent duplicate active journeys at service layer
+    const existing = await tx.userJourney.findFirst({
+      where: { userId, status: 'ACTIVE' },
+    })
+    if (existing) throw new Error('User already has an active journey')
+
+    const journey = await tx.journey.findUniqueOrThrow({
+      where: { id: journeyId },
+      include: {
+        phases: {
+          include: { days: { orderBy: { position: 'asc' } } },
+          orderBy: { position: 'asc' },
+        },
       },
-    },
-  })
+    })
 
-  const firstDay = journey.phases[0]?.days[0]
-  if (!firstDay) throw new Error('Journey has no days')
+    const firstDay = journey.phases[0]?.days[0]
+    if (!firstDay) throw new Error('Journey has no days')
 
-  return prisma.userJourney.create({
-    data: {
-      userId,
-      journeyId,
-      currentDayId: firstDay.id,
-      status: 'ACTIVE',
-    },
+    return tx.userJourney.create({
+      data: {
+        userId,
+        journeyId,
+        currentDayId: firstDay.id,
+        status: 'ACTIVE',
+      },
+    })
   })
 }
 
@@ -205,44 +213,52 @@ export async function getUserActiveJourney(userId: string) {
 }
 
 export async function completeDay(userJourneyId: string, dayId: string, checkInOptionId: string, reflection?: string) {
-  // Create check-in
-  await prisma.userDayCheckIn.create({
-    data: { userJourneyId, dayId, checkInOptionId, reflection },
-  })
+  return prisma.$transaction(async (tx) => {
+    // Re-verify current day inside transaction (prevents race conditions)
+    const uj = await tx.userJourney.findUniqueOrThrow({
+      where: { id: userJourneyId },
+    })
+    if (uj.currentDayId !== dayId) {
+      throw new Error('Day already completed or skipped')
+    }
 
-  // Find next day
-  const userJourney = await prisma.userJourney.findUniqueOrThrow({
-    where: { id: userJourneyId },
-    include: {
-      journey: {
-        include: {
-          phases: {
-            include: { days: { orderBy: { position: 'asc' } } },
-            orderBy: { position: 'asc' },
+    // Create check-in
+    await tx.userDayCheckIn.create({
+      data: { userJourneyId, dayId, checkInOptionId, reflection },
+    })
+
+    // Find next day
+    const userJourney = await tx.userJourney.findUniqueOrThrow({
+      where: { id: userJourneyId },
+      include: {
+        journey: {
+          include: {
+            phases: {
+              include: { days: { orderBy: { position: 'asc' } } },
+              orderBy: { position: 'asc' },
+            },
           },
         },
       },
-    },
+    })
+
+    // Flatten all days in order
+    const allDays = userJourney.journey.phases.flatMap(p => p.days)
+    const currentIndex = allDays.findIndex(d => d.id === dayId)
+    const nextDay = allDays[currentIndex + 1]
+
+    if (nextDay) {
+      return tx.userJourney.update({
+        where: { id: userJourneyId },
+        data: { currentDayId: nextDay.id },
+      })
+    } else {
+      return tx.userJourney.update({
+        where: { id: userJourneyId },
+        data: { status: 'COMPLETED', completedAt: new Date(), currentDayId: null },
+      })
+    }
   })
-
-  // Flatten all days in order
-  const allDays = userJourney.journey.phases.flatMap(p => p.days)
-  const currentIndex = allDays.findIndex(d => d.id === dayId)
-  const nextDay = allDays[currentIndex + 1]
-
-  if (nextDay) {
-    // Advance to next day
-    return prisma.userJourney.update({
-      where: { id: userJourneyId },
-      data: { currentDayId: nextDay.id },
-    })
-  } else {
-    // Journey complete
-    return prisma.userJourney.update({
-      where: { id: userJourneyId },
-      data: { status: 'COMPLETED', completedAt: new Date(), currentDayId: null },
-    })
-  }
 }
 
 export async function getJourneyProgress(userJourneyId: string) {

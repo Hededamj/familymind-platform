@@ -62,7 +62,7 @@ export default async function DashboardPage() {
             />
           )}
 
-          {stateKey === 'active_journey' && activeJourney && journeyProgress && (
+          {stateKey === 'active_journey' && activeJourney?.currentDay && journeyProgress && (
             <ActiveJourneyView
               message={message}
               activeJourney={activeJourney}
@@ -70,7 +70,7 @@ export default async function DashboardPage() {
             />
           )}
 
-          {stateKey === 'active_journey_plus_courses' && activeJourney && journeyProgress && (
+          {stateKey === 'active_journey_plus_courses' && activeJourney?.currentDay && journeyProgress && (
             <ActiveJourneyPlusCoursesView
               message={message}
               activeJourney={activeJourney}

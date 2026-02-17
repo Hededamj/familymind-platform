@@ -105,7 +105,7 @@ export function JourneyForm({ mode, initialData }: JourneyFormProps) {
         } else {
           await updateJourneyAction(initialData!.id, {
             title: formData.title,
-            description: formData.description || undefined,
+            description: formData.description || null,
             slug: formData.slug,
             targetAgeMin: formData.targetAgeMin
               ? parseInt(formData.targetAgeMin, 10)

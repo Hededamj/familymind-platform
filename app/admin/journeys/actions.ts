@@ -24,7 +24,7 @@ export async function updateJourneyAction(
   id: string,
   data: Partial<{
     title: string
-    description: string
+    description: string | null
     slug: string
     targetAgeMin: number | null
     targetAgeMax: number | null
