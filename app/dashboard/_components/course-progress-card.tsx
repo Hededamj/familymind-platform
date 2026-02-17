@@ -57,7 +57,7 @@ export function CourseProgressCard({
         {nextLesson ? (
           <Button asChild className="w-full" size="sm">
             <Link href={`/content/${nextLesson.slug}`}>
-              Fortsaet
+              Fortsæt
               <ArrowRight className="ml-2 size-4" />
             </Link>
           </Button>

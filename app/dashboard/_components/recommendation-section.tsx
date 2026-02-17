@@ -45,7 +45,7 @@ export function RecommendationSection({
                 <div className="flex items-center gap-2">
                   <Icon className="size-4 text-primary" />
                   <Badge variant="secondary" className="text-xs">
-                    {isJourney ? 'Forloeb' : 'Kursus'}
+                    {isJourney ? 'Forløb' : 'Kursus'}
                   </Badge>
                 </div>
                 <CardTitle className="mt-2 text-base">{rec.title}</CardTitle>
@@ -58,7 +58,7 @@ export function RecommendationSection({
               <CardContent className="mt-auto">
                 <Button asChild variant="outline" className="w-full" size="sm">
                   <Link href={href}>
-                    {isJourney ? 'Start forloeb' : 'Se kursus'}
+                    {isJourney ? 'Start forløb' : 'Se kursus'}
                     <ArrowRight className="ml-2 size-4" />
                   </Link>
                 </Button>

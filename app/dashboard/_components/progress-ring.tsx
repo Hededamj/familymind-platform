@@ -1,3 +1,5 @@
+import { cn } from '@/lib/utils'
+
 interface ProgressRingProps {
   percent: number
   size?: number
@@ -16,7 +18,7 @@ export function ProgressRing({
   const offset = circumference - (percent / 100) * circumference
 
   return (
-    <div className={className}>
+    <div className={cn('relative', className)}>
       <svg
         width={size}
         height={size}

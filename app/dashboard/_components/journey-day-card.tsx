@@ -120,7 +120,7 @@ export function JourneyDayCard({
         {/* Primary CTA */}
         <Button asChild size="lg" className="w-full">
           <Link href={dayUrl}>
-            Fortsaet med dag {progress.currentDayNumber}
+            Fortsæt med dag {progress.currentDayNumber}
             <ArrowRight className="ml-2 size-4" />
           </Link>
         </Button>

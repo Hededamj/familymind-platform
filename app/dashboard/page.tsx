@@ -138,7 +138,7 @@ function NewUserView({
       ) : (
         <DashboardMessageBanner
           heading="Velkommen til FamilyMind!"
-          body="Start dit foerste forloeb eller udforsk vores kurser for at komme i gang."
+          body="Start dit første forløb eller udforsk vores kurser for at komme i gang."
           ctaLabel="Udforsk indhold"
           ctaUrl="/browse"
         />
@@ -154,11 +154,11 @@ function NewUserView({
               Udforsk vores indhold
             </h2>
             <p className="mb-6 max-w-sm text-sm text-muted-foreground">
-              Find forloeb og kurser der passer til din familie.
+              Find forløb og kurser der passer til din familie.
             </p>
             <Button asChild>
               <Link href="/browse">
-                Se alle forloeb og kurser
+                Se alle forløb og kurser
                 <ArrowRight className="ml-2 size-4" />
               </Link>
             </Button>
@@ -276,9 +276,9 @@ function NoJourneyHasCoursesView({
         />
       ) : (
         <DashboardMessageBanner
-          heading="Proev et forloeb"
-          body="Udover dine kurser kan du starte et dagligt forloeb, der guider dig skridt for skridt."
-          ctaLabel="Se forloeb"
+          heading="Prøv et forløb"
+          body="Udover dine kurser kan du starte et dagligt forløb, der guider dig skridt for skridt."
+          ctaLabel="Se forløb"
           ctaUrl="/browse"
         />
       )}
@@ -327,9 +327,9 @@ function CompletedJourneyView({
         />
       ) : (
         <DashboardMessageBanner
-          heading="Hvad bliver det naeste?"
-          body="Du har gennemfoert dit forloeb - fantastisk! Er du klar til at starte et nyt?"
-          ctaLabel="Se flere forloeb"
+          heading="Hvad bliver det næste?"
+          body="Du har gennemført dit forløb - fantastisk! Er du klar til at starte et nyt?"
+          ctaLabel="Se flere forløb"
           ctaUrl="/browse"
         />
       )}

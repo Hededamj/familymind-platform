@@ -18,7 +18,7 @@ export function CompletedJourneyCard({
           Tillykke!
         </h3>
         <p className="mt-1 text-sm text-green-700 dark:text-green-300">
-          Du har gennemfoert{' '}
+          Du har gennemført{' '}
           <span className="font-semibold">{journeyTitle}</span>
         </p>
       </CardContent>

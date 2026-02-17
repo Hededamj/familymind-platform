@@ -11,21 +11,22 @@ type DashboardState =
   | 'completed_journey'
 
 export async function getDashboardState(userId: string) {
-  const activeJourney = await getUserActiveJourney(userId)
-  const inProgressCourses = await getUserInProgressCourses(userId)
-  const recommendations = await getRecommendations(userId)
-
-  // Check for recently completed journey
-  const recentlyCompleted = await prisma.userJourney.findFirst({
-    where: { userId, status: 'COMPLETED' },
-    orderBy: { completedAt: 'desc' },
-    include: { journey: true },
-  })
+  const [activeJourney, inProgressCourses, recommendations, recentlyCompleted] =
+    await Promise.all([
+      getUserActiveJourney(userId),
+      getUserInProgressCourses(userId),
+      getRecommendations(userId),
+      prisma.userJourney.findFirst({
+        where: { userId, status: 'COMPLETED' },
+        orderBy: { completedAt: 'desc' },
+        include: { journey: true },
+      }),
+    ])
 
   let stateKey: DashboardState
   let journeyProgress = null
 
-  if (activeJourney) {
+  if (activeJourney && activeJourney.currentDay) {
     journeyProgress = await getJourneyProgress(activeJourney.id)
     stateKey = inProgressCourses.length > 0 ? 'active_journey_plus_courses' : 'active_journey'
   } else if (inProgressCourses.length > 0) {
