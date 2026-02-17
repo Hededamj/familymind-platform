@@ -6,7 +6,16 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card'
-import { ClipboardList, Target, SmilePlus, MessageSquare } from 'lucide-react'
+import {
+  ClipboardList,
+  Target,
+  SmilePlus,
+  MessageSquare,
+  Mail,
+  Bell,
+  RefreshCw,
+  Trophy,
+} from 'lucide-react'
 
 const settingsSections = [
   {
@@ -35,6 +44,34 @@ const settingsSections = [
     description:
       'Rediger tilstandsbaserede beskeder paa brugerens dashboard',
     icon: MessageSquare,
+  },
+  {
+    href: '/admin/settings/emails',
+    title: 'E-mail Skabeloner',
+    description:
+      'Rediger emnelinjer, indhold og status for e-mail skabeloner',
+    icon: Mail,
+  },
+  {
+    href: '/admin/settings/notifications',
+    title: 'Notifikationsplan',
+    description:
+      'Konfigurer hvornaar notifikationer sendes til brugerne',
+    icon: Bell,
+  },
+  {
+    href: '/admin/settings/reengagement',
+    title: 'Genaktiveringsniveauer',
+    description:
+      'Konfigurer hvornaar og hvordan inaktive brugere kontaktes',
+    icon: RefreshCw,
+  },
+  {
+    href: '/admin/settings/milestones',
+    title: 'Milepaalsdefinitioner',
+    description:
+      'Konfigurer milepaalene og deres fejringsmeddelelser',
+    icon: Trophy,
   },
 ]
 
