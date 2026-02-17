@@ -1,16 +1,15 @@
 import Link from 'next/link'
-import { Settings, BookOpen, ArrowRight } from 'lucide-react'
-import { requireAuth } from '@/lib/auth'
-import { getUserInProgressCourses } from '@/lib/services/progress.service'
+import { Settings, ArrowRight, Compass } from 'lucide-react'
 import { redirect } from 'next/navigation'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { requireAuth } from '@/lib/auth'
+import { getDashboardState } from '@/lib/services/dashboard.service'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { DashboardMessageBanner } from './_components/dashboard-message-banner'
+import { JourneyDayCard } from './_components/journey-day-card'
+import { CourseProgressCard } from './_components/course-progress-card'
+import { RecommendationSection } from './_components/recommendation-section'
+import { CompletedJourneyCard } from './_components/completed-journey-card'
 
 export default async function DashboardPage() {
   const user = await requireAuth()
@@ -20,20 +19,28 @@ export default async function DashboardPage() {
     redirect('/onboarding')
   }
 
-  const courses = await getUserInProgressCourses(user.id)
+  const {
+    stateKey,
+    message,
+    activeJourney,
+    journeyProgress,
+    inProgressCourses,
+    recommendations,
+    recentlyCompleted,
+  } = await getDashboardState(user.id)
 
   const displayName = user.name || user.email.split('@')[0]
 
   return (
-    <div className="flex min-h-screen flex-col px-4 py-8 sm:px-8">
-      <div className="mx-auto w-full max-w-4xl">
+    <div className="flex min-h-screen flex-col px-4 py-6 sm:px-8 sm:py-8">
+      <div className="mx-auto w-full max-w-2xl">
         {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
+        <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
               Hej, {displayName}!
             </h1>
-            <p className="mt-1 text-muted-foreground">
+            <p className="mt-1 text-sm text-muted-foreground">
               Velkommen tilbage til FamilyMind
             </p>
           </div>
@@ -46,95 +53,288 @@ export default async function DashboardPage() {
           </Link>
         </div>
 
-        {/* In-progress courses */}
-        {courses.length > 0 ? (
-          <section>
-            <h2 className="mb-4 text-lg font-semibold">Dine kurser</h2>
-            <div className="grid gap-4 sm:grid-cols-2">
-              {courses.map((course) => {
-                // Find next incomplete lesson
-                const nextLesson = course.lessons.find((l) => !l.completed)
+        {/* State-based content */}
+        <div className="space-y-6">
+          {stateKey === 'new_user' && (
+            <NewUserView
+              message={message}
+              recommendations={recommendations}
+            />
+          )}
 
-                return (
-                  <Card key={course.product.id}>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-base">
-                        {course.product.title}
-                      </CardTitle>
-                      <CardDescription>
-                        {course.completedLessons} af {course.totalLessons}{' '}
-                        lektioner
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      {/* Progress bar */}
-                      <div className="mb-4">
-                        <div className="mb-1 flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">
-                            Fremskridt
-                          </span>
-                          <span className="font-medium">
-                            {course.percentComplete}%
-                          </span>
-                        </div>
-                        <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-                          <div
-                            className="h-full rounded-full bg-primary transition-all"
-                            style={{
-                              width: `${course.percentComplete}%`,
-                            }}
-                          />
-                        </div>
-                      </div>
+          {stateKey === 'active_journey' && activeJourney && journeyProgress && (
+            <ActiveJourneyView
+              message={message}
+              activeJourney={activeJourney}
+              journeyProgress={journeyProgress}
+            />
+          )}
 
-                      {/* Continue button */}
-                      {nextLesson ? (
-                        <Button asChild className="w-full" size="sm">
-                          <Link href={`/content/${nextLesson.slug}`}>
-                            Forts\u00e6t
-                            <ArrowRight className="ml-2 size-4" />
-                          </Link>
-                        </Button>
-                      ) : (
-                        <Button
-                          asChild
-                          variant="outline"
-                          className="w-full"
-                          size="sm"
-                        >
-                          <Link
-                            href={`/products/${course.product.slug}`}
-                          >
-                            Se kursus
-                          </Link>
-                        </Button>
-                      )}
-                    </CardContent>
-                  </Card>
-                )
-              })}
-            </div>
-          </section>
-        ) : (
-          <Card>
-            <CardContent className="flex flex-col items-center py-12 text-center">
-              <BookOpen className="mb-4 size-12 text-muted-foreground/50" />
-              <h2 className="mb-2 text-lg font-semibold">
-                Ingen kurser endnu
-              </h2>
-              <p className="mb-6 max-w-sm text-sm text-muted-foreground">
-                Udforsk vores kurser og start din l\u00e6ringsrejse i dag.
-              </p>
-              <Button asChild>
-                <Link href="/browse">
-                  Udforsk vores kurser
-                  <ArrowRight className="ml-2 size-4" />
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+          {stateKey === 'active_journey_plus_courses' && activeJourney && journeyProgress && (
+            <ActiveJourneyPlusCoursesView
+              message={message}
+              activeJourney={activeJourney}
+              journeyProgress={journeyProgress}
+              inProgressCourses={inProgressCourses}
+            />
+          )}
+
+          {stateKey === 'no_journey_has_courses' && (
+            <NoJourneyHasCoursesView
+              message={message}
+              inProgressCourses={inProgressCourses}
+            />
+          )}
+
+          {stateKey === 'completed_journey' && (
+            <CompletedJourneyView
+              message={message}
+              recentlyCompleted={recentlyCompleted}
+              recommendations={recommendations}
+            />
+          )}
+        </div>
       </div>
     </div>
+  )
+}
+
+/* -------------------------------------------------------------------------- */
+/*  State views                                                               */
+/* -------------------------------------------------------------------------- */
+
+interface DashboardMessage {
+  heading: string
+  body: string
+  ctaLabel?: string | null
+  ctaUrl?: string | null
+}
+
+/* --- new_user --- */
+
+function NewUserView({
+  message,
+  recommendations,
+}: {
+  message: DashboardMessage | null
+  recommendations: Array<{
+    type: string
+    id: string
+    title: string
+    description: string | null
+    slug: string
+    priority: number
+  }>
+}) {
+  return (
+    <>
+      {message ? (
+        <DashboardMessageBanner
+          heading={message.heading}
+          body={message.body}
+          ctaLabel={message.ctaLabel}
+          ctaUrl={message.ctaUrl}
+        />
+      ) : (
+        <DashboardMessageBanner
+          heading="Velkommen til FamilyMind!"
+          body="Start dit foerste forloeb eller udforsk vores kurser for at komme i gang."
+          ctaLabel="Udforsk indhold"
+          ctaUrl="/browse"
+        />
+      )}
+
+      <RecommendationSection recommendations={recommendations} />
+
+      {recommendations.length === 0 && (
+        <Card>
+          <CardContent className="flex flex-col items-center py-10 text-center">
+            <Compass className="mb-4 size-12 text-muted-foreground/50" />
+            <h2 className="mb-2 text-lg font-semibold">
+              Udforsk vores indhold
+            </h2>
+            <p className="mb-6 max-w-sm text-sm text-muted-foreground">
+              Find forloeb og kurser der passer til din familie.
+            </p>
+            <Button asChild>
+              <Link href="/browse">
+                Se alle forloeb og kurser
+                <ArrowRight className="ml-2 size-4" />
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+    </>
+  )
+}
+
+/* --- active_journey --- */
+
+function ActiveJourneyView({
+  message,
+  activeJourney,
+  journeyProgress,
+}: {
+  message: DashboardMessage | null
+  activeJourney: NonNullable<
+    Awaited<ReturnType<typeof getDashboardState>>['activeJourney']
+  >
+  journeyProgress: NonNullable<
+    Awaited<ReturnType<typeof getDashboardState>>['journeyProgress']
+  >
+}) {
+  return (
+    <>
+      {message && (
+        <DashboardMessageBanner
+          heading={message.heading}
+          body={message.body}
+          ctaLabel={message.ctaLabel}
+          ctaUrl={message.ctaUrl}
+        />
+      )}
+
+      <JourneyDayCard
+        journey={activeJourney.journey}
+        currentDay={activeJourney.currentDay!}
+        progress={journeyProgress}
+      />
+    </>
+  )
+}
+
+/* --- active_journey_plus_courses --- */
+
+function ActiveJourneyPlusCoursesView({
+  message,
+  activeJourney,
+  journeyProgress,
+  inProgressCourses,
+}: {
+  message: DashboardMessage | null
+  activeJourney: NonNullable<
+    Awaited<ReturnType<typeof getDashboardState>>['activeJourney']
+  >
+  journeyProgress: NonNullable<
+    Awaited<ReturnType<typeof getDashboardState>>['journeyProgress']
+  >
+  inProgressCourses: Awaited<
+    ReturnType<typeof getDashboardState>
+  >['inProgressCourses']
+}) {
+  return (
+    <>
+      {message && (
+        <DashboardMessageBanner
+          heading={message.heading}
+          body={message.body}
+          ctaLabel={message.ctaLabel}
+          ctaUrl={message.ctaUrl}
+        />
+      )}
+
+      <JourneyDayCard
+        journey={activeJourney.journey}
+        currentDay={activeJourney.currentDay!}
+        progress={journeyProgress}
+      />
+
+      {inProgressCourses.length > 0 && (
+        <section>
+          <h2 className="mb-4 text-lg font-semibold">Dine kurser</h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {inProgressCourses.map((course) => (
+              <CourseProgressCard key={course.product.id} {...course} />
+            ))}
+          </div>
+        </section>
+      )}
+    </>
+  )
+}
+
+/* --- no_journey_has_courses --- */
+
+function NoJourneyHasCoursesView({
+  message,
+  inProgressCourses,
+}: {
+  message: DashboardMessage | null
+  inProgressCourses: Awaited<
+    ReturnType<typeof getDashboardState>
+  >['inProgressCourses']
+}) {
+  return (
+    <>
+      {message ? (
+        <DashboardMessageBanner
+          heading={message.heading}
+          body={message.body}
+          ctaLabel={message.ctaLabel}
+          ctaUrl={message.ctaUrl}
+        />
+      ) : (
+        <DashboardMessageBanner
+          heading="Proev et forloeb"
+          body="Udover dine kurser kan du starte et dagligt forloeb, der guider dig skridt for skridt."
+          ctaLabel="Se forloeb"
+          ctaUrl="/browse"
+        />
+      )}
+
+      <section>
+        <h2 className="mb-4 text-lg font-semibold">Dine kurser</h2>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {inProgressCourses.map((course) => (
+            <CourseProgressCard key={course.product.id} {...course} />
+          ))}
+        </div>
+      </section>
+    </>
+  )
+}
+
+/* --- completed_journey --- */
+
+function CompletedJourneyView({
+  message,
+  recentlyCompleted,
+  recommendations,
+}: {
+  message: DashboardMessage | null
+  recentlyCompleted: Awaited<
+    ReturnType<typeof getDashboardState>
+  >['recentlyCompleted']
+  recommendations: Awaited<
+    ReturnType<typeof getDashboardState>
+  >['recommendations']
+}) {
+  return (
+    <>
+      {recentlyCompleted && (
+        <CompletedJourneyCard
+          journeyTitle={recentlyCompleted.journey.title}
+        />
+      )}
+
+      {message ? (
+        <DashboardMessageBanner
+          heading={message.heading}
+          body={message.body}
+          ctaLabel={message.ctaLabel}
+          ctaUrl={message.ctaUrl}
+        />
+      ) : (
+        <DashboardMessageBanner
+          heading="Hvad bliver det naeste?"
+          body="Du har gennemfoert dit forloeb - fantastisk! Er du klar til at starte et nyt?"
+          ctaLabel="Se flere forloeb"
+          ctaUrl="/browse"
+        />
+      )}
+
+      <RecommendationSection recommendations={recommendations} />
+    </>
   )
 }
