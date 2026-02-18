@@ -23,6 +23,7 @@ import {
   FileText,
   Check,
   Pencil,
+  MessageCircle,
 } from 'lucide-react'
 import {
   updateDayAction,
@@ -32,6 +33,9 @@ import {
   createDayActionItemAction,
   updateDayActionItemAction,
   deleteDayActionItemAction,
+  createPromptAction,
+  updatePromptAction,
+  deletePromptAction,
 } from '../../../actions'
 
 type ContentUnit = {
@@ -54,12 +58,19 @@ type DayAction = {
   reflectionPrompt: string | null
 }
 
+type DiscussionPromptType = {
+  id: string
+  promptText: string
+  isActive: boolean
+}
+
 type Day = {
   id: string
   position: number
   title: string | null
   contents: DayContent[]
   actions: DayAction[]
+  discussionPrompts: DiscussionPromptType[]
 }
 
 type DayEditorProps = {
@@ -88,6 +99,12 @@ export function DayEditor({ day, allContentUnits }: DayEditorProps) {
   const [editingActionId, setEditingActionId] = useState<string | null>(null)
   const [editActionText, setEditActionText] = useState('')
   const [editReflectionPrompt, setEditReflectionPrompt] = useState('')
+
+  // Discussion prompts
+  const [showAddPrompt, setShowAddPrompt] = useState(false)
+  const [newPromptText, setNewPromptText] = useState('')
+  const [editingPromptId, setEditingPromptId] = useState<string | null>(null)
+  const [editPromptText, setEditPromptText] = useState('')
 
   // Delete confirmation
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
@@ -194,6 +211,58 @@ export function DayEditor({ day, allContentUnits }: DayEditorProps) {
         router.refresh()
       } catch {
         toast.error('Kunne ikke slette handling')
+      }
+    })
+  }
+
+  // Discussion prompt handlers
+  function handleCreatePrompt() {
+    if (!newPromptText.trim()) return
+    startTransition(async () => {
+      try {
+        await createPromptAction(day.id, newPromptText.trim())
+        toast.success('Diskussionsspørgsmål tilføjet')
+        setNewPromptText('')
+        setShowAddPrompt(false)
+        router.refresh()
+      } catch {
+        toast.error('Kunne ikke oprette diskussionsspørgsmål')
+      }
+    })
+  }
+
+  function handleSavePrompt(id: string) {
+    startTransition(async () => {
+      try {
+        await updatePromptAction(id, { promptText: editPromptText.trim() })
+        toast.success('Diskussionsspørgsmål opdateret')
+        setEditingPromptId(null)
+        router.refresh()
+      } catch {
+        toast.error('Kunne ikke opdatere diskussionsspørgsmål')
+      }
+    })
+  }
+
+  function handleTogglePrompt(id: string, isActive: boolean) {
+    startTransition(async () => {
+      try {
+        await updatePromptAction(id, { isActive: !isActive })
+        router.refresh()
+      } catch {
+        toast.error('Kunne ikke opdatere diskussionsspørgsmål')
+      }
+    })
+  }
+
+  function handleDeletePrompt(id: string) {
+    startTransition(async () => {
+      try {
+        await deletePromptAction(id)
+        toast.success('Diskussionsspørgsmål slettet')
+        router.refresh()
+      } catch {
+        toast.error('Kunne ikke slette diskussionsspørgsmål')
       }
     })
   }
@@ -457,6 +526,141 @@ export function DayEditor({ day, allContentUnits }: DayEditorProps) {
                   setShowAddAction(false)
                   setNewActionText('')
                   setNewReflectionPrompt('')
+                }}
+              >
+                Annuller
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Discussion prompts section */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-medium text-muted-foreground">
+            <MessageCircle className="mr-1 inline size-3.5" />
+            Diskussionsspørgsmål ({day.discussionPrompts.length})
+          </span>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-7 text-xs"
+            onClick={() => setShowAddPrompt(true)}
+          >
+            <Plus className="mr-1 size-3" />
+            Tilføj spørgsmål
+          </Button>
+        </div>
+
+        {day.discussionPrompts.map((prompt) => (
+          <div
+            key={prompt.id}
+            className="rounded-md border bg-background px-3 py-2"
+          >
+            {editingPromptId === prompt.id ? (
+              <div className="space-y-2">
+                <Textarea
+                  value={editPromptText}
+                  onChange={(e) => setEditPromptText(e.target.value)}
+                  className="text-sm"
+                  rows={2}
+                  disabled={isPending}
+                />
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => handleSavePrompt(prompt.id)}
+                    disabled={isPending}
+                  >
+                    Gem
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs"
+                    onClick={() => setEditingPromptId(null)}
+                  >
+                    Annuller
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <p className={`text-sm ${!prompt.isActive ? 'text-muted-foreground line-through' : ''}`}>
+                    {prompt.promptText}
+                  </p>
+                  {!prompt.isActive && (
+                    <Badge variant="secondary" className="mt-1 text-xs">
+                      Deaktiveret
+                    </Badge>
+                  )}
+                </div>
+                <div className="flex items-center gap-1">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="size-6 p-0"
+                    onClick={() => handleTogglePrompt(prompt.id, prompt.isActive)}
+                    disabled={isPending}
+                    title={prompt.isActive ? 'Deaktiver' : 'Aktiver'}
+                  >
+                    {prompt.isActive ? <Check className="size-3 text-green-600" /> : <X className="size-3" />}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="size-6 p-0"
+                    onClick={() => {
+                      setEditingPromptId(prompt.id)
+                      setEditPromptText(prompt.promptText)
+                    }}
+                  >
+                    <Pencil className="size-3" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="size-6 p-0 text-destructive hover:text-destructive"
+                    onClick={() => handleDeletePrompt(prompt.id)}
+                    disabled={isPending}
+                  >
+                    <Trash2 className="size-3" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+
+        {showAddPrompt && (
+          <div className="rounded-md border bg-background p-3 space-y-2">
+            <Textarea
+              value={newPromptText}
+              onChange={(e) => setNewPromptText(e.target.value)}
+              placeholder="F.eks. Hvordan har I arbejdet med dette emne i jeres familie?"
+              className="text-sm"
+              rows={2}
+              disabled={isPending}
+            />
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                className="h-7 text-xs"
+                onClick={handleCreatePrompt}
+                disabled={isPending || !newPromptText.trim()}
+              >
+                Tilføj
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 text-xs"
+                onClick={() => {
+                  setShowAddPrompt(false)
+                  setNewPromptText('')
                 }}
               >
                 Annuller

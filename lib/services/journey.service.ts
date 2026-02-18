@@ -73,6 +73,7 @@ export async function getJourneyById(id: string) {
             include: {
               contents: { include: { contentUnit: true }, orderBy: { position: 'asc' } },
               actions: true,
+              discussionPrompts: true,
             },
             orderBy: { position: 'asc' },
           },

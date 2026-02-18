@@ -1,8 +1,9 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowRight, Check, CircleDot, Circle, ArrowLeft } from 'lucide-react'
+import { ArrowRight, Check, CircleDot, Circle, ArrowLeft, Users } from 'lucide-react'
 import { requireAuth } from '@/lib/auth'
 import { getJourney, getUserActiveJourney, getJourneyProgress } from '@/lib/services/journey.service'
+import { getUserCohort } from '@/lib/services/community.service'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -30,6 +31,11 @@ export default async function JourneyOverviewPage({
   // Get progress if the user has this journey active
   const progress = isActiveForThisJourney
     ? await getJourneyProgress(activeJourney.id)
+    : null
+
+  // Get cohort membership for community link
+  const cohortMembership = isActiveForThisJourney
+    ? await getUserCohort(user.id, journey.id)
     : null
 
   // Flatten all days to compute total and find current
@@ -86,6 +92,29 @@ export default async function JourneyOverviewPage({
                 </span>
               </div>
               <Progress value={progress.percentComplete} className="h-3" />
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Community link */}
+        {cohortMembership && (
+          <Card className="mb-6">
+            <CardContent className="pt-6">
+              <Link
+                href={`/journeys/${slug}/community`}
+                className="flex items-center justify-between"
+              >
+                <div className="flex items-center gap-3">
+                  <Users className="size-5 text-primary" />
+                  <div>
+                    <p className="text-sm font-medium">Fællesskab</p>
+                    <p className="text-xs text-muted-foreground">
+                      {cohortMembership.cohort._count.members} medlemmer i din gruppe
+                    </p>
+                  </div>
+                </div>
+                <ArrowRight className="size-4 text-muted-foreground" />
+              </Link>
             </CardContent>
           </Card>
         )}

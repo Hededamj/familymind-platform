@@ -2,6 +2,7 @@
 
 import { requireAdmin } from '@/lib/auth'
 import * as journeyService from '@/lib/services/journey.service'
+import * as communityService from '@/lib/services/community.service'
 import { revalidatePath } from 'next/cache'
 
 // --- Journey CRUD ---
@@ -137,5 +138,35 @@ export async function updateDayActionItemAction(
 export async function deleteDayActionItemAction(id: string) {
   await requireAdmin()
   await journeyService.deleteDayAction(id)
+  revalidatePath('/admin/journeys')
+}
+
+// --- Discussion Prompts ---
+
+export async function listJourneyPromptsAction(journeyId: string) {
+  await requireAdmin()
+  return communityService.listJourneyPrompts(journeyId)
+}
+
+export async function createPromptAction(dayId: string, promptText: string) {
+  await requireAdmin()
+  const result = await communityService.createPrompt(dayId, promptText)
+  revalidatePath('/admin/journeys')
+  return result
+}
+
+export async function updatePromptAction(
+  id: string,
+  data: { promptText?: string; isActive?: boolean }
+) {
+  await requireAdmin()
+  const result = await communityService.updatePrompt(id, data)
+  revalidatePath('/admin/journeys')
+  return result
+}
+
+export async function deletePromptAction(id: string) {
+  await requireAdmin()
+  await communityService.deletePrompt(id)
   revalidatePath('/admin/journeys')
 }

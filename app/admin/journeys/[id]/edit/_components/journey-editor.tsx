@@ -31,12 +31,19 @@ type DayAction = {
   reflectionPrompt: string | null
 }
 
+type DiscussionPromptType = {
+  id: string
+  promptText: string
+  isActive: boolean
+}
+
 type Day = {
   id: string
   position: number
   title: string | null
   contents: DayContent[]
   actions: DayAction[]
+  discussionPrompts: DiscussionPromptType[]
 }
 
 type Phase = {

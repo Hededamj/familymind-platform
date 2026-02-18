@@ -19,3 +19,20 @@ export async function updateCohortAction(
   revalidatePath(`/admin/cohorts/${id}`)
   return result
 }
+
+export async function getCohortFeedAction(cohortId: string, cursor?: string) {
+  await requireAdmin()
+  return communityService.getCohortFeed(cohortId, cursor)
+}
+
+export async function hidePostAction(postId: string, cohortId: string) {
+  await requireAdmin()
+  await communityService.hidePost(postId)
+  revalidatePath(`/admin/cohorts/${cohortId}`)
+}
+
+export async function hideReplyAction(replyId: string, cohortId: string) {
+  await requireAdmin()
+  await communityService.hideReply(replyId)
+  revalidatePath(`/admin/cohorts/${cohortId}`)
+}

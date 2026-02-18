@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { getSiteSetting } from './settings.service'
+import { createInAppNotification } from './engagement.service'
 import type { Prisma } from '@prisma/client'
 
 const DEFAULT_COHORT_MAX_MEMBERS = 25
@@ -180,4 +181,309 @@ export async function getCohortById(id: string) {
       _count: { select: { members: true } },
     },
   })
+}
+
+// --- Discussion Feed ---
+
+const FEED_PAGE_SIZE = 20
+
+/**
+ * Get paginated discussion feed for a cohort.
+ */
+export async function getCohortFeed(
+  cohortId: string,
+  cursor?: string,
+  userId?: string
+) {
+  const posts = await prisma.discussionPost.findMany({
+    where: { cohortId, isHidden: false },
+    take: FEED_PAGE_SIZE + 1,
+    ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+    orderBy: [{ isPinned: 'desc' }, { createdAt: 'desc' }],
+    include: {
+      author: { select: { id: true, name: true } },
+      day: { select: { id: true, title: true, position: true } },
+      _count: { select: { replies: true, reactions: true } },
+      reactions: userId
+        ? { where: { userId }, select: { id: true, emoji: true } }
+        : false,
+    },
+  })
+
+  const hasMore = posts.length > FEED_PAGE_SIZE
+  const items = hasMore ? posts.slice(0, FEED_PAGE_SIZE) : posts
+  const nextCursor = hasMore ? items[items.length - 1]?.id : undefined
+
+  return { items, nextCursor, hasMore }
+}
+
+/**
+ * Get a single post with all replies and reactions.
+ */
+export async function getPostWithReplies(
+  postId: string,
+  userId?: string
+) {
+  return prisma.discussionPost.findUnique({
+    where: { id: postId },
+    include: {
+      author: { select: { id: true, name: true } },
+      day: { select: { id: true, title: true, position: true } },
+      reactions: {
+        include: { user: { select: { id: true, name: true } } },
+      },
+      replies: {
+        where: { isHidden: false },
+        orderBy: { createdAt: 'asc' },
+        include: {
+          author: { select: { id: true, name: true } },
+          reactions: userId
+            ? { where: { userId }, select: { id: true, emoji: true } }
+            : { include: { user: { select: { id: true, name: true } } } },
+        },
+      },
+    },
+  })
+}
+
+/**
+ * Create a new discussion post. Verifies user is a cohort member.
+ */
+export async function createPost(
+  cohortId: string,
+  authorId: string,
+  body: string,
+  dayId?: string
+) {
+  // Verify membership
+  const membership = await prisma.cohortMember.findFirst({
+    where: { cohortId, userId: authorId },
+  })
+  if (!membership) {
+    throw new Error('Du er ikke medlem af denne kohorte')
+  }
+
+  return prisma.discussionPost.create({
+    data: { cohortId, authorId, body, dayId },
+    include: {
+      author: { select: { id: true, name: true } },
+      _count: { select: { replies: true, reactions: true } },
+    },
+  })
+}
+
+/**
+ * Create a reply to a discussion post. Notifies original author.
+ */
+export async function createReply(
+  postId: string,
+  authorId: string,
+  body: string
+) {
+  const post = await prisma.discussionPost.findUnique({
+    where: { id: postId },
+    include: {
+      cohort: { select: { id: true, journeyId: true } },
+      author: { select: { id: true, name: true } },
+    },
+  })
+
+  if (!post) throw new Error('Indlæg ikke fundet')
+
+  // Verify membership
+  const membership = await prisma.cohortMember.findFirst({
+    where: { cohortId: post.cohortId, userId: authorId },
+  })
+  if (!membership) {
+    throw new Error('Du er ikke medlem af denne kohorte')
+  }
+
+  const reply = await prisma.discussionReply.create({
+    data: { postId, authorId, body },
+    include: {
+      author: { select: { id: true, name: true } },
+    },
+  })
+
+  // Notify original post author (don't notify yourself)
+  if (post.authorId !== authorId) {
+    const authorName = reply.author.name ?? 'Nogen'
+    await createInAppNotification(
+      post.authorId,
+      'COMMUNITY_REPLY',
+      `${authorName} svarede på dit indlæg`,
+      body.length > 100 ? body.slice(0, 100) + '…' : body,
+      `/journeys/community/${post.cohortId}/${postId}`
+    )
+  }
+
+  return reply
+}
+
+/**
+ * Toggle a reaction on a post or reply.
+ * Returns true if added, false if removed.
+ */
+export async function toggleReaction(
+  userId: string,
+  emoji: string,
+  postId?: string,
+  replyId?: string
+) {
+  if (!postId && !replyId) throw new Error('postId eller replyId påkrævet')
+
+  // Check for existing reaction
+  const existing = postId
+    ? await prisma.postReaction.findUnique({
+        where: { userId_postId_emoji: { userId, postId, emoji } },
+      })
+    : await prisma.postReaction.findUnique({
+        where: { userId_replyId_emoji: { userId, replyId: replyId!, emoji } },
+      })
+
+  if (existing) {
+    await prisma.postReaction.delete({ where: { id: existing.id } })
+    return false
+  }
+
+  await prisma.postReaction.create({
+    data: { userId, postId, replyId, emoji },
+  })
+  return true
+}
+
+// --- Discussion Prompts (Admin) ---
+
+/**
+ * List discussion prompts for a journey day.
+ */
+export async function listPrompts(dayId: string) {
+  return prisma.discussionPrompt.findMany({
+    where: { dayId },
+    orderBy: { promptText: 'asc' },
+  })
+}
+
+/**
+ * List all prompts for a journey (grouped by day).
+ */
+export async function listJourneyPrompts(journeyId: string) {
+  return prisma.discussionPrompt.findMany({
+    where: {
+      day: {
+        phase: { journeyId },
+      },
+    },
+    include: {
+      day: {
+        select: {
+          id: true,
+          title: true,
+          position: true,
+          phase: { select: { title: true, position: true } },
+        },
+      },
+    },
+    orderBy: {
+      day: { position: 'asc' },
+    },
+  })
+}
+
+/**
+ * Create a discussion prompt for a journey day.
+ */
+export async function createPrompt(dayId: string, promptText: string) {
+  return prisma.discussionPrompt.create({
+    data: { dayId, promptText },
+  })
+}
+
+/**
+ * Update a discussion prompt.
+ */
+export async function updatePrompt(
+  id: string,
+  data: { promptText?: string; isActive?: boolean }
+) {
+  return prisma.discussionPrompt.update({
+    where: { id },
+    data,
+  })
+}
+
+/**
+ * Delete a discussion prompt.
+ */
+export async function deletePrompt(id: string) {
+  return prisma.discussionPrompt.delete({ where: { id } })
+}
+
+/**
+ * Auto-post a discussion prompt to a cohort as a system post.
+ * Used by the cron job when cohort members reach a new journey day.
+ */
+export async function autoPostPrompt(
+  promptId: string,
+  cohortId: string,
+  dayId: string,
+  systemUserId: string
+) {
+  // Check if this prompt has already been posted in this cohort
+  const existing = await prisma.discussionPost.findFirst({
+    where: { cohortId, promptId, isPrompt: true },
+  })
+  if (existing) return existing
+
+  return prisma.discussionPost.create({
+    data: {
+      cohortId,
+      authorId: systemUserId,
+      promptId,
+      dayId,
+      body: (
+        await prisma.discussionPrompt.findUniqueOrThrow({
+          where: { id: promptId },
+        })
+      ).promptText,
+      isPrompt: true,
+      isPinned: true,
+    },
+  })
+}
+
+// --- Moderation (basic, expanded in Task 4.3) ---
+
+/**
+ * Hide a post (admin moderation).
+ */
+export async function hidePost(postId: string) {
+  return prisma.discussionPost.update({
+    where: { id: postId },
+    data: { isHidden: true },
+  })
+}
+
+/**
+ * Hide a reply (admin moderation).
+ */
+export async function hideReply(replyId: string) {
+  return prisma.discussionReply.update({
+    where: { id: replyId },
+    data: { isHidden: true },
+  })
+}
+
+/**
+ * Delete a post and all its replies (admin or author).
+ */
+export async function deletePost(postId: string) {
+  return prisma.discussionPost.delete({ where: { id: postId } })
+}
+
+/**
+ * Delete a reply (admin or author).
+ */
+export async function deleteReply(replyId: string) {
+  return prisma.discussionReply.delete({ where: { id: replyId } })
 }
