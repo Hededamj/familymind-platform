@@ -1,30 +1,68 @@
-# FamilyMind 2.0 — Implementation Plan
+# FamilyMind 2.0 — Implementation Plan (v2)
 
 > For Claude: REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 Goal: Build a structured parenting platform with flexible content packaging, multi-model monetization, and a layered architecture that ships in phases.
 
-Architecture: Next.js 16 App Router with server components and server actions. PostgreSQL via Supabase (managed DB + auth + storage). Prisma ORM. Stripe for payments. Deployed on Vercel.
+Architecture: Next.js 16 App Router with server components and server actions. Service layer pattern: all business logic in lib/services/ (framework-agnostic), server actions are thin wrappers. This enables a future native app (Capacitor) to call the same logic via API routes.
 
-Tech Stack: Next.js 16, React 19, TypeScript 5, Prisma, Supabase (Postgres + Auth + Storage), Stripe, Tailwind CSS 4, shadcn/ui, Resend (email), Vercel.
+Tech Stack: Next.js 16, React 19, TypeScript 5, Prisma, Supabase (Postgres + Auth + Storage), Stripe, Bunny.net Stream (video), Tailwind CSS 4, shadcn/ui, Resend (email), Vercel.
 
 ---
 
-## Critical Technical Decisions (Stated, Not Asked)
-
-These are opinionated choices. Override any you disagree with.
+## Critical Technical Decisions
 
 | Decision          | Choice                        | Rationale                                                                                      |
 |-------------------|-------------------------------|------------------------------------------------------------------------------------------------|
-| Database          | Supabase (managed Postgres)   | Auth, DB, storage, and realtime in one service. Free tier for dev. Row-level security for B2B. |
+| Database          | Supabase (managed Postgres)   | Auth, DB, storage, and realtime in one service. Row-level security for B2B.                    |
 | ORM               | Prisma                        | Most mature Next.js ORM. Type-safe. Migrations. Introspection.                                 |
-| Auth              | Supabase Auth                 | Already included. Social login, magic link, email/password. Handles sessions.                  |
-| Payments          | Stripe                        | Industry standard. Handles subscriptions, one-time, coupons, invoicing. Full EU/DK support.    |
-| Video hosting     | External URLs (agnostic)      | Store video URLs, not files. Works with NewZenler embeds now, Mux/Bunny later. No migration.   |
-| UI components     | shadcn/ui                     | Not a dependency -- copied into project. Full control. Accessible. Tailwind-native.            |
-| Email             | Resend + React Email          | Modern, developer-friendly. Transactional email with React components.                         |
-| Deployment        | Vercel                        | Native Next.js host. Zero config. Preview deployments. Edge functions.                         |
-| Admin             | Built-in, role-based          | No external CMS. Admin pages behind role check. Same codebase. Simpler.                        |
+| Auth              | Supabase Auth                 | Email/password + Google OAuth + Apple Sign-In. Handles sessions.                               |
+| Payments          | Stripe                        | Subscriptions, one-time, coupons, invoicing. Full EU/DK support.                               |
+| Video hosting     | Bunny.net Stream              | EU-based (GDPR), affordable, HLS adaptive streaming, token-based protection. Can migrate to Mux later. |
+| UI components     | shadcn/ui                     | Copied into project. Full control. Accessible. Tailwind-native.                                |
+| Email             | Resend + React Email          | Transactional email with React components.                                                     |
+| Deployment        | Vercel                        | Native Next.js host. Preview deployments. Cron jobs.                                           |
+| Admin             | Built-in, role-based          | Admin pages behind role check. Same codebase. No external CMS.                                 |
+| Architecture      | Service layer pattern         | lib/services/ = pure business logic. Server actions and future API routes are thin wrappers.    |
+| Future app        | Capacitor (later)             | Wraps consumer-facing web pages in native shell. No in-app purchases (web checkout only).      |
+
+---
+
+## Architectural Pattern: Service Layer
+
+All business logic lives in lib/services/. No Next.js imports. No request/response objects. Pure functions that take data and return data.
+
+```
+lib/services/
+  content.service.ts      -- CRUD, publishing, filtering
+  product.service.ts      -- CRUD, Stripe sync, pricing
+  entitlement.service.ts  -- access checks, grant/revoke
+  journey.service.ts      -- CRUD, progression, check-ins
+  onboarding.service.ts   -- quiz logic, recommendations
+  engagement.service.ts   -- notifications, ladder, milestones
+  checkout.service.ts     -- Stripe sessions, discount validation
+  progress.service.ts     -- content/course/journey progress
+  user.service.ts         -- profile, preferences, sync
+```
+
+Server actions (app/admin/*/actions.ts) call services. Future API routes (app/api/v1/*) call the same services. Zero duplicated logic.
+
+---
+
+## Admin-Configurable Systems
+
+These are NOT hardcoded. They are database-backed and managed via admin UI.
+
+| System                      | Admin page                    | What Mette controls                                              |
+|-----------------------------|-------------------------------|------------------------------------------------------------------|
+| Onboarding quiz             | /admin/settings/onboarding    | Questions, answer options, order, type, mapping to tags          |
+| Recommendation rules        | /admin/settings/recommendations | Profile → journey/product mappings, priority, conditions       |
+| Email templates             | /admin/settings/emails        | Subject, body text (with variables), per template type           |
+| Notification schedule       | /admin/settings/notifications | Day + time for each notification type (weekly plan, nudge, etc.) |
+| Re-engagement ladder        | /admin/settings/reengagement  | Tier thresholds (days), messages, max frequency                  |
+| Milestone definitions       | /admin/settings/milestones    | Trigger conditions, celebration messages, active/inactive        |
+| Check-in options            | /admin/settings/checkins      | Response options (labels, emoji, order)                          |
+| Dashboard messages          | /admin/settings/dashboard     | State-based copy (new user, active journey, completed, etc.)     |
 
 ---
 
@@ -48,15 +86,16 @@ Phase 3: Only after retention data validates the approach
 
 ### Task 0.1: Supabase Project Setup
 
-What: Create Supabase project, configure auth, get connection strings.
+What: Configure existing Supabase project, set up auth providers, get connection strings.
 
 Steps:
-1. Create Supabase project (supabase.com)
-2. Enable email/password auth + Google OAuth (if needed)
+1. Configure Supabase project (existing account)
+2. Enable auth providers: email/password, Google OAuth, Apple Sign-In
 3. Note: project URL, anon key, service role key, database URL
 4. Create .env.local with all credentials
 5. Add .env.local to .gitignore (verify it's already there)
 6. Create .env.example with placeholder keys
+7. Commit
 
 ### Task 0.2: Prisma Setup
 
@@ -88,22 +127,34 @@ What: Install shadcn/ui, set up core layout, configure theme.
 
 Steps:
 1. Initialize shadcn/ui: npx shadcn@latest init
-2. Install base components: button, card, input, label, dialog, dropdown-menu, separator, badge, tabs
+2. Install base components: button, card, input, label, dialog, dropdown-menu, separator, badge, tabs, table, select, textarea, toast
 3. Create root layout with navigation shell (app/layout.tsx)
 4. Create placeholder pages: /, /dashboard, /admin
-5. Set up FamilyMind color palette in CSS variables (replace defaults)
+5. Set up FamilyMind color palette in CSS variables
 6. Commit
 
 ### Task 0.5: Stripe Setup
 
-What: Create Stripe account, install SDK, configure webhooks.
+What: Configure existing Stripe account, install SDK, set up webhooks.
 
 Steps:
-1. Create Stripe account (or use existing). Enable test mode.
+1. Use existing Stripe account. Enable test mode.
 2. Install: stripe, @stripe/stripe-js
 3. Add Stripe keys to .env.local (publishable key, secret key, webhook secret)
 4. Create webhook endpoint: app/api/webhooks/stripe/route.ts (skeleton)
 5. Configure Stripe CLI for local webhook testing: stripe listen --forward-to localhost:3000/api/webhooks/stripe
+6. Commit
+
+### Task 0.6: Bunny.net Stream Setup
+
+What: Configure Bunny.net Stream for video hosting.
+
+Steps:
+1. Create Bunny.net account + Stream library
+2. Note: API key, library ID, CDN hostname
+3. Add Bunny credentials to .env.local
+4. Create lib/bunny.ts -- upload URL generator, signed playback URL generator, delete video
+5. Test: upload a test video via API, verify playback URL works
 6. Commit
 
 ---
@@ -112,7 +163,7 @@ Steps:
 
 ### Task 1.1: Database Schema — Core Models
 
-What: Define the complete Prisma schema for content, products, users, and entitlements.
+What: Define the complete Prisma schema for content, products, users, entitlements, and admin-configurable settings.
 
 Models:
 
@@ -137,18 +188,20 @@ ContentUnit
   - description
   - slug (unique)
   - mediaType (VIDEO, AUDIO, PDF, TEXT)
-  - mediaUrl (external URL -- provider agnostic)
+  - mediaUrl (external URL or Bunny.net stream URL)
+  - bunnyVideoId (nullable -- for Bunny-hosted videos)
   - thumbnailUrl
   - durationMinutes
   - difficulty (INTRODUCTORY, INTERMEDIATE, ADVANCED)
   - isStandalone (boolean)
   - isFree (boolean)
+  - accessLevel (FREE, SUBSCRIPTION, PURCHASE) -- controls who sees it
   - publishedAt (nullable -- null means draft)
   - createdAt, updatedAt
 
 ContentTag
   - id
-  - name (unique, e.g. "sleep", "boundaries")
+  - name (unique, e.g. "søvn", "grænser")
   - slug
 
 ContentUnitTag (join table)
@@ -206,30 +259,159 @@ DiscountCode
   - applicableProductId (nullable -- null means all products)
   - isActive (boolean)
 
+--- Admin-Configurable Models ---
+
+SiteSetting (key-value for simple settings)
+  - id
+  - key (unique, e.g. "subscription_price_dkk", "notification_max_per_week")
+  - value (text)
+  - description
+
+OnboardingQuestion
+  - id
+  - questionText
+  - questionType (SINGLE_SELECT, MULTI_SELECT, DATE, SLIDER)
+  - position (ordering)
+  - isActive (boolean)
+  - helperText (nullable)
+
+OnboardingOption
+  - id
+  - questionId
+  - label
+  - value (stored value)
+  - tagId (nullable -- maps answer to a ContentTag for recommendations)
+  - position (ordering)
+
+RecommendationRule
+  - id
+  - name
+  - conditions (json -- e.g. {"tagId": "x", "ageMin": 0, "ageMax": 36})
+  - targetType (JOURNEY, PRODUCT)
+  - targetId
+  - priority (int -- higher = shown first)
+  - isActive (boolean)
+
+EmailTemplate
+  - id
+  - templateKey (unique, e.g. "weekly_plan", "midweek_nudge", "reflection", "reengagement_tier1")
+  - subject
+  - bodyHtml (with variable placeholders: {{userName}}, {{journeyTitle}}, etc.)
+  - description (admin-facing, explains when this email is sent)
+  - isActive (boolean)
+  - updatedAt
+
+NotificationSchedule
+  - id
+  - notificationType (WEEKLY_PLAN, MIDWEEK_NUDGE, REFLECTION, MONTHLY_PROGRESS)
+  - dayOfWeek (0-6, Monday=1)
+  - timeOfDay (HH:MM)
+  - isActive (boolean)
+
+ReEngagementTier
+  - id
+  - tierNumber (1, 2, 3, 4)
+  - daysInactiveMin (int)
+  - daysInactiveMax (int)
+  - emailTemplateId (links to EmailTemplate)
+  - isActive (boolean)
+
+MilestoneDefinition
+  - id
+  - name (e.g. "First day complete", "Journey halfway")
+  - triggerType (DAYS_ACTIVE, PHASE_COMPLETE, JOURNEY_COMPLETE, CONTENT_COUNT, CHECKIN_STREAK)
+  - triggerValue (int -- e.g. 4 for "4 days active")
+  - celebrationTitle
+  - celebrationMessage
+  - isActive (boolean)
+
+CheckInOption
+  - id
+  - label (e.g. "Det gik godt", "Blandet", "Det var svært", "Sprang over")
+  - value (e.g. "WORKED_WELL", "MIXED", "HARD", "SKIPPED")
+  - emoji (nullable, e.g. "😊")
+  - position (ordering)
+  - isActive (boolean)
+
+DashboardMessage
+  - id
+  - stateKey (unique, e.g. "new_user", "active_journey", "completed_journey", "no_journey_has_courses")
+  - heading
+  - body
+  - ctaLabel
+  - ctaUrl
+
 Steps:
 1. Write full Prisma schema in prisma/schema.prisma
 2. Run: npx prisma migrate dev --name init (creates all tables)
-3. Create seed file prisma/seed.ts with test data (1 admin user, 5 content units, 2 courses, 1 bundle)
+3. Create seed file prisma/seed.ts with:
+   - 1 admin user, 5 content units, 2 courses, 1 bundle
+   - Default onboarding questions (5 questions with options)
+   - Default email templates (all types with placeholder text)
+   - Default notification schedule (Mon 8:00, Wed 18:00, Fri 18:00)
+   - Default re-engagement tiers (4 tiers)
+   - Default milestone definitions (5 milestones)
+   - Default check-in options (4 options)
+   - Default dashboard messages (5 states)
+   - Default recommendation rules (2-3 example rules)
 4. Run seed: npx prisma db seed
 5. Verify in Supabase dashboard: all tables populated
 6. Commit
 
-### Task 1.2: Auth Integration — User Sync
+### Task 1.2: Service Layer — Core Services
 
-What: When a user signs up via Supabase Auth, create a matching row in the User table. Protect admin routes.
+What: Create the service layer with all core business logic as pure functions.
 
 Steps:
-1. Create Supabase Auth trigger (database function) or use a webhook to sync auth.users -> public.User
-2. Alternative: create lib/auth.ts with getOrCreateUser() that checks if a User row exists for the current Supabase session and creates one if not
-3. Create auth middleware in middleware.ts that protects /dashboard/* and /admin/*
-4. Create admin role check utility: lib/auth.ts -> requireAdmin()
-5. Create sign-in page: app/(auth)/login/page.tsx
-6. Create sign-up page: app/(auth)/signup/page.tsx
-7. Test: sign up -> verify User row created with role USER
-8. Test: access /admin as USER -> redirected to /dashboard
+1. Create lib/services/content.service.ts:
+   - createContentUnit(data), updateContentUnit(id, data), deleteContentUnit(id)
+   - listContentUnits(filters), getContentUnit(slug), publishContentUnit(id)
+2. Create lib/services/product.service.ts:
+   - createProduct(data), updateProduct(id, data), deleteProduct(id)
+   - listProducts(filters), getProduct(slug)
+   - addLessonToCourse(), removeLessonFromCourse(), reorderLessons()
+   - addProductToBundle(), removeProductFromBundle()
+   - syncToStripe(productId) -- creates/updates Stripe Product + Price
+3. Create lib/services/entitlement.service.ts:
+   - createEntitlement(userId, productId, source, stripeData)
+   - getUserEntitlements(userId)
+   - canAccessContent(userId, contentUnitId) -> boolean
+   - revokeEntitlement(id)
+4. Create lib/services/checkout.service.ts:
+   - createCheckoutSession(userId, productId, discountCode?)
+   - validateDiscountCode(code, productId)
+5. Create lib/services/user.service.ts:
+   - getOrCreateUser(supabaseUser)
+   - updateProfile(userId, data)
+   - getUserById(id), getUserByEmail(email)
+6. Create lib/services/settings.service.ts:
+   - getOnboardingQuestions() -- returns active questions with options, ordered
+   - getEmailTemplate(key) -- returns template with current content
+   - getNotificationSchedule() -- returns all schedules
+   - getReEngagementTiers() -- returns active tiers, ordered
+   - getMilestoneDefinitions() -- returns active milestones
+   - getCheckInOptions() -- returns active options, ordered
+   - getDashboardMessage(stateKey) -- returns message for given state
+   - getRecommendationRules() -- returns active rules, ordered by priority
+7. All services use Prisma client from lib/prisma.ts
+8. All services validate input with Zod schemas defined in lib/validators/
 9. Commit
 
-### Task 1.3: Content Layer — Admin CRUD
+### Task 1.3: Auth Integration — User Sync
+
+What: When a user signs up via Supabase Auth (email, Google, or Apple), create a matching row in the User table. Protect admin routes.
+
+Steps:
+1. Create lib/auth.ts with getOrCreateUser() that checks if a User row exists for the current Supabase session and creates one if not (calls user.service.ts)
+2. Create auth middleware in middleware.ts that protects /dashboard/* and /admin/*
+3. Create admin role check utility: lib/auth.ts -> requireAdmin()
+4. Create sign-in page: app/(auth)/login/page.tsx (email/password + Google + Apple buttons)
+5. Create sign-up page: app/(auth)/signup/page.tsx
+6. Test: sign up -> verify User row created with role USER
+7. Test: access /admin as USER -> redirected to /dashboard
+8. Commit
+
+### Task 1.4: Content Layer — Admin CRUD
 
 What: Admin pages to create, edit, list, and manage content units.
 
@@ -238,48 +420,50 @@ Pages:
 - app/admin/content/new/page.tsx -- create form
 - app/admin/content/[id]/edit/page.tsx -- edit form
 
-API (Server Actions):
+Server Actions (thin wrappers calling content.service.ts):
 - app/admin/content/actions.ts:
-  - createContentUnit(data) -> validates, creates, returns
-  - updateContentUnit(id, data) -> validates, updates, returns
-  - deleteContentUnit(id) -> soft delete or hard delete (only if unused)
-  - listContentUnits(filters) -> paginated list with tag/type filters
-  - publishContentUnit(id) -> sets publishedAt
-  - unpublishContentUnit(id) -> nulls publishedAt
+  - createContentUnit(data) -> calls content.service.createContentUnit()
+  - updateContentUnit(id, data) -> calls content.service.updateContentUnit()
+  - etc.
 
 Form fields:
 - Title, description, slug (auto-generated from title, editable)
-- Media type selector, media URL input
-- Thumbnail URL
-- Duration (minutes)
+- Media type selector, media URL input OR Bunny.net video upload
+- Thumbnail URL (auto-generated from Bunny if video)
+- Duration (minutes, auto-detected from Bunny if video)
 - Difficulty selector
-- Age range (min/max in months, with helper: "0-12 months", "1-3 years", etc.)
-- Tags (multi-select from existing + create new)
-- Standalone flag, free flag
+- Age range (min/max in months, with helper labels)
+- Tags (multi-select from existing + create new inline)
+- Access level (FREE, SUBSCRIPTION, PURCHASE)
+- Standalone flag
 - Publish/unpublish toggle
 
+Bunny.net integration:
+- Upload button -> uploads to Bunny.net Stream via API
+- Returns bunnyVideoId + playback URL
+- Thumbnail auto-generated by Bunny
+
 Steps:
-1. Create the server actions with Zod validation
+1. Create server actions as thin wrappers
 2. Create the list page with DataTable (shadcn table)
-3. Create the form component (shared between new/edit)
+3. Create the form component (shared between new/edit) with Bunny upload
 4. Create the new page
 5. Create the edit page
-6. Test: create a content unit via admin -> verify in DB
-7. Test: edit it -> verify changes persisted
-8. Test: publish/unpublish -> verify publishedAt toggled
-9. Commit
+6. Test: create a content unit with video upload -> verify in DB + Bunny
+7. Test: edit, publish/unpublish -> verify
+8. Commit
 
-### Task 1.4: Content Layer — Tag Management
+### Task 1.5: Content Layer — Tag Management
 
 What: Simple admin interface for managing tags.
 
 Steps:
 1. Create app/admin/tags/page.tsx -- list/create/delete tags inline
-2. Server actions: createTag, deleteTag, listTags
-3. Integrate tag selector into content unit form (Task 1.3)
+2. Server actions calling service layer
+3. Integrate tag selector into content unit form (Task 1.4)
 4. Commit
 
-### Task 1.5: Product Layer — Course Admin
+### Task 1.6: Product Layer — Course Admin
 
 What: Admin pages to create courses (ordered sequences of content units).
 
@@ -289,7 +473,7 @@ Pages:
 - app/admin/products/[id]/edit/page.tsx -- edit product
 
 For COURSE type products:
-- Drag-and-drop (or up/down arrows) to order content units
+- Drag-and-drop or up/down arrows to order content units
 - Add/remove content units from course
 - Set price, Stripe sync
 
@@ -297,78 +481,77 @@ Steps:
 1. Create product list page
 2. Create product form component (common fields: title, description, slug, price, type)
 3. Create course-specific sub-form: content unit selector + ordering
-4. Server actions: createProduct, updateProduct, deleteProduct, addLessonToCourse, removeLessonFromCourse, reorderLessons
-5. Stripe sync: on product create/update, create/update Stripe Product + Price via stripe.products.create() and stripe.prices.create()
+4. Server actions as thin wrappers calling product.service.ts
+5. Stripe sync: on product create/update -> product.service.syncToStripe()
 6. Test: create a course with 3 content units -> verify DB + Stripe
 7. Commit
 
-### Task 1.6: Product Layer — Bundle Admin
+### Task 1.7: Product Layer — Bundle Admin
 
 What: Admin can create bundles (groups of other products at a discount).
 
 Steps:
 1. Create bundle-specific sub-form: product selector (multi-select from existing courses/singles)
 2. Bundle price is set independently (not auto-calculated)
-3. Server actions: addProductToBundle, removeProductFromBundle
+3. Server actions calling product.service.ts
 4. Stripe sync for bundle product
 5. Test: create a bundle with 2 courses -> verify DB + Stripe
 6. Commit
 
-### Task 1.7: Product Layer — Standalone & Subscription Products
+### Task 1.8: Product Layer — Standalone & Subscription Products
 
 What: Admin can create standalone single-content products and subscription products.
 
 Steps:
 1. SINGLE type: links to one content unit, has a price
-2. SUBSCRIPTION type: no linked content units -- entitles access to all subscription-tier content
+2. SUBSCRIPTION type: no linked content units -- entitles access to all SUBSCRIPTION-level content. Price: 149 DKK/md (configurable via admin)
 3. Subscription product syncs to Stripe as a recurring price
 4. Test: create one of each -> verify Stripe
 5. Commit
 
-### Task 1.8: Discount Code System
+### Task 1.9: Discount Code System
 
 What: Admin can create and manage discount codes.
 
 Steps:
 1. Create app/admin/discounts/page.tsx -- list/create/edit discount codes
-2. Server actions: createDiscountCode, updateDiscountCode, deactivateDiscountCode
-3. Create lib/discounts.ts -- validateDiscountCode(code, productId) returns discount details or error
-4. Stripe integration: create Stripe Coupon + Promotion Code on discount create
-5. Test: create a 20% discount -> verify Stripe coupon
-6. Commit
+2. Server actions calling checkout.service.ts
+3. Stripe integration: create Stripe Coupon + Promotion Code on discount create
+4. Test: create a 20% discount -> verify Stripe coupon
+5. Commit
 
-### Task 1.9: Checkout Flow — One-Time Purchases
+### Task 1.10: Checkout Flow — One-Time Purchases
 
 What: Users can purchase courses, bundles, and standalone content.
 
 Steps:
-1. Create app/api/checkout/route.ts -- POST handler that creates Stripe Checkout Session
+1. Create app/api/checkout/route.ts -- POST handler calling checkout.service.createCheckoutSession()
 2. Accepts: productId, optional discountCode
-3. Validates product exists, validates discount (if provided)
+3. Validates product, validates discount
 4. Creates Stripe Checkout Session with line items and redirect URLs
-5. Create product detail page: app/products/[slug]/page.tsx -- shows product info, price, "Buy Now" button
+5. Create product detail page: app/products/[slug]/page.tsx (mobile-first design)
 6. Create checkout success page: app/checkout/success/page.tsx
-7. Test: click Buy -> Stripe Checkout -> complete (test card) -> redirect to success
+7. Test: click Buy -> Stripe Checkout -> complete -> redirect to success
 8. Commit
 
-### Task 1.10: Checkout Flow — Subscriptions
+### Task 1.11: Checkout Flow — Subscriptions
 
 What: Users can subscribe for recurring access.
 
 Steps:
-1. Extend checkout route to handle SUBSCRIPTION type -> creates Stripe Checkout Session with mode: 'subscription'
-2. Create subscription page: app/subscribe/page.tsx -- shows plan, price, "Subscribe" button
-3. Create Stripe Customer Portal integration for managing subscription (cancel, update payment)
-4. Add "Manage Subscription" link in user settings
+1. Extend checkout route for SUBSCRIPTION type -> Stripe Checkout Session with mode: 'subscription'
+2. Create subscription page: app/subscribe/page.tsx -- mobile-first, shows plan, price, benefits, CTA
+3. Create Stripe Customer Portal integration for managing subscription
+4. Add "Administrer abonnement" link in user settings
 5. Test: subscribe -> verify Stripe subscription active
 6. Commit
 
-### Task 1.11: Stripe Webhooks — Entitlement Creation
+### Task 1.12: Stripe Webhooks — Entitlement Creation
 
-What: When Stripe confirms a payment or subscription, create entitlements in the database.
+What: When Stripe confirms a payment or subscription, create entitlements.
 
-Webhook events to handle:
-- checkout.session.completed -> create Entitlement (PURCHASE or SUBSCRIPTION)
+Webhook events:
+- checkout.session.completed -> calls entitlement.service.createEntitlement()
 - customer.subscription.updated -> update Entitlement status
 - customer.subscription.deleted -> mark Entitlement as CANCELLED
 - invoice.payment_failed -> flag for follow-up (don't immediately revoke)
@@ -376,46 +559,45 @@ Webhook events to handle:
 Steps:
 1. Implement webhook handler in app/api/webhooks/stripe/route.ts
 2. Verify webhook signature
-3. Handle each event type
-4. Create lib/entitlements.ts -- createEntitlement(userId, productId, source, stripeData)
-5. For BUNDLE purchases: create entitlements for each included product
-6. Test: complete purchase -> verify Entitlement row created
-7. Test: cancel subscription -> verify Entitlement marked CANCELLED
-8. Commit
+3. Handle each event type, calling entitlement.service.ts
+4. For BUNDLE purchases: create entitlements for each included product
+5. Test: complete purchase -> verify Entitlement created
+6. Test: cancel subscription -> verify Entitlement CANCELLED
+7. Commit
 
-### Task 1.12: Access Control — Content Gating
+### Task 1.13: Access Control — Content Gating
 
-What: Check user entitlements before serving content. The core gatekeeping logic.
+What: Check user entitlements before serving content.
 
 Steps:
-1. Create lib/access.ts:
-   - canAccessContent(userId, contentUnitId) -> boolean
-   - Logic: check if content is free -> true. Check if user has active entitlement for any product containing this content unit. Check org-level entitlements.
-   - getUserEntitlements(userId) -> list of active entitlements with product details
-2. Create middleware or server-side check in content pages
-3. Content page: if no access, show product purchase CTA instead of content
-4. Test: user without entitlement -> sees paywall. User with entitlement -> sees content.
-5. Commit
+1. entitlement.service.canAccessContent(userId, contentUnitId) logic:
+   - Content is FREE -> true
+   - Content accessLevel is SUBSCRIPTION -> check active subscription entitlement
+   - Content is in a product the user owns -> true
+   - Check org-level entitlements (B2B)
+2. Content page: if no access, show product purchase CTA instead of content
+3. Test: user without entitlement -> sees paywall. User with entitlement -> sees content.
+4. Commit
 
-### Task 1.13: User-Facing — Content Browsing
+### Task 1.14: User-Facing — Content Browsing
 
 What: Users can browse available content and products.
 
 Pages:
-- app/dashboard/page.tsx -- user home (placeholder for Phase 1b "one clear next step")
+- app/dashboard/page.tsx -- user home (placeholder, completed in Phase 1b)
 - app/browse/page.tsx -- browse all products (courses, bundles, standalone)
-- app/browse/[slug]/page.tsx -- product detail page (course outline, price, buy/access button)
+- app/browse/[slug]/page.tsx -- product detail page
 - app/content/[slug]/page.tsx -- content consumption page (video player, access-gated)
 
 Steps:
-1. Create browse page with product cards (title, description, price, thumbnail)
-2. Filter by type (course, bundle, standalone), by tag, by age range
-3. Product detail page: shows outline (for courses: lesson list), price, and CTA (buy or continue)
-4. Content consumption page: if access -> show video embed + description. If no access -> show upsell.
-5. Video embed: use an iframe or HTML5 video based on mediaUrl. Provider-agnostic.
+1. Create browse page with product cards (mobile-first design)
+2. Filter by type, tag, age range
+3. Product detail: outline (for courses: lesson list), price, CTA (buy or continue)
+4. Content consumption page: if access -> Bunny.net video player + description. If no access -> upsell.
+5. Video player: Bunny.net Stream embed with signed URL for content protection
 6. Commit
 
-### Task 1.14: User-Facing — Course Progress Tracking
+### Task 1.15: User-Facing — Course Progress Tracking
 
 What: Track which content units a user has completed within a course.
 
@@ -430,15 +612,34 @@ UserContentProgress
 
 Steps:
 1. Add model to Prisma schema, migrate
-2. Create lib/progress.ts:
+2. Create lib/services/progress.service.ts:
    - markContentStarted(userId, contentUnitId)
    - markContentCompleted(userId, contentUnitId)
-   - getCourseProgress(userId, productId) -> returns completion % and per-lesson status
-3. Add "Mark as complete" button on content page
+   - getCourseProgress(userId, productId) -> completion % and per-lesson status
+3. Add "Markér som færdig" button on content page
 4. Show progress bar on course detail page
 5. On dashboard: show in-progress courses with progress
-6. Test: start course -> complete 2/5 lessons -> verify 40% progress shown
+6. Test: start course -> complete 2/5 lessons -> verify 40% shown
 7. Commit
+
+### Task 1.16: Admin Settings — Configurable Systems (Phase 1a portion)
+
+What: Admin pages for settings that are needed before Phase 1b.
+
+Pages:
+- app/admin/settings/page.tsx -- settings overview/navigation
+- app/admin/settings/onboarding/page.tsx -- manage quiz questions + options
+- app/admin/settings/recommendations/page.tsx -- manage recommendation rules
+- app/admin/settings/checkins/page.tsx -- manage check-in response options
+- app/admin/settings/dashboard/page.tsx -- manage dashboard state messages
+
+Steps:
+1. Onboarding admin: list questions, add/edit/reorder/toggle questions, manage options per question, map options to tags
+2. Recommendation admin: list rules, add/edit/toggle rules, set conditions (tag, age range) and target (journey or product)
+3. Check-in admin: list options, add/edit/reorder/toggle, set label + emoji + value
+4. Dashboard messages admin: list states, edit heading/body/CTA per state
+5. All pages use server actions calling settings.service.ts
+6. Commit
 
 ---
 
@@ -454,7 +655,7 @@ Journey
   - description
   - slug
   - targetAgeMin, targetAgeMax (months)
-  - estimatedWeeks
+  - estimatedDays
   - isActive
   - createdAt, updatedAt
 
@@ -464,134 +665,135 @@ JourneyPhase
   - title
   - position (ordering)
 
-JourneyWeek
+JourneyDay
   - id
   - phaseId
   - position (ordering within phase)
   - title (optional)
 
-JourneyWeekContent
+JourneyDayContent
   - id
-  - weekId
+  - dayId
   - contentUnitId
-  - position (ordering within week)
+  - position (ordering within day)
 
-JourneyWeekAction
+JourneyDayAction
   - id
-  - weekId
-  - actionText ("Try this with your child this week")
-  - reflectionPrompt ("How did it go?")
+  - dayId
+  - actionText ("Prøv dette med dit barn i denne uge")
+  - reflectionPrompt ("Hvordan gik det?")
 
 UserJourney
   - id
   - userId
   - journeyId
-  - currentWeekId
+  - currentDayId
   - startedAt
   - completedAt (nullable)
   - status (ACTIVE, PAUSED, COMPLETED, ABANDONED)
 
-UserWeekCheckIn
+UserDayCheckIn
   - id
   - userJourneyId
-  - weekId
-  - actionResult (WORKED_WELL, MIXED, HARD, SKIPPED)
+  - dayId
+  - checkInOptionId (links to CheckInOption instead of hardcoded enum)
   - reflection (optional text)
   - completedAt
 
 Steps:
 1. Add to Prisma schema, migrate
-2. Seed: create 1 test journey with 2 phases, 3 weeks each, content + actions
+2. Seed: create 1 test journey with 2 phases, 3 days each, content + actions
 3. Commit
 
 ### Task 2.2: Journey Admin — CRUD
 
-What: Admin can create and manage journeys with phases, weeks, content, and actions.
+What: Admin can create and manage journeys with phases, days, content, and actions.
 
 Pages:
 - app/admin/journeys/page.tsx -- list journeys
 - app/admin/journeys/new/page.tsx -- create journey
-- app/admin/journeys/[id]/edit/page.tsx -- edit journey (phases, weeks, content, actions)
+- app/admin/journeys/[id]/edit/page.tsx -- edit journey (phases, days, content, actions)
 
 Steps:
-1. Journey form: title, description, slug, age range, estimated weeks
+1. Journey form: title, description, slug, age range, estimated days
 2. Phase editor: add/remove/reorder phases within journey
-3. Week editor: add/remove/reorder weeks within phase
-4. Week content: select content units to include in each week + ordering
-5. Week action: add micro-action text + reflection prompt per week
-6. Server actions for all CRUD operations
+3. Day editor: add/remove/reorder days within phase
+4. Day content: select content units to include in each day + ordering
+5. Day action: add micro-action text + reflection prompt per day
+6. Server actions calling journey.service.ts
 7. Test: create a full journey -> verify DB structure
 8. Commit
 
-### Task 2.3: Onboarding Quiz
+### Task 2.3: Onboarding Quiz (Data-Driven)
 
-What: New users answer 4 questions to get a personalized recommendation.
-
-Questions:
-1. Child's age(s) -- date picker or age range selector
-2. Biggest current challenge -- select from tag-mapped options
-3. Experience level -- first-time parent / experienced
-4. Time preference -- 5 min/week / 15 min/week / deep dive
+What: New users answer admin-configured questions to get a personalized recommendation.
 
 Steps:
-1. Create app/onboarding/page.tsx -- multi-step form (1 question per step)
-2. Create UserProfile model (or extend User) to store onboarding answers:
+1. Create app/onboarding/page.tsx -- multi-step form
+2. Fetches questions from DB via onboarding.service.getActiveQuestions()
+3. Renders dynamically based on questionType (SINGLE_SELECT, MULTI_SELECT, DATE, SLIDER)
+4. Create UserProfile model:
 
    UserProfile
      - userId
-     - childAges (json array of {ageMonths, name?})
-     - primaryChallenge (tagId)
-     - experienceLevel (FIRST_TIME, EXPERIENCED)
-     - timePreference (MINIMAL, MODERATE, DEEP)
+     - responses (json -- array of {questionId, selectedOptionIds})
+     - childAges (json -- extracted from date question)
+     - primaryChallengeTagId (extracted from tag-mapped answer)
+     - completedAt
 
-3. Add to Prisma schema, migrate
-4. On completion: set user.onboardingCompleted = true
-5. Create lib/recommendations.ts:
-   - getRecommendedJourney(profile) -- simple rules: match challenge tag -> journey, filter by age range
-   - getRecommendedProducts(profile) -- match tags + age range
-6. After quiz: redirect to dashboard with recommendation
-7. Middleware: redirect users with onboardingCompleted = false to /onboarding
-8. Commit
+5. Add to Prisma schema, migrate
+6. On completion: set user.onboardingCompleted = true
+7. onboarding.service.getRecommendations(profile):
+   - Reads RecommendationRule table
+   - Matches user profile against rule conditions
+   - Returns ordered list of recommended journeys/products
+8. After quiz: redirect to dashboard with recommendations
+9. Middleware: redirect users with onboardingCompleted = false to /onboarding
+10. Commit
 
 ### Task 2.4: Dashboard — "One Clear Next Step"
 
-What: The dashboard is the structural fix. It always shows the user what to do next.
+What: The dashboard always shows the user what to do next. Messages are loaded from DashboardMessage table.
 
 Dashboard states:
 
 | State                              | What Shows                                                        |
 |------------------------------------|-------------------------------------------------------------------|
-| New user (no journey, no courses)  | "Start your recommended journey" + recommended products           |
-| Active journey                     | "Continue Week N: [title]" as primary CTA + progress ring         |
-| Journey + courses                  | Active journey week + in-progress courses below                   |
-| No journey, has courses            | In-progress courses + "Start a journey" suggestion                |
-| Completed journey                  | "You finished [journey]! Start your next?" + recommendations      |
+| new_user (no journey, no courses)  | Heading + CTA from DashboardMessage + recommended journey/products|
+| active_journey                     | Continue Dag N as primary CTA + progress ring                     |
+| active_journey_plus_courses        | Active journey day + in-progress courses below                    |
+| no_journey_has_courses             | In-progress courses + "Start a journey" from DashboardMessage     |
+| completed_journey                  | Celebration + "Start your next?" from DashboardMessage            |
 
 Steps:
 1. Create app/dashboard/page.tsx with state-based rendering
-2. Create lib/dashboard.ts:
-   - getDashboardState(userId) -> returns one of the states above with relevant data
-3. Journey progress component: shows current week, phase, overall progress
-4. Course progress cards: shows in-progress courses with completion %
-5. Recommendation section: shows relevant products/journeys based on profile
-6. Test each state with different user setups
-7. Commit
+2. Create lib/services/dashboard.service.ts:
+   - getDashboardState(userId) -> returns state key + relevant data
+   - Loads matching DashboardMessage from DB for copy
+3. Journey progress component: current day, phase, overall progress
+4. Course progress cards: in-progress courses with completion %
+5. Recommendation section: from onboarding.service.getRecommendations()
+6. Mobile-first design (this is the primary app screen)
+7. Test each state with different user setups
+8. Commit
 
 ### Task 2.5: Journey Consumption UI
 
-What: User-facing pages for following a journey week by week.
+What: User-facing pages for following a journey day by day.
 
 Pages:
-- app/journey/[slug]/page.tsx -- journey overview (phases, weeks, progress)
-- app/journey/[slug]/week/[weekId]/page.tsx -- current week view (content + action + reflection)
+- app/journey/[slug]/page.tsx -- journey overview (phases, days, progress)
+- app/journey/[slug]/day/[dayId]/page.tsx -- current day view
 
 Steps:
-1. Journey overview: shows all phases and weeks, highlights current position, completed weeks are checked
-2. Week view: embedded content (video player), micro-action card, reflection prompt
-3. "Complete this week" button: submits check-in (action result selector) and advances to next week
-4. If all weeks complete: mark journey as COMPLETED, show celebration + next recommendation
-5. Test: start journey -> progress through 2 weeks -> verify state updates
-6. Commit
+1. Journey overview: all phases and days, highlights current position, completed days checked
+2. Day view: Bunny.net video player, micro-action card, reflection prompt
+3. Check-in form: loads CheckInOption from DB (not hardcoded), optional reflection text
+4. "Færdiggør denne dag" button: submits check-in and advances to next day
+5. If all days complete: mark journey COMPLETED, show milestone celebration + next recommendation
+6. Mobile-first design
+7. Test: start journey -> progress through 2 days -> verify state updates
+8. Commit
 
 ---
 
@@ -599,23 +801,20 @@ Steps:
 
 ### Task 3.1: Notification Infrastructure
 
-What: Set up Resend for transactional email + in-app notification system.
+What: Set up Resend for transactional email + in-app notification system. Email content loaded from EmailTemplate table.
 
 Steps:
 1. Install: resend, @react-email/components
-2. Create email templates in emails/:
-   - WeeklyPlan.tsx -- "Your week is ready"
-   - MidWeekNudge.tsx -- "Have you tried your action?"
-   - WeeklyReflection.tsx -- "How did it go?"
-   - ReEngagement.tsx -- notification ladder messages
-   - MonthlyProgress.tsx -- progress summary
-3. Create lib/email.ts -- sendEmail(to, template, data)
+2. Create email layout component in emails/layout.tsx (shared branding wrapper)
+3. Create lib/services/engagement.service.ts:
+   - sendTemplatedEmail(userId, templateKey, variables) -- loads template from DB, fills variables, sends via Resend
+   - createInAppNotification(userId, type, title, body, actionUrl)
 4. Create in-app notification model:
 
    Notification
      - id
      - userId
-     - type (WEEKLY_PLAN, NUDGE, MILESTONE, etc.)
+     - type (WEEKLY_PLAN, NUDGE, REFLECTION, MILESTONE, REENGAGEMENT, SYSTEM)
      - title
      - body
      - actionUrl (nullable)
@@ -623,54 +822,71 @@ Steps:
      - createdAt
 
 5. Add to schema, migrate
-6. Create notification bell component in nav
-7. Commit
+6. Create notification bell component in nav (unread count + dropdown)
+7. Test: send a test email using a template from DB -> verify delivery + variables filled
+8. Commit
 
-### Task 3.2: Weekly Rhythm — Cron Jobs
+### Task 3.2: Weekly Rhythm — Cron Jobs (Schedule from DB)
 
-What: Scheduled jobs that drive the weekly engagement loop.
-
-Jobs (run via Vercel Cron or similar):
-- Monday 8:00: send "Your week is ready" to all active journey users
-- Wednesday 18:00: send mid-week nudge to users who haven't opened content
-- Friday 18:00: send reflection prompt to users who consumed content but haven't checked in
+What: Scheduled jobs that drive the weekly engagement loop. Schedule is read from NotificationSchedule table.
 
 Steps:
-1. Create app/api/cron/weekly-plan/route.ts -- Monday job
-2. Create app/api/cron/midweek-nudge/route.ts -- Wednesday job
-3. Create app/api/cron/reflection-prompt/route.ts -- Friday job
-4. Configure Vercel Cron in vercel.json
-5. Each job: query relevant users, send email + create in-app notification
-6. Add lastNotifiedAt tracking to prevent duplicates
-7. Commit
+1. Create app/api/cron/engagement/route.ts -- single cron that runs hourly
+2. Logic: read NotificationSchedule table -> check if current day+time matches any schedule -> execute matching jobs
+3. WEEKLY_PLAN job: send "Din uge er klar" to all active journey users (template from EmailTemplate)
+4. MIDWEEK_NUDGE job: send nudge to users who haven't opened content (template from EmailTemplate)
+5. REFLECTION job: send reflection prompt to users who consumed but haven't checked in (template from EmailTemplate)
+6. Configure Vercel Cron in vercel.json (run hourly, job checks schedule)
+7. Each job: query relevant users, call engagement.service.sendTemplatedEmail() + createInAppNotification()
+8. Add lastNotifiedAt tracking to prevent duplicates
+9. Commit
 
-### Task 3.3: Re-engagement Ladder
+### Task 3.3: Re-engagement Ladder (Config from DB)
 
-What: Automated escalation for inactive users.
+What: Automated escalation for inactive users. Tiers loaded from ReEngagementTier table.
 
 Steps:
 1. Create app/api/cron/reengagement/route.ts -- runs daily
 2. Logic:
-   - 3-5 days inactive -> content-forward nudge
-   - 7-10 days inactive -> social proof (or value) nudge
-   - 14+ days inactive -> empathy reset
-   - 30+ days inactive -> re-onboarding offer
-3. Track which ladder step each user has received (don't re-send same tier)
-4. Respect hard rule: max 1 touch per week for inactive users
-5. Commit
+   - Calculate days since last activity for each user
+   - Read ReEngagementTier table for thresholds
+   - Match user to appropriate tier
+   - Send email using linked EmailTemplate
+3. Track which tier each user has received (don't re-send same tier)
+4. Read max frequency from NotificationSchedule or SiteSetting
+5. Test: simulate inactive user -> verify correct tier email sent
+6. Commit
 
-### Task 3.4: Progress & Milestone System
+### Task 3.4: Progress & Milestone System (Definitions from DB)
 
-What: Monthly progress summaries and milestone celebrations.
+What: Milestone celebrations and monthly progress summaries. Definitions loaded from MilestoneDefinition table.
 
 Steps:
-1. Create lib/milestones.ts:
-   - checkMilestones(userId) -- returns any new milestones (phase complete, journey complete, N weeks active)
+1. Extend engagement.service.ts:
+   - checkMilestones(userId) -- reads MilestoneDefinition table, evaluates triggers, returns new milestones
    - getMonthlyProgress(userId) -- content consumed, actions completed, check-in history
-2. Create app/api/cron/monthly-progress/route.ts -- monthly job, sends progress summary email
-3. In-app milestone celebrations: modal/toast when user hits a milestone
+2. Create app/api/cron/monthly-progress/route.ts -- monthly job, uses "monthly_progress" EmailTemplate
+3. In-app milestone celebrations: modal/toast using celebrationTitle + celebrationMessage from DB
 4. Create app/dashboard/progress/page.tsx -- full progress history view
 5. Commit
+
+### Task 3.5: Admin Settings — Engagement Configuration
+
+What: Admin pages for engagement-related settings.
+
+Pages:
+- app/admin/settings/emails/page.tsx -- manage email templates (edit subject, body, toggle active)
+- app/admin/settings/notifications/page.tsx -- manage notification schedule (day, time, toggle)
+- app/admin/settings/reengagement/page.tsx -- manage re-engagement tiers (days, linked template, toggle)
+- app/admin/settings/milestones/page.tsx -- manage milestone definitions (trigger, value, messages, toggle)
+
+Steps:
+1. Email templates admin: list all templates, edit subject + body with variable reference, preview, toggle active
+2. Notification schedule admin: list all schedules, edit day + time, toggle active
+3. Re-engagement admin: list tiers, edit day ranges, link to email template, toggle active
+4. Milestones admin: list definitions, edit trigger type + value + messages, toggle active
+5. All pages use server actions calling settings.service.ts
+6. Commit
 
 ---
 
@@ -679,13 +895,13 @@ Steps:
 Phase 3 is not planned in detail. It ships only after Phase 2 data shows retention improvement.
 
 ### Task 4.1: Cohort Model
-- Create Cohort model (journeyId, startDate, maxMembers)
+- Create Cohort model (journeyId, startDate, maxMembers -- configurable via admin)
 - Auto-assign users to cohort on journey start
-- Cohort size: 15-30
+- Default cohort size: 15-30 (admin-configurable)
 
 ### Task 4.2: Discussion Feed
 - Simple threaded discussion per cohort
-- Auto-posted weekly discussion prompts (tied to journey week)
+- Auto-posted weekly discussion prompts (tied to journey day, editable in journey admin)
 - Reactions and replies
 
 ### Task 4.3: Moderation
@@ -694,7 +910,7 @@ Phase 3 is not planned in detail. It ships only after Phase 2 data shows retenti
 
 ### Task 4.4: Community Notifications
 - Notify on replies to your posts
-- Weekly cohort digest
+- Weekly cohort digest (template from EmailTemplate)
 
 ---
 
@@ -705,18 +921,25 @@ Phase 3 is not planned in detail. It ships only after Phase 2 data shows retenti
 - Stripe webhook signature verification
 - Input validation with Zod on all server actions
 - CSRF protection via Next.js server actions (built-in)
+- Bunny.net signed URLs for video content protection
 - GDPR: user data export + deletion capability (add in Phase 1a)
 
 ### Performance
 - Server components by default (no unnecessary client JS)
 - Database queries with Prisma includes, avoid N+1
 - Image/thumbnail optimization via Next.js Image
-- Video served from external provider (no self-hosting bandwidth)
+- Video served from Bunny.net CDN (EU edge, low latency for DK users)
+
+### Mobile-First
+- All user-facing pages designed mobile-first
+- Dashboard, browse, content, journey, checkout -- all optimized for mobile
+- Admin pages: desktop-first (admin is not used on mobile)
+- Prepares for Capacitor wrapper (future native app)
 
 ### Monitoring
 - Vercel Analytics (built-in)
 - Error tracking: Sentry
-- Custom event tracking for retention KPIs (simple: log to DB table, build dashboard later)
+- Custom event tracking for retention KPIs (log to DB table, build dashboard later)
 
 ---
 
@@ -736,13 +959,16 @@ Phase 3 is not planned in detail. It ships only after Phase 2 data shows retenti
 |-----------------------------------|-----------------------------------------------------------------------------------------|
 | Tests in every task step          | TDD during execution, not pre-written. Each task writes tests before implementation.    |
 | AI-powered recommendations        | Simple rule-based matching is sufficient. AI is Phase 4+ at earliest.                   |
-| Mobile app                        | Responsive web first. Native app only after PMF.                                        |
+| Mobile app (Capacitor)            | Web-first. Capacitor wrapper after web platform is validated.                           |
 | i18n                              | Danish-first. Internationalization is a separate project.                                |
 | Advanced analytics dashboard      | Log events to DB. Build dashboards when you know which metrics matter.                  |
-| Content migration from NewZenler  | Manual re-entry or CSV import. Migration script is a separate task if needed.            |
+| Content migration from NewZenler  | Upload to Bunny.net manually or via script. Separate task if needed.                    |
+| Visual email template builder     | Edit text + variables, not drag-and-drop. WYSIWYG builder is Phase 4+.                 |
 
 ---
 
 This plan builds the minimum viable platform that delivers structural clarity.
 Every task serves a layer in the architecture.
+Admin-configurable where Mette needs control.
+Hardcoded where only a developer would change it.
 No task exists "because it would be nice."

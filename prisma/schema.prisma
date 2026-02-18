@@ -1,0 +1,659 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ──────────────────────────────────────────────
+// Enums
+// ──────────────────────────────────────────────
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum MediaType {
+  VIDEO
+  AUDIO
+  PDF
+  TEXT
+}
+
+enum Difficulty {
+  INTRODUCTORY
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum AccessLevel {
+  FREE
+  SUBSCRIPTION
+  PURCHASE
+}
+
+enum ProductType {
+  SUBSCRIPTION
+  COURSE
+  SINGLE
+  BUNDLE
+}
+
+enum EntitlementSource {
+  PURCHASE
+  SUBSCRIPTION
+  GIFT
+  B2B_LICENSE
+}
+
+enum EntitlementStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED_AMOUNT
+}
+
+enum QuestionType {
+  SINGLE_SELECT
+  MULTI_SELECT
+  DATE
+  SLIDER
+}
+
+enum NotificationType {
+  WEEKLY_PLAN
+  MIDWEEK_NUDGE
+  REFLECTION
+  MONTHLY_PROGRESS
+}
+
+enum MilestoneTriggerType {
+  DAYS_ACTIVE
+  PHASE_COMPLETE
+  JOURNEY_COMPLETE
+  CONTENT_COUNT
+  CHECKIN_STREAK
+}
+
+enum InAppNotificationType {
+  WEEKLY_PLAN
+  MIDWEEK_NUDGE
+  REFLECTION
+  MILESTONE
+  REENGAGEMENT
+  COMMUNITY_REPLY
+  SYSTEM
+}
+
+enum JourneyStatus {
+  ACTIVE
+  PAUSED
+  COMPLETED
+  ABANDONED
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  DISMISSED
+}
+
+// ──────────────────────────────────────────────
+// Core Models
+// ──────────────────────────────────────────────
+
+model User {
+  id                  String   @id @default(uuid()) @db.Uuid
+  email               String   @unique
+  name                String?
+  role                UserRole @default(USER)
+  organizationId      String?  @db.Uuid
+  onboardingCompleted Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  organization    Organization?         @relation(fields: [organizationId], references: [id])
+  entitlements    Entitlement[]
+  contentProgress UserContentProgress[]
+  userJourneys    UserJourney[]
+  userProfile     UserProfile?
+  notifications   Notification[]
+  notificationLog UserNotificationLog[]
+  cohortMemberships  CohortMember[]
+  discussionPosts    DiscussionPost[]
+  discussionReplies  DiscussionReply[]
+  postReactions      PostReaction[]
+  cohortBans         CohortBan[]
+  contentReports     ContentReport[]
+}
+
+model Organization {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+
+  users        User[]
+  entitlements Entitlement[]
+}
+
+model ContentUnit {
+  id              String      @id @default(uuid()) @db.Uuid
+  title           String
+  description     String?
+  slug            String      @unique
+  mediaType       MediaType
+  mediaUrl        String?
+  bunnyVideoId    String?
+  thumbnailUrl    String?
+  durationMinutes Int?
+  difficulty      Difficulty  @default(INTRODUCTORY)
+  ageMin          Int? // months
+  ageMax          Int? // months
+  isStandalone    Boolean     @default(false)
+  isFree          Boolean     @default(false)
+  accessLevel     AccessLevel @default(FREE)
+  publishedAt     DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  tags               ContentUnitTag[]
+  courseLessons      CourseLesson[]
+  journeyDayContents JourneyDayContent[]
+  userProgress       UserContentProgress[]
+}
+
+model ContentTag {
+  id   String @id @default(uuid()) @db.Uuid
+  name String @unique
+  slug String @unique
+
+  contentUnits      ContentUnitTag[]
+  onboardingOptions OnboardingOption[]
+}
+
+model ContentUnitTag {
+  contentUnitId String @db.Uuid
+  tagId         String @db.Uuid
+
+  contentUnit ContentUnit @relation(fields: [contentUnitId], references: [id], onDelete: Cascade)
+  tag         ContentTag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([contentUnitId, tagId])
+}
+
+model Product {
+  id               String      @id @default(uuid()) @db.Uuid
+  title            String
+  description      String?
+  slug             String      @unique
+  type             ProductType
+  priceAmountCents Int
+  priceCurrency    String      @default("DKK")
+  stripeProductId  String?
+  stripePriceId    String?
+  isActive         Boolean     @default(true)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  courseLessons     CourseLesson[]
+  bundleItems       BundleItem[]   @relation("BundleProduct")
+  includedInBundles BundleItem[]   @relation("IncludedProduct")
+  entitlements      Entitlement[]
+  discountCodes     DiscountCode[]
+}
+
+model CourseLesson {
+  id            String @id @default(uuid()) @db.Uuid
+  productId     String @db.Uuid
+  contentUnitId String @db.Uuid
+  position      Int
+
+  product     Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  contentUnit ContentUnit @relation(fields: [contentUnitId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, contentUnitId])
+}
+
+model BundleItem {
+  id                String @id @default(uuid()) @db.Uuid
+  bundleProductId   String @db.Uuid
+  includedProductId String @db.Uuid
+
+  bundle          Product @relation("BundleProduct", fields: [bundleProductId], references: [id], onDelete: Cascade)
+  includedProduct Product @relation("IncludedProduct", fields: [includedProductId], references: [id], onDelete: Cascade)
+
+  @@unique([bundleProductId, includedProductId])
+}
+
+model Entitlement {
+  id                      String            @id @default(uuid()) @db.Uuid
+  userId                  String            @db.Uuid
+  organizationId          String?           @db.Uuid
+  productId               String            @db.Uuid
+  source                  EntitlementSource
+  status                  EntitlementStatus @default(ACTIVE)
+  stripeSubscriptionId    String?
+  stripeCheckoutSessionId String?           @unique
+  expiresAt               DateTime?
+  createdAt               DateTime          @default(now())
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization? @relation(fields: [organizationId], references: [id])
+  product      Product       @relation(fields: [productId], references: [id])
+}
+
+model DiscountCode {
+  id                  String       @id @default(uuid()) @db.Uuid
+  code                String       @unique
+  type                DiscountType
+  value               Int // percentage or cents
+  maxUses             Int?
+  currentUses         Int          @default(0)
+  validFrom           DateTime     @default(now())
+  validUntil          DateTime?
+  applicableProductId String?      @db.Uuid
+  isActive            Boolean      @default(true)
+
+  applicableProduct Product? @relation(fields: [applicableProductId], references: [id])
+}
+
+model UserContentProgress {
+  id            String    @id @default(uuid()) @db.Uuid
+  userId        String    @db.Uuid
+  contentUnitId String    @db.Uuid
+  completedAt   DateTime?
+  createdAt     DateTime  @default(now())
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contentUnit ContentUnit @relation(fields: [contentUnitId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, contentUnitId])
+}
+
+// ──────────────────────────────────────────────
+// Journey Models
+// ──────────────────────────────────────────────
+
+model Journey {
+  id            String   @id @default(uuid()) @db.Uuid
+  title         String
+  description   String?
+  slug          String   @unique
+  targetAgeMin  Int? // months
+  targetAgeMax  Int? // months
+  estimatedDays Int?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  phases       JourneyPhase[]
+  userJourneys UserJourney[]
+  cohorts      Cohort[]
+}
+
+model JourneyPhase {
+  id        String @id @default(uuid()) @db.Uuid
+  journeyId String @db.Uuid
+  title     String
+  position  Int
+
+  journey Journey      @relation(fields: [journeyId], references: [id], onDelete: Cascade)
+  days    JourneyDay[]
+}
+
+model JourneyDay {
+  id       String  @id @default(uuid()) @db.Uuid
+  phaseId  String  @db.Uuid
+  position Int
+  title    String?
+
+  phase              JourneyPhase        @relation(fields: [phaseId], references: [id], onDelete: Cascade)
+  contents           JourneyDayContent[]
+  actions            JourneyDayAction[]
+  userCheckIns       UserDayCheckIn[]
+  currentForJourneys UserJourney[]
+  discussionPrompts  DiscussionPrompt[]
+  discussionPosts    DiscussionPost[]
+}
+
+model JourneyDayContent {
+  id            String @id @default(uuid()) @db.Uuid
+  dayId         String @db.Uuid
+  contentUnitId String @db.Uuid
+  position      Int
+
+  day         JourneyDay  @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  contentUnit ContentUnit @relation(fields: [contentUnitId], references: [id], onDelete: Cascade)
+}
+
+model JourneyDayAction {
+  id               String  @id @default(uuid()) @db.Uuid
+  dayId            String  @db.Uuid
+  actionText       String // "Pr0v dette med dit barn i dag"
+  reflectionPrompt String? // "Hvordan gik det?"
+
+  day JourneyDay @relation(fields: [dayId], references: [id], onDelete: Cascade)
+}
+
+model UserJourney {
+  id           String        @id @default(uuid()) @db.Uuid
+  userId       String        @db.Uuid
+  journeyId    String        @db.Uuid
+  currentDayId String?       @db.Uuid
+  startedAt    DateTime      @default(now())
+  completedAt  DateTime?
+  status       JourneyStatus @default(ACTIVE)
+
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  journey    Journey          @relation(fields: [journeyId], references: [id])
+  currentDay JourneyDay?      @relation(fields: [currentDayId], references: [id])
+  checkIns   UserDayCheckIn[]
+}
+
+model UserDayCheckIn {
+  id              String   @id @default(uuid()) @db.Uuid
+  userJourneyId   String   @db.Uuid
+  dayId           String   @db.Uuid
+  checkInOptionId String   @db.Uuid
+  reflection      String?
+  completedAt     DateTime @default(now())
+
+  userJourney   UserJourney   @relation(fields: [userJourneyId], references: [id], onDelete: Cascade)
+  day           JourneyDay    @relation(fields: [dayId], references: [id])
+  checkInOption CheckInOption @relation(fields: [checkInOptionId], references: [id])
+}
+
+model UserProfile {
+  id                    String    @id @default(uuid()) @db.Uuid
+  userId                String    @unique @db.Uuid
+  responses             Json? // array of {questionId, selectedOptionIds}
+  childAges             Json? // extracted from date question
+  primaryChallengeTagId String?   @db.Uuid
+  completedAt           DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ──────────────────────────────────────────────
+// Admin-Configurable Models
+// ──────────────────────────────────────────────
+
+model SiteSetting {
+  id          String  @id @default(uuid()) @db.Uuid
+  key         String  @unique
+  value       String
+  description String?
+}
+
+model OnboardingQuestion {
+  id           String       @id @default(uuid()) @db.Uuid
+  questionText String
+  questionType QuestionType
+  position     Int
+  isActive     Boolean      @default(true)
+  helperText   String?
+
+  options OnboardingOption[]
+}
+
+model OnboardingOption {
+  id         String  @id @default(uuid()) @db.Uuid
+  questionId String  @db.Uuid
+  label      String
+  value      String
+  tagId      String? @db.Uuid
+  position   Int
+
+  question OnboardingQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  tag      ContentTag?        @relation(fields: [tagId], references: [id])
+}
+
+model RecommendationRule {
+  id         String  @id @default(uuid()) @db.Uuid
+  name       String
+  conditions Json // e.g. {"tagId": "x", "ageMin": 0, "ageMax": 36}
+  targetType String // "JOURNEY" or "PRODUCT"
+  targetId   String  @db.Uuid
+  priority   Int     @default(0)
+  isActive   Boolean @default(true)
+}
+
+model EmailTemplate {
+  id          String   @id @default(uuid()) @db.Uuid
+  templateKey String   @unique
+  subject     String
+  bodyHtml    String
+  description String?
+  isActive    Boolean  @default(true)
+  updatedAt   DateTime @updatedAt
+
+  reEngagementTiers ReEngagementTier[]
+}
+
+model NotificationSchedule {
+  id               String           @id @default(uuid()) @db.Uuid
+  notificationType NotificationType
+  dayOfWeek        Int // 0-6
+  timeOfDay        String // HH:MM
+  isActive         Boolean          @default(true)
+}
+
+model ReEngagementTier {
+  id              String  @id @default(uuid()) @db.Uuid
+  tierNumber      Int     @unique
+  daysInactiveMin Int
+  daysInactiveMax Int
+  emailTemplateId String  @db.Uuid
+  isActive        Boolean @default(true)
+
+  emailTemplate EmailTemplate @relation(fields: [emailTemplateId], references: [id])
+}
+
+model MilestoneDefinition {
+  id                 String               @id @default(uuid()) @db.Uuid
+  name               String
+  triggerType        MilestoneTriggerType
+  triggerValue       Int
+  celebrationTitle   String
+  celebrationMessage String
+  isActive           Boolean              @default(true)
+}
+
+model CheckInOption {
+  id       String  @id @default(uuid()) @db.Uuid
+  label    String
+  value    String
+  emoji    String?
+  position Int
+  isActive Boolean @default(true)
+
+  checkIns UserDayCheckIn[]
+}
+
+model DashboardMessage {
+  id       String  @id @default(uuid()) @db.Uuid
+  stateKey String  @unique
+  heading  String
+  body     String
+  ctaLabel String?
+  ctaUrl   String?
+}
+
+model Notification {
+  id        String                @id @default(uuid()) @db.Uuid
+  userId    String                @db.Uuid
+  type      InAppNotificationType
+  title     String
+  body      String
+  actionUrl String?
+  readAt    DateTime?
+  createdAt DateTime              @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+model UserNotificationLog {
+  id     String   @id @default(uuid()) @db.Uuid
+  userId String   @db.Uuid
+  type   String // "engagement" or "reengagement"
+  key    String // notification type (e.g. "WEEKLY_PLAN") or tier number (e.g. "1")
+  sentAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type, key])
+  @@index([userId, type, sentAt])
+}
+
+// ──────────────────────────────────────────────
+// Community / Cohort Models
+// ──────────────────────────────────────────────
+
+model Cohort {
+  id            String   @id @default(uuid()) @db.Uuid
+  journeyId     String   @db.Uuid
+  name          String?
+  maxMembers    Int      @default(25)
+  isOpen        Boolean  @default(true)
+  startDate     DateTime @default(now())
+  createdAt     DateTime @default(now())
+
+  journey Journey            @relation(fields: [journeyId], references: [id], onDelete: Cascade)
+  members CohortMember[]
+  posts   DiscussionPost[]
+  bans    CohortBan[]
+
+  @@index([journeyId, isOpen])
+}
+
+model CohortMember {
+  id       String   @id @default(uuid()) @db.Uuid
+  cohortId String   @db.Uuid
+  userId   String   @db.Uuid
+  joinedAt DateTime @default(now())
+
+  cohort Cohort @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([cohortId, userId])
+  @@index([userId])
+}
+
+model DiscussionPrompt {
+  id         String  @id @default(uuid()) @db.Uuid
+  dayId      String  @db.Uuid
+  promptText String
+  isActive   Boolean @default(true)
+
+  day   JourneyDay       @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  posts DiscussionPost[]
+
+  @@index([dayId])
+}
+
+model DiscussionPost {
+  id         String   @id @default(uuid()) @db.Uuid
+  cohortId   String   @db.Uuid
+  authorId   String   @db.Uuid
+  dayId      String?  @db.Uuid
+  promptId   String?  @db.Uuid
+  body       String
+  isPrompt   Boolean  @default(false)
+  isPinned   Boolean  @default(false)
+  isHidden   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  cohort    Cohort            @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  author    User              @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  day       JourneyDay?       @relation(fields: [dayId], references: [id])
+  prompt    DiscussionPrompt? @relation(fields: [promptId], references: [id])
+  replies   DiscussionReply[]
+  reactions PostReaction[]
+  reports   ContentReport[]   @relation("PostReports")
+
+  @@index([cohortId, createdAt])
+  @@index([authorId])
+}
+
+model DiscussionReply {
+  id        String   @id @default(uuid()) @db.Uuid
+  postId    String   @db.Uuid
+  authorId  String   @db.Uuid
+  body      String
+  isHidden  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  post      DiscussionPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author    User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  reactions PostReaction[]
+  reports   ContentReport[] @relation("ReplyReports")
+
+  @@index([postId, createdAt])
+  @@index([authorId])
+}
+
+model PostReaction {
+  id      String  @id @default(uuid()) @db.Uuid
+  userId  String  @db.Uuid
+  postId  String? @db.Uuid
+  replyId String? @db.Uuid
+  emoji   String  @default("❤️")
+
+  user  User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post  DiscussionPost?   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  reply DiscussionReply?  @relation(fields: [replyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId, emoji])
+  @@unique([userId, replyId, emoji])
+  @@index([postId])
+  @@index([replyId])
+}
+
+model CohortBan {
+  id        String   @id @default(uuid()) @db.Uuid
+  cohortId  String   @db.Uuid
+  userId    String   @db.Uuid
+  reason    String?
+  bannedAt  DateTime @default(now())
+
+  cohort Cohort @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([cohortId, userId])
+  @@index([userId])
+}
+
+model ContentReport {
+  id         String       @id @default(uuid()) @db.Uuid
+  reporterId String       @db.Uuid
+  postId     String?      @db.Uuid
+  replyId    String?      @db.Uuid
+  reason     String
+  status     ReportStatus @default(PENDING)
+  resolvedAt DateTime?
+  createdAt  DateTime     @default(now())
+
+  reporter User              @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  post     DiscussionPost?   @relation("PostReports", fields: [postId], references: [id], onDelete: Cascade)
+  reply    DiscussionReply?  @relation("ReplyReports", fields: [replyId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
+  @@index([postId])
+  @@index([replyId])
+}
