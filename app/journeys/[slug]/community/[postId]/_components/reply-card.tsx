@@ -1,9 +1,10 @@
 'use client'
 
-import { useTransition } from 'react'
-import { Heart, Trash2 } from 'lucide-react'
+import { useState, useTransition } from 'react'
+import { Heart, Trash2, Flag } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toggleReactionAction, deleteReplyAction } from '../../actions'
+import { ReportDialog } from '../../_components/report-dialog'
 import { formatDistanceToNow } from '@/lib/utils/date'
 
 type ReplyCardProps = {
@@ -27,6 +28,7 @@ export function ReplyCard({
   isAdmin,
   journeySlug,
 }: ReplyCardProps) {
+  const [showReportDialog, setShowReportDialog] = useState(false)
   const [isPending, startTransition] = useTransition()
 
   const hasLiked = Array.isArray(reply.reactions)
@@ -51,6 +53,7 @@ export function ReplyCard({
   }
 
   const canDelete = reply.author.id === currentUserId || isAdmin
+  const canReport = reply.author.id !== currentUserId
 
   return (
     <div className="rounded-lg bg-muted/50 px-4 py-3">
@@ -77,6 +80,18 @@ export function ReplyCard({
           <Heart className={`size-3 ${hasLiked ? 'fill-current' : ''}`} />
         </Button>
 
+        {canReport && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 px-1.5 text-[10px] text-muted-foreground hover:text-orange-500"
+            onClick={() => setShowReportDialog(true)}
+            disabled={isPending}
+          >
+            <Flag className="size-3" />
+          </Button>
+        )}
+
         {canDelete && (
           <Button
             variant="ghost"
@@ -89,6 +104,13 @@ export function ReplyCard({
           </Button>
         )}
       </div>
+
+      <ReportDialog
+        open={showReportDialog}
+        onOpenChange={setShowReportDialog}
+        journeySlug={journeySlug}
+        replyId={reply.id}
+      />
     </div>
   )
 }

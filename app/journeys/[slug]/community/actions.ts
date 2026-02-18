@@ -118,3 +118,19 @@ export async function deleteReplyAction(
   revalidatePath(`/journeys/${journeySlug}/community/${postId}`)
   return { success: true }
 }
+
+export async function reportContentAction(
+  reason: string,
+  journeySlug: string,
+  postId?: string,
+  replyId?: string
+) {
+  const user = await requireAuth()
+
+  if (!reason.trim()) {
+    return { error: 'Angiv venligst en årsag' }
+  }
+
+  await communityService.createReport(user.id, reason.trim(), postId, replyId)
+  return { success: true }
+}

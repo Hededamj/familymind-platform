@@ -1,12 +1,13 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Heart, MessageCircle, Trash2, Pin } from 'lucide-react'
+import { Heart, MessageCircle, Trash2, Pin, Flag } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { toggleReactionAction, deletePostAction } from '../actions'
+import { toggleReactionAction, deletePostAction, reportContentAction } from '../actions'
 import { ReplyForm } from './reply-form'
+import { ReportDialog } from './report-dialog'
 import { formatDistanceToNow } from '@/lib/utils/date'
 
 type PostCardProps = {
@@ -37,6 +38,7 @@ export function PostCard({
   showFullThread = false,
 }: PostCardProps) {
   const [showReplyForm, setShowReplyForm] = useState(false)
+  const [showReportDialog, setShowReportDialog] = useState(false)
   const [isPending, startTransition] = useTransition()
 
   const hasLiked = post.reactions?.some((r) => r.emoji === '❤️') ?? false
@@ -55,6 +57,7 @@ export function PostCard({
   }
 
   const canDelete = post.author.id === currentUserId || isAdmin
+  const canReport = post.author.id !== currentUserId && !post.isPrompt
 
   return (
     <Card className={post.isPrompt ? 'border-primary/30 bg-primary/5' : ''}>
@@ -117,17 +120,30 @@ export function PostCard({
             {!showFullThread && post._count.replies === 0 && 'Svar'}
           </Button>
 
-          {canDelete && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="ml-auto h-8 px-2 text-xs text-muted-foreground hover:text-destructive"
-              onClick={handleDelete}
-              disabled={isPending}
-            >
-              <Trash2 className="size-3.5" />
-            </Button>
-          )}
+          <div className="ml-auto flex items-center gap-1">
+            {canReport && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 px-2 text-xs text-muted-foreground hover:text-orange-500"
+                onClick={() => setShowReportDialog(true)}
+                disabled={isPending}
+              >
+                <Flag className="size-3.5" />
+              </Button>
+            )}
+            {canDelete && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 px-2 text-xs text-muted-foreground hover:text-destructive"
+                onClick={handleDelete}
+                disabled={isPending}
+              >
+                <Trash2 className="size-3.5" />
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Reply form */}
@@ -140,6 +156,14 @@ export function PostCard({
             />
           </div>
         )}
+
+        {/* Report dialog */}
+        <ReportDialog
+          open={showReportDialog}
+          onOpenChange={setShowReportDialog}
+          journeySlug={journeySlug}
+          postId={post.id}
+        />
       </CardContent>
     </Card>
   )

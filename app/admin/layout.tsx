@@ -9,6 +9,7 @@ import {
   ArrowLeft,
   Tag,
   Users,
+  Shield,
 } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 
@@ -19,6 +20,7 @@ const navItems = [
   { href: '/admin/discounts', label: 'Rabatkoder', icon: Ticket },
   { href: '/admin/journeys', label: 'Rejser', icon: Map },
   { href: '/admin/cohorts', label: 'Kohorter', icon: Users },
+  { href: '/admin/moderation', label: 'Moderering', icon: Shield },
   { href: '/admin/settings', label: 'Indstillinger', icon: Settings },
 ]
 

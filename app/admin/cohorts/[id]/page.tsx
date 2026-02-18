@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { requireAdmin } from '@/lib/auth'
-import { getCohortById } from '@/lib/services/community.service'
+import { getCohortById, listCohortBans } from '@/lib/services/community.service'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -15,6 +15,8 @@ import {
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
 import { CohortToggle } from '../_components/cohort-toggle'
+import { MemberActions } from './_components/member-actions'
+import { BanActions } from './_components/ban-actions'
 
 function formatDate(date: Date): string {
   return new Intl.DateTimeFormat('da-DK', {
@@ -41,7 +43,11 @@ export default async function CohortDetailPage({
 }) {
   await requireAdmin()
   const { id } = await params
-  const cohort = await getCohortById(id)
+
+  const [cohort, bans] = await Promise.all([
+    getCohortById(id),
+    listCohortBans(id),
+  ])
 
   if (!cohort) {
     notFound()
@@ -120,6 +126,7 @@ export default async function CohortDetailPage({
                   <TableHead>Navn</TableHead>
                   <TableHead>E-mail</TableHead>
                   <TableHead>Tilmeldt</TableHead>
+                  <TableHead className="w-24"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -134,6 +141,13 @@ export default async function CohortDetailPage({
                     <TableCell className="text-muted-foreground">
                       {formatDateTime(member.joinedAt)}
                     </TableCell>
+                    <TableCell>
+                      <MemberActions
+                        cohortId={cohort.id}
+                        userId={member.user.id}
+                        userName={member.user.name ?? member.user.email}
+                      />
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -141,6 +155,55 @@ export default async function CohortDetailPage({
           )}
         </CardContent>
       </Card>
+
+      {/* Banned users */}
+      {bans.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Udelukkede brugere</CardTitle>
+            <CardDescription>
+              Brugere der er udelukket fra denne kohorte
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Navn</TableHead>
+                  <TableHead>E-mail</TableHead>
+                  <TableHead>Årsag</TableHead>
+                  <TableHead>Udelukket</TableHead>
+                  <TableHead className="w-24"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {bans.map((ban) => (
+                  <TableRow key={ban.id}>
+                    <TableCell className="font-medium">
+                      {ban.user.name || 'Anonym'}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {ban.user.email}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {ban.reason ?? '–'}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {formatDateTime(ban.bannedAt)}
+                    </TableCell>
+                    <TableCell>
+                      <BanActions
+                        cohortId={cohort.id}
+                        userId={ban.user.id}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

@@ -255,6 +255,14 @@ export async function createPost(
   body: string,
   dayId?: string
 ) {
+  // Check ban
+  const banned = await prisma.cohortBan.findUnique({
+    where: { cohortId_userId: { cohortId, userId: authorId } },
+  })
+  if (banned) {
+    throw new Error('Du er udelukket fra denne gruppe')
+  }
+
   // Verify membership
   const membership = await prisma.cohortMember.findFirst({
     where: { cohortId, userId: authorId },
@@ -289,6 +297,14 @@ export async function createReply(
   })
 
   if (!post) throw new Error('Indlæg ikke fundet')
+
+  // Check ban
+  const banned = await prisma.cohortBan.findUnique({
+    where: { cohortId_userId: { cohortId: post.cohortId, userId: authorId } },
+  })
+  if (banned) {
+    throw new Error('Du er udelukket fra denne gruppe')
+  }
 
   // Verify membership
   const membership = await prisma.cohortMember.findFirst({
@@ -452,7 +468,7 @@ export async function autoPostPrompt(
   })
 }
 
-// --- Moderation (basic, expanded in Task 4.3) ---
+// --- Moderation ---
 
 /**
  * Hide a post (admin moderation).
@@ -465,12 +481,32 @@ export async function hidePost(postId: string) {
 }
 
 /**
+ * Unhide a post (admin).
+ */
+export async function unhidePost(postId: string) {
+  return prisma.discussionPost.update({
+    where: { id: postId },
+    data: { isHidden: false },
+  })
+}
+
+/**
  * Hide a reply (admin moderation).
  */
 export async function hideReply(replyId: string) {
   return prisma.discussionReply.update({
     where: { id: replyId },
     data: { isHidden: true },
+  })
+}
+
+/**
+ * Unhide a reply (admin).
+ */
+export async function unhideReply(replyId: string) {
+  return prisma.discussionReply.update({
+    where: { id: replyId },
+    data: { isHidden: false },
   })
 }
 
@@ -486,4 +522,187 @@ export async function deletePost(postId: string) {
  */
 export async function deleteReply(replyId: string) {
   return prisma.discussionReply.delete({ where: { id: replyId } })
+}
+
+// --- Cohort Bans ---
+
+/**
+ * Ban a user from a cohort. Removes membership and hides their posts.
+ */
+export async function banUserFromCohort(
+  cohortId: string,
+  userId: string,
+  reason?: string
+) {
+  return prisma.$transaction(async (tx) => {
+    // Create ban record
+    await tx.cohortBan.upsert({
+      where: { cohortId_userId: { cohortId, userId } },
+      create: { cohortId, userId, reason },
+      update: { reason, bannedAt: new Date() },
+    })
+
+    // Remove membership
+    await tx.cohortMember.deleteMany({
+      where: { cohortId, userId },
+    })
+
+    // Hide all their posts in this cohort
+    await tx.discussionPost.updateMany({
+      where: { cohortId, authorId: userId },
+      data: { isHidden: true },
+    })
+
+    // Hide all their replies in this cohort's posts
+    const cohortPostIds = await tx.discussionPost.findMany({
+      where: { cohortId },
+      select: { id: true },
+    })
+    if (cohortPostIds.length > 0) {
+      await tx.discussionReply.updateMany({
+        where: {
+          authorId: userId,
+          postId: { in: cohortPostIds.map((p) => p.id) },
+        },
+        data: { isHidden: true },
+      })
+    }
+  })
+}
+
+/**
+ * Unban a user from a cohort.
+ */
+export async function unbanUserFromCohort(cohortId: string, userId: string) {
+  return prisma.cohortBan.delete({
+    where: { cohortId_userId: { cohortId, userId } },
+  })
+}
+
+/**
+ * Check if a user is banned from a cohort.
+ */
+export async function isUserBanned(cohortId: string, userId: string) {
+  const ban = await prisma.cohortBan.findUnique({
+    where: { cohortId_userId: { cohortId, userId } },
+  })
+  return !!ban
+}
+
+/**
+ * List bans for a cohort (admin).
+ */
+export async function listCohortBans(cohortId: string) {
+  return prisma.cohortBan.findMany({
+    where: { cohortId },
+    include: {
+      user: { select: { id: true, name: true, email: true } },
+    },
+    orderBy: { bannedAt: 'desc' },
+  })
+}
+
+// --- Content Reports ---
+
+/**
+ * Report a post or reply (user action).
+ */
+export async function createReport(
+  reporterId: string,
+  reason: string,
+  postId?: string,
+  replyId?: string
+) {
+  if (!postId && !replyId) throw new Error('postId eller replyId påkrævet')
+
+  return prisma.contentReport.create({
+    data: { reporterId, postId, replyId, reason },
+  })
+}
+
+/**
+ * List pending reports (admin).
+ */
+export async function listReports(status?: 'PENDING' | 'REVIEWED' | 'DISMISSED') {
+  return prisma.contentReport.findMany({
+    where: status ? { status } : undefined,
+    include: {
+      reporter: { select: { id: true, name: true, email: true } },
+      post: {
+        include: {
+          author: { select: { id: true, name: true } },
+          cohort: {
+            include: {
+              journey: { select: { id: true, title: true, slug: true } },
+            },
+          },
+        },
+      },
+      reply: {
+        include: {
+          author: { select: { id: true, name: true } },
+          post: {
+            select: {
+              id: true,
+              cohort: {
+                select: {
+                  id: true,
+                  journey: { select: { id: true, title: true, slug: true } },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+  })
+}
+
+/**
+ * Resolve a report (admin). Optionally hide the reported content.
+ */
+export async function resolveReport(
+  reportId: string,
+  action: 'dismiss' | 'hide'
+) {
+  const report = await prisma.contentReport.findUniqueOrThrow({
+    where: { id: reportId },
+  })
+
+  return prisma.$transaction(async (tx) => {
+    // Update report status
+    await tx.contentReport.update({
+      where: { id: reportId },
+      data: {
+        status: action === 'dismiss' ? 'DISMISSED' : 'REVIEWED',
+        resolvedAt: new Date(),
+      },
+    })
+
+    // Hide content if action is 'hide'
+    if (action === 'hide') {
+      if (report.postId) {
+        await tx.discussionPost.update({
+          where: { id: report.postId },
+          data: { isHidden: true },
+        })
+      }
+      if (report.replyId) {
+        await tx.discussionReply.update({
+          where: { id: report.replyId },
+          data: { isHidden: true },
+        })
+      }
+    }
+  })
+}
+
+/**
+ * Count pending reports (for admin badge).
+ */
+export async function countPendingReports() {
+  return prisma.contentReport.count({
+    where: { status: 'PENDING' },
+  })
 }

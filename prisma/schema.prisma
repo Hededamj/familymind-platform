@@ -103,6 +103,12 @@ enum JourneyStatus {
   ABANDONED
 }
 
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  DISMISSED
+}
+
 // ──────────────────────────────────────────────
 // Core Models
 // ──────────────────────────────────────────────
@@ -128,6 +134,8 @@ model User {
   discussionPosts    DiscussionPost[]
   discussionReplies  DiscussionReply[]
   postReactions      PostReaction[]
+  cohortBans         CohortBan[]
+  contentReports     ContentReport[]
 }
 
 model Organization {
@@ -526,6 +534,7 @@ model Cohort {
   journey Journey            @relation(fields: [journeyId], references: [id], onDelete: Cascade)
   members CohortMember[]
   posts   DiscussionPost[]
+  bans    CohortBan[]
 
   @@index([journeyId, isOpen])
 }
@@ -574,6 +583,7 @@ model DiscussionPost {
   prompt    DiscussionPrompt? @relation(fields: [promptId], references: [id])
   replies   DiscussionReply[]
   reactions PostReaction[]
+  reports   ContentReport[]   @relation("PostReports")
 
   @@index([cohortId, createdAt])
   @@index([authorId])
@@ -591,6 +601,7 @@ model DiscussionReply {
   post      DiscussionPost @relation(fields: [postId], references: [id], onDelete: Cascade)
   author    User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
   reactions PostReaction[]
+  reports   ContentReport[] @relation("ReplyReports")
 
   @@index([postId, createdAt])
   @@index([authorId])
@@ -609,6 +620,39 @@ model PostReaction {
 
   @@unique([userId, postId, emoji])
   @@unique([userId, replyId, emoji])
+  @@index([postId])
+  @@index([replyId])
+}
+
+model CohortBan {
+  id        String   @id @default(uuid()) @db.Uuid
+  cohortId  String   @db.Uuid
+  userId    String   @db.Uuid
+  reason    String?
+  bannedAt  DateTime @default(now())
+
+  cohort Cohort @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([cohortId, userId])
+  @@index([userId])
+}
+
+model ContentReport {
+  id         String       @id @default(uuid()) @db.Uuid
+  reporterId String       @db.Uuid
+  postId     String?      @db.Uuid
+  replyId    String?      @db.Uuid
+  reason     String
+  status     ReportStatus @default(PENDING)
+  resolvedAt DateTime?
+  createdAt  DateTime     @default(now())
+
+  reporter User              @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  post     DiscussionPost?   @relation("PostReports", fields: [postId], references: [id], onDelete: Cascade)
+  reply    DiscussionReply?  @relation("ReplyReports", fields: [replyId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
   @@index([postId])
   @@index([replyId])
 }
