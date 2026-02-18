@@ -5,6 +5,7 @@ import {
   sendTemplatedEmail,
   createInAppNotification,
 } from '@/lib/services/engagement.service'
+import { getDanishTime } from '@/lib/utils/timezone'
 import type { NotificationType } from '@prisma/client'
 
 /**
@@ -184,10 +185,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const now = new Date()
-  const currentDayOfWeek = now.getUTCDay() // 0 = Sunday
-  const currentHour = now.getUTCHours()
-  const currentTimeStr = `${String(currentHour).padStart(2, '0')}:00`
+  const danishTime = getDanishTime()
+  const currentDayOfWeek = danishTime.dayOfWeek
+  const currentHour = danishTime.hour
+  const currentTimeStr = danishTime.timeStr
 
   // Find all schedules matching the current day + hour
   const matchingSchedules = await prisma.notificationSchedule.findMany({
