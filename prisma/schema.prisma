@@ -238,15 +238,16 @@ model BundleItem {
 }
 
 model Entitlement {
-  id                   String            @id @default(uuid()) @db.Uuid
-  userId               String            @db.Uuid
-  organizationId       String?           @db.Uuid
-  productId            String            @db.Uuid
-  source               EntitlementSource
-  status               EntitlementStatus @default(ACTIVE)
-  stripeSubscriptionId String?
-  expiresAt            DateTime?
-  createdAt            DateTime          @default(now())
+  id                      String            @id @default(uuid()) @db.Uuid
+  userId                  String            @db.Uuid
+  organizationId          String?           @db.Uuid
+  productId               String            @db.Uuid
+  source                  EntitlementSource
+  status                  EntitlementStatus @default(ACTIVE)
+  stripeSubscriptionId    String?
+  stripeCheckoutSessionId String?           @unique
+  expiresAt               DateTime?
+  createdAt               DateTime          @default(now())
 
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   organization Organization? @relation(fields: [organizationId], references: [id])

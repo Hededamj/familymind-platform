@@ -8,15 +8,20 @@ const activeEntitlementFilter = {
   ],
 }
 
-export async function createEntitlement(data: {
-  userId: string
-  productId: string
-  source: 'PURCHASE' | 'SUBSCRIPTION' | 'GIFT' | 'B2B_LICENSE'
-  stripeSubscriptionId?: string
-  organizationId?: string
-  expiresAt?: Date
-}) {
-  return prisma.entitlement.create({ data })
+export async function createEntitlement(
+  data: {
+    userId: string
+    productId: string
+    source: 'PURCHASE' | 'SUBSCRIPTION' | 'GIFT' | 'B2B_LICENSE'
+    stripeSubscriptionId?: string
+    stripeCheckoutSessionId?: string
+    organizationId?: string
+    expiresAt?: Date
+  },
+  tx?: Parameters<Parameters<typeof prisma.$transaction>[0]>[0]
+) {
+  const db = tx ?? prisma
+  return db.entitlement.create({ data })
 }
 
 export async function getUserEntitlements(userId: string) {

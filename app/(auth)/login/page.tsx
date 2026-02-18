@@ -10,6 +10,11 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 
+function safeRedirect(url: string | null): string {
+  if (!url || !url.startsWith('/') || url.startsWith('//')) return '/dashboard'
+  return url
+}
+
 function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -17,7 +22,7 @@ function LoginForm() {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirectTo = searchParams.get('redirectTo') || '/dashboard'
+  const redirectTo = safeRedirect(searchParams.get('redirectTo'))
   const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null)
 
   function getSupabase() {

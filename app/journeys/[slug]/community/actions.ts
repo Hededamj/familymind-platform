@@ -2,18 +2,39 @@
 
 import { requireAuth } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
+import { prisma } from '@/lib/prisma'
 import * as communityService from '@/lib/services/community.service'
+
+async function verifyCohortMembership(userId: string, cohortId: string) {
+  const membership = await prisma.cohortMember.findFirst({
+    where: { userId, cohortId },
+  })
+  if (!membership) {
+    throw new Error('Ikke autoriseret')
+  }
+}
+
+async function verifyCohortMembershipByPost(userId: string, postId: string) {
+  const post = await prisma.discussionPost.findUnique({
+    where: { id: postId },
+    select: { cohortId: true },
+  })
+  if (!post) throw new Error('Indlæg ikke fundet')
+  await verifyCohortMembership(userId, post.cohortId)
+}
 
 export async function getCohortFeedAction(
   cohortId: string,
   cursor?: string
 ) {
   const user = await requireAuth()
+  await verifyCohortMembership(user.id, cohortId)
   return communityService.getCohortFeed(cohortId, cursor, user.id)
 }
 
 export async function getPostWithRepliesAction(postId: string) {
   const user = await requireAuth()
+  await verifyCohortMembershipByPost(user.id, postId)
   return communityService.getPostWithReplies(postId, user.id)
 }
 
@@ -24,6 +45,7 @@ export async function createPostAction(
   dayId?: string
 ) {
   const user = await requireAuth()
+  await verifyCohortMembership(user.id, cohortId)
 
   if (!body.trim()) {
     return { error: 'Indlægget må ikke være tomt' }
@@ -50,6 +72,7 @@ export async function createReplyAction(
   journeySlug: string
 ) {
   const user = await requireAuth()
+  await verifyCohortMembershipByPost(user.id, postId)
 
   if (!body.trim()) {
     return { error: 'Svaret må ikke være tomt' }
@@ -73,6 +96,17 @@ export async function toggleReactionAction(
   replyId?: string
 ) {
   const user = await requireAuth()
+  // Verify membership via the post (or the reply's post)
+  if (postId) {
+    await verifyCohortMembershipByPost(user.id, postId)
+  } else if (replyId) {
+    const reply = await prisma.discussionReply.findUnique({
+      where: { id: replyId },
+      select: { postId: true },
+    })
+    if (!reply) throw new Error('Svar ikke fundet')
+    await verifyCohortMembershipByPost(user.id, reply.postId)
+  }
   const added = await communityService.toggleReaction(
     user.id,
     emoji,

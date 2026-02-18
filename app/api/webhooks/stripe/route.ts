@@ -20,13 +20,22 @@ export async function POST(req: Request) {
     )
   }
 
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
+  if (!webhookSecret) {
+    console.error('STRIPE_WEBHOOK_SECRET not configured')
+    return NextResponse.json(
+      { error: 'Server misconfiguration' },
+      { status: 500 }
+    )
+  }
+
   let event
 
   try {
     event = getStripe().webhooks.constructEvent(
       body,
       signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
+      webhookSecret
     )
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'
@@ -52,33 +61,45 @@ export async function POST(req: Request) {
       })
       if (!product) break
 
-      // Before creating entitlement, check if one already exists for this session
-      const existingEntitlement = await prisma.entitlement.findFirst({
-        where: { userId, productId, source: product.type === 'SUBSCRIPTION' ? 'SUBSCRIPTION' : 'PURCHASE' },
+      // Idempotency: check if this checkout session was already processed
+      const existingEntitlement = await prisma.entitlement.findUnique({
+        where: { stripeCheckoutSessionId: session.id },
       })
       if (existingEntitlement) break // Already processed
 
       if (product.type === 'SUBSCRIPTION') {
-        // For subscriptions, store the subscription ID
         await createEntitlement({
           userId,
           productId,
           source: 'SUBSCRIPTION',
           stripeSubscriptionId: session.subscription as string,
+          stripeCheckoutSessionId: session.id,
         })
       } else if (product.type === 'BUNDLE') {
-        // For bundles, create entitlements for the bundle AND each included product
-        await createEntitlement({ userId, productId, source: 'PURCHASE' })
-        for (const item of product.bundleItems) {
+        // Atomic: create bundle + included product entitlements in one transaction
+        await prisma.$transaction(async (tx) => {
           await createEntitlement({
             userId,
-            productId: item.includedProductId,
+            productId,
             source: 'PURCHASE',
-          })
-        }
+            stripeCheckoutSessionId: session.id,
+          }, tx)
+          for (const item of product.bundleItems) {
+            await createEntitlement({
+              userId,
+              productId: item.includedProductId,
+              source: 'PURCHASE',
+            }, tx)
+          }
+        })
       } else {
         // For COURSE and SINGLE
-        await createEntitlement({ userId, productId, source: 'PURCHASE' })
+        await createEntitlement({
+          userId,
+          productId,
+          source: 'PURCHASE',
+          stripeCheckoutSessionId: session.id,
+        })
       }
 
       // Increment discount code usage if applicable
