@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { getSiteSetting } from './settings.service'
-import { createInAppNotification } from './engagement.service'
+import { createInAppNotification, sendTemplatedEmail } from './engagement.service'
 import type { Prisma } from '@prisma/client'
 
 const DEFAULT_COHORT_MAX_MEMBERS = 25
@@ -324,13 +324,23 @@ export async function createReply(
   // Notify original post author (don't notify yourself)
   if (post.authorId !== authorId) {
     const authorName = reply.author.name ?? 'Nogen'
+    const snippet = body.length > 100 ? body.slice(0, 100) + '…' : body
+
+    // In-app notification
     await createInAppNotification(
       post.authorId,
       'COMMUNITY_REPLY',
       `${authorName} svarede på dit indlæg`,
-      body.length > 100 ? body.slice(0, 100) + '…' : body,
+      snippet,
       `/journeys/community/${post.cohortId}/${postId}`
     )
+
+    // Email notification
+    await sendTemplatedEmail(post.authorId, 'community_reply', {
+      replierName: authorName,
+      replySnippet: snippet,
+      postSnippet: post.body.length > 80 ? post.body.slice(0, 80) + '…' : post.body,
+    })
   }
 
   return reply
@@ -704,5 +714,70 @@ export async function resolveReport(
 export async function countPendingReports() {
   return prisma.contentReport.count({
     where: { status: 'PENDING' },
+  })
+}
+
+// --- Community Digest ---
+
+/**
+ * Get weekly activity stats for a cohort (for digest email).
+ */
+export async function getCohortWeeklyStats(cohortId: string) {
+  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+
+  const [newPosts, newReplies, activeMembers] = await Promise.all([
+    prisma.discussionPost.count({
+      where: {
+        cohortId,
+        isHidden: false,
+        isPrompt: false,
+        createdAt: { gte: weekAgo },
+      },
+    }),
+    prisma.discussionReply.count({
+      where: {
+        isHidden: false,
+        createdAt: { gte: weekAgo },
+        post: { cohortId },
+      },
+    }),
+    prisma.discussionPost.findMany({
+      where: {
+        cohortId,
+        isPrompt: false,
+        createdAt: { gte: weekAgo },
+      },
+      select: { authorId: true },
+      distinct: ['authorId'],
+    }).then((posts) => posts.length),
+  ])
+
+  return { newPosts, newReplies, activeMembers }
+}
+
+/**
+ * Get all cohort members for sending digest emails.
+ */
+export async function getCohortMemberIds(cohortId: string) {
+  const members = await prisma.cohortMember.findMany({
+    where: { cohortId },
+    select: { userId: true },
+  })
+  return members.map((m) => m.userId)
+}
+
+/**
+ * Get all active cohorts with their journey info (for digest cron).
+ */
+export async function getActiveCohortsForDigest() {
+  return prisma.cohort.findMany({
+    where: {
+      journey: { isActive: true },
+      members: { some: {} }, // At least one member
+    },
+    include: {
+      journey: { select: { id: true, title: true, slug: true } },
+      _count: { select: { members: true } },
+    },
   })
 }
