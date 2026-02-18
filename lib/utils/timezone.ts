@@ -26,8 +26,13 @@ export function getDanishTime(date: Date = new Date()) {
     lørdag: 6,
   }
 
+  const dayNumber = dayMap[weekday.toLowerCase()]
+  if (dayNumber === undefined) {
+    console.warn(`[timezone] Unknown Danish weekday: "${weekday}", falling back to UTC`)
+  }
+
   return {
-    dayOfWeek: dayMap[weekday.toLowerCase()] ?? new Date().getDay(),
+    dayOfWeek: dayNumber ?? date.getDay(),
     hour: parseInt(hour, 10),
     timeStr: `${hour}:00`,
   }
