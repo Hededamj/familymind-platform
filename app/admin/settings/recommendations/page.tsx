@@ -42,7 +42,7 @@ export default async function RecommendationsSettingsPage() {
             Anbefalingsregler
           </h1>
           <p className="text-muted-foreground">
-            Opsaet regler for automatiske anbefalinger baseret paa tags og alder
+            Opsæt regler for automatiske anbefalinger baseret på tags og alder
           </p>
         </div>
       </div>

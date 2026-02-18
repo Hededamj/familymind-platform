@@ -218,7 +218,7 @@ export function RecommendationsManager({
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="F.eks. Soevnrejse for 0-6 mdr"
+                placeholder="F.eks. Søvnrejse for 0-6 mdr"
               />
             </div>
             <div className="space-y-2">
@@ -239,7 +239,7 @@ export function RecommendationsManager({
                 <Label className="text-xs">Tag</Label>
                 <Select value={tagId} onValueChange={setTagId}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Vaelg tag" />
+                    <SelectValue placeholder="Vælg tag" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">Ingen tag</SelectItem>
@@ -252,7 +252,7 @@ export function RecommendationsManager({
                 </Select>
               </div>
               <div className="space-y-1">
-                <Label className="text-xs">Min. alder (maaneder)</Label>
+                <Label className="text-xs">Min. alder (måneder)</Label>
                 <Input
                   type="number"
                   value={ageMin}
@@ -261,7 +261,7 @@ export function RecommendationsManager({
                 />
               </div>
               <div className="space-y-1">
-                <Label className="text-xs">Max. alder (maaneder)</Label>
+                <Label className="text-xs">Max. alder (måneder)</Label>
                 <Input
                   type="number"
                   value={ageMax}
@@ -273,7 +273,7 @@ export function RecommendationsManager({
           </div>
 
           <div className="space-y-2">
-            <Label className="font-semibold">Maal</Label>
+            <Label className="font-semibold">Mål</Label>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1">
                 <Label className="text-xs">Type</Label>
@@ -299,7 +299,7 @@ export function RecommendationsManager({
                 </Label>
                 <Select value={targetId} onValueChange={setTargetId}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Vaelg..." />
+                    <SelectValue placeholder="Vælg..." />
                   </SelectTrigger>
                   <SelectContent>
                     {targets.map((t) => (
@@ -349,14 +349,14 @@ export function RecommendationsManager({
       ) : (
         <Button onClick={openNew}>
           <Plus className="mr-2 size-4" />
-          Tilfoej regel
+          Tilføj regel
         </Button>
       )}
 
       {rules.length === 0 ? (
         <div className="rounded-md border p-12 text-center">
           <p className="text-muted-foreground">
-            Ingen anbefalingsregler endnu. Tilfoej din foerste regel ovenfor.
+            Ingen anbefalingsregler endnu. Tilføj din første regel ovenfor.
           </p>
         </div>
       ) : (
@@ -366,7 +366,7 @@ export function RecommendationsManager({
               <TableRow>
                 <TableHead>Navn</TableHead>
                 <TableHead>Betingelser</TableHead>
-                <TableHead>Maal</TableHead>
+                <TableHead>Mål</TableHead>
                 <TableHead className="w-20">Prioritet</TableHead>
                 <TableHead className="w-20">Status</TableHead>
                 <TableHead className="w-[100px]" />
@@ -437,8 +437,8 @@ export function RecommendationsManager({
           <DialogHeader>
             <DialogTitle>Slet regel</DialogTitle>
             <DialogDescription>
-              Er du sikker paa, at du vil slette reglen &quot;
-              {deleteTarget?.name}&quot;? Denne handling kan ikke fortrydes.
+              Er du sikker på, at du vil slette reglen "
+              {deleteTarget?.name}"? Denne handling kan ikke fortrydes.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

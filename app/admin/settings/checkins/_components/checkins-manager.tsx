@@ -153,7 +153,7 @@ export function CheckInsManager({ options }: CheckInsManagerProps) {
               />
             </div>
             <div className="space-y-2">
-              <Label>Vaerdi</Label>
+              <Label>Værdi</Label>
               <Input
                 value={newValue}
                 onChange={(e) => setNewValue(e.target.value)}
@@ -185,7 +185,7 @@ export function CheckInsManager({ options }: CheckInsManagerProps) {
       ) : (
         <Button onClick={() => setShowNew(true)}>
           <Plus className="mr-2 size-4" />
-          Tilfoej mulighed
+          Tilføj mulighed
         </Button>
       )}
 
@@ -193,7 +193,7 @@ export function CheckInsManager({ options }: CheckInsManagerProps) {
       {options.length === 0 ? (
         <div className="rounded-md border p-12 text-center">
           <p className="text-muted-foreground">
-            Ingen check-in muligheder endnu. Tilfoej din foerste mulighed
+            Ingen check-in muligheder endnu. Tilføj din første mulighed
             ovenfor.
           </p>
         </div>
@@ -205,7 +205,7 @@ export function CheckInsManager({ options }: CheckInsManagerProps) {
                 <TableHead className="w-16">Pos.</TableHead>
                 <TableHead className="w-16">Emoji</TableHead>
                 <TableHead>Label</TableHead>
-                <TableHead>Vaerdi</TableHead>
+                <TableHead>Værdi</TableHead>
                 <TableHead className="w-20">Status</TableHead>
                 <TableHead className="w-[160px]" />
               </TableRow>
@@ -349,8 +349,8 @@ export function CheckInsManager({ options }: CheckInsManagerProps) {
           <DialogHeader>
             <DialogTitle>Slet check-in mulighed</DialogTitle>
             <DialogDescription>
-              Er du sikker paa, at du vil slette &quot;{deleteTarget?.label}
-              &quot;? Denne handling kan ikke fortrydes.
+              Er du sikker på, at du vil slette "{deleteTarget?.label}
+              "? Denne handling kan ikke fortrydes.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

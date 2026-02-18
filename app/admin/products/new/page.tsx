@@ -9,7 +9,7 @@ export default async function NewProductPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Opret produkt</h1>
         <p className="text-muted-foreground">
-          Tilfoej et nyt produkt til platformen
+          Tilføj et nyt produkt til platformen
         </p>
       </div>
       <ProductForm mode="create" />

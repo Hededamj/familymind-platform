@@ -121,7 +121,7 @@ export function JourneyEditor({
               onClick={() => setShowAddPhase(true)}
             >
               <Plus className="mr-2 size-4" />
-              Tilfoej fase
+              Tilføj fase
             </Button>
           </div>
         </CardHeader>
@@ -129,7 +129,7 @@ export function JourneyEditor({
           {journey.phases.length === 0 && !showAddPhase ? (
             <div className="rounded-md border border-dashed p-8 text-center">
               <p className="text-muted-foreground">
-                Ingen faser endnu. Tilfoej en fase for at begynde at
+                Ingen faser endnu. Tilføj en fase for at begynde at
                 strukturere rejsen.
               </p>
               <Button
@@ -138,7 +138,7 @@ export function JourneyEditor({
                 onClick={() => setShowAddPhase(true)}
               >
                 <Plus className="mr-2 size-4" />
-                Tilfoej foerste fase
+                Tilføj første fase
               </Button>
             </div>
           ) : (
@@ -172,7 +172,7 @@ export function JourneyEditor({
                 onClick={handleAddPhase}
                 disabled={isPending || !newPhaseTitle.trim()}
               >
-                {isPending ? 'Opretter...' : 'Tilfoej'}
+                {isPending ? 'Opretter...' : 'Tilføj'}
               </Button>
               <Button
                 variant="outline"

@@ -60,7 +60,7 @@ export default async function SettingsPage() {
           <CardHeader>
             <CardTitle>Abonnement</CardTitle>
             <CardDescription>
-              Status p&aring; dit FamilyMind-abonnement
+              Status på dit FamilyMind-abonnement
             </CardDescription>
           </CardHeader>
           <CardContent>

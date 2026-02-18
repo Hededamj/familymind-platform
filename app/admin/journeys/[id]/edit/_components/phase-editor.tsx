@@ -128,7 +128,7 @@ export function PhaseEditor({
     startTransition(async () => {
       try {
         await createDayAction(phase.id)
-        toast.success('Dag tilfojet')
+        toast.success('Dag tilføjet')
         setIsOpen(true)
         router.refresh()
       } catch {
@@ -208,7 +208,7 @@ export function PhaseEditor({
               disabled={isPending}
             >
               <Plus className="mr-1 size-3" />
-              Tilfoej dag
+              Tilføj dag
             </Button>
             <Button
               size="sm"
@@ -237,7 +237,7 @@ export function PhaseEditor({
                   disabled={isPending}
                 >
                   <Plus className="mr-1 size-4" />
-                  Tilfoej foerste dag
+                  Tilføj første dag
                 </Button>
               </div>
             ) : (
@@ -259,9 +259,9 @@ export function PhaseEditor({
           <DialogHeader>
             <DialogTitle>Slet fase</DialogTitle>
             <DialogDescription>
-              Er du sikker paa, at du vil slette fasen &quot;{phase.title}
-              &quot;? Alle dage, indhold og handlinger i denne fase vil
-              ogsaa blive slettet.
+              Er du sikker på, at du vil slette fasen "{phase.title}
+              "? Alle dage, indhold og handlinger i denne fase vil
+              også blive slettet.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

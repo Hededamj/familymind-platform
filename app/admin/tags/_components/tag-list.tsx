@@ -58,7 +58,7 @@ export function TagList({ tags }: TagListProps) {
     return (
       <div className="rounded-md border p-12 text-center">
         <p className="text-muted-foreground">
-          Ingen tags endnu. Opret dit foerste tag ovenfor.
+          Ingen tags endnu. Opret dit første tag ovenfor.
         </p>
       </div>
     )
@@ -123,14 +123,14 @@ export function TagList({ tags }: TagListProps) {
             <DialogDescription>
               {deleteTarget && deleteTarget._count.contentUnits > 0 ? (
                 <>
-                  Tagget &quot;{deleteTarget.name}&quot; bruges af{' '}
+                  Tagget "{deleteTarget.name}" bruges af{' '}
                   {deleteTarget._count.contentUnits} indhold. Hvis du sletter
                   det, fjernes det fra alt tilknyttet indhold.
                 </>
               ) : (
                 <>
-                  Er du sikker paa, at du vil slette tagget &quot;
-                  {deleteTarget?.name}&quot;? Denne handling kan ikke fortrydes.
+                  Er du sikker på, at du vil slette tagget "
+                  {deleteTarget?.name}"? Denne handling kan ikke fortrydes.
                 </>
               )}
             </DialogDescription>

@@ -228,7 +228,7 @@ export function ProductForm({
         setShowLessonDialog(false)
         toast.success('Lektion tilfojet')
       } catch {
-        toast.error('Kunne ikke tilfoeje lektion')
+        toast.error('Kunne ikke tilføje lektion')
       }
     })
   }
@@ -305,7 +305,7 @@ export function ProductForm({
         setShowBundleDialog(false)
         toast.success('Produkt tilfojet til pakke')
       } catch {
-        toast.error('Kunne ikke tilfoeje produkt til pakke')
+        toast.error('Kunne ikke tilføje produkt til pakke')
       }
     })
   }
@@ -366,7 +366,7 @@ export function ProductForm({
   const productTypeLabels: Record<string, string> = {
     SUBSCRIPTION: 'Abonnement',
     COURSE: 'Kursus',
-    SINGLE: 'Enkeltstaaende',
+    SINGLE: 'Enkeltstående',
     BUNDLE: 'Pakke',
   }
 
@@ -398,7 +398,7 @@ export function ProductForm({
                 placeholder="auto-genereret-slug"
                 required
                 pattern="^[a-z0-9-]+$"
-                title="Slug skal bestaa af smaa bogstaver, tal og bindestreger"
+                title="Slug skal bestå af små bogstaver, tal og bindestreger"
               />
             </div>
           </div>
@@ -414,7 +414,7 @@ export function ProductForm({
                   description: e.target.value,
                 }))
               }
-              placeholder="Tilfoej en beskrivelse..."
+              placeholder="Tilføj en beskrivelse..."
               rows={4}
             />
           </div>
@@ -438,13 +438,13 @@ export function ProductForm({
                 <SelectContent>
                   <SelectItem value="SUBSCRIPTION">Abonnement</SelectItem>
                   <SelectItem value="COURSE">Kursus</SelectItem>
-                  <SelectItem value="SINGLE">Enkeltstaaende</SelectItem>
+                  <SelectItem value="SINGLE">Enkeltstående</SelectItem>
                   <SelectItem value="BUNDLE">Pakke</SelectItem>
                 </SelectContent>
               </Select>
               {mode === 'edit' && (
                 <p className="text-xs text-muted-foreground">
-                  Produkttype kan ikke aendres efter oprettelse
+                  Produkttype kan ikke ændres efter oprettelse
                 </p>
               )}
             </div>
@@ -517,14 +517,14 @@ export function ProductForm({
                 disabled={isPending || availableLessonUnits.length === 0}
               >
                 <Plus className="mr-2 size-4" />
-                Tilfoej lektion
+                Tilføj lektion
               </Button>
             </div>
           </CardHeader>
           <CardContent>
             {lessons.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                Ingen lektioner tilfojet endnu. Tilfoej indhold som lektioner
+                Ingen lektioner tilfojet endnu. Tilføj indhold som lektioner
                 til dette kursus.
               </p>
             ) : (
@@ -621,14 +621,14 @@ export function ProductForm({
                 disabled={isPending || availableBundleProducts.length === 0}
               >
                 <Plus className="mr-2 size-4" />
-                Tilfoej produkt
+                Tilføj produkt
               </Button>
             </div>
           </CardHeader>
           <CardContent>
             {bundleItems.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                Ingen produkter tilfojet endnu. Tilfoej produkter til denne
+                Ingen produkter tilfojet endnu. Tilføj produkter til denne
                 pakke.
               </p>
             ) : (
@@ -717,7 +717,7 @@ export function ProductForm({
             ) : (
               <div className="space-y-3">
                 <p className="text-sm text-muted-foreground">
-                  Intet indhold tilknyttet endnu. Vaelg en indholdsenheld til
+                  Intet indhold tilknyttet endnu. Vælg en indholdsenhed til
                   dette produkt.
                 </p>
                 <Button
@@ -728,7 +728,7 @@ export function ProductForm({
                   disabled={isPending || availableSingleUnits.length === 0}
                 >
                   <Plus className="mr-2 size-4" />
-                  Vaelg indhold
+                  Vælg indhold
                 </Button>
               </div>
             )}
@@ -762,11 +762,11 @@ export function ProductForm({
               <div className="space-y-1 text-sm">
                 <p>
                   Abonnementsproduktet giver adgang til alt indhold markeret med
-                  &quot;Abonnement&quot; adgangsniveau.
+                  "Abonnement" adgangsniveau.
                 </p>
                 <p className="text-muted-foreground">
-                  Stripe-synkronisering opretter en gentagende maanedlig pris
-                  baseret paa det angivne beloeb.
+                  Stripe-synkronisering opretter en gentagende månedlig pris
+                  baseret pådet angivne beløb.
                 </p>
               </div>
             </div>
@@ -832,7 +832,7 @@ export function ProductForm({
               : 'Gemmer...'
             : mode === 'create'
               ? 'Opret produkt'
-              : 'Gem aendringer'}
+              : 'Gem ændringer'}
         </Button>
         <Button
           type="button"
@@ -849,8 +849,8 @@ export function ProductForm({
           <DialogHeader>
             <DialogTitle>
               {formData.type === 'SINGLE'
-                ? 'Vaelg indhold'
-                : 'Tilfoej lektion'}
+                ? 'Vælg indhold'
+                : 'Tilføj lektion'}
             </DialogTitle>
           </DialogHeader>
           <div className="max-h-[400px] overflow-y-auto">
@@ -859,7 +859,7 @@ export function ProductForm({
               : availableLessonUnits
             ).length === 0 ? (
               <p className="py-4 text-center text-sm text-muted-foreground">
-                Intet tilgaengeligt indhold at tilfoeje.
+                Intet tilgængeligt indhold at tilføje.
               </p>
             ) : (
               <div className="space-y-2">
@@ -893,12 +893,12 @@ export function ProductForm({
       <Dialog open={showBundleDialog} onOpenChange={setShowBundleDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Tilfoej produkt til pakke</DialogTitle>
+            <DialogTitle>Tilføj produkt til pakke</DialogTitle>
           </DialogHeader>
           <div className="max-h-[400px] overflow-y-auto">
             {availableBundleProducts.length === 0 ? (
               <p className="py-4 text-center text-sm text-muted-foreground">
-                Ingen tilgaengelige produkter at tilfoeje.
+                Ingen tilgængelige produkter at tilføje.
               </p>
             ) : (
               <div className="space-y-2">

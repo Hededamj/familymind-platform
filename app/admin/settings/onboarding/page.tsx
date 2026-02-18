@@ -36,7 +36,7 @@ export default async function OnboardingSettingsPage() {
             Onboarding Quiz
           </h1>
           <p className="text-muted-foreground">
-            Konfigurer spoergsmaal og svarmuligheder til onboarding-quizzen
+            Konfigurer spørgsmål og svarmuligheder til onboarding-quizzen
           </p>
         </div>
       </div>

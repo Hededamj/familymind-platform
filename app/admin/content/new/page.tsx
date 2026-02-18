@@ -13,7 +13,7 @@ export default async function NewContentPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Opret indhold</h1>
         <p className="text-muted-foreground">
-          Tilfoej nyt indhold til platformen
+          Tilføj nyt indhold til platformen
         </p>
       </div>
       <ContentForm mode="create" availableTags={tags} />

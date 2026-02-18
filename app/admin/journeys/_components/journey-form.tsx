@@ -146,7 +146,7 @@ export function JourneyForm({ mode, initialData }: JourneyFormProps) {
                 id="title"
                 value={formData.title}
                 onChange={(e) => handleTitleChange(e.target.value)}
-                placeholder="F.eks. Soevnrejsen"
+                placeholder="F.eks. Søvnrejsen"
                 required
               />
             </div>
@@ -159,7 +159,7 @@ export function JourneyForm({ mode, initialData }: JourneyFormProps) {
                 placeholder="auto-genereret-slug"
                 required
                 pattern="^[a-z0-9-]+$"
-                title="Slug skal bestaa af smaa bogstaver, tal og bindestreger"
+                title="Slug skal bestå af små bogstaver, tal og bindestreger"
               />
             </div>
           </div>
@@ -189,7 +189,7 @@ export function JourneyForm({ mode, initialData }: JourneyFormProps) {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="targetAgeMin">Min. alder (maaneder)</Label>
+              <Label htmlFor="targetAgeMin">Min. alder (måneder)</Label>
               <Input
                 id="targetAgeMin"
                 type="number"
@@ -205,7 +205,7 @@ export function JourneyForm({ mode, initialData }: JourneyFormProps) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="targetAgeMax">Maks. alder (maaneder)</Label>
+              <Label htmlFor="targetAgeMax">Maks. alder (måneder)</Label>
               <Input
                 id="targetAgeMax"
                 type="number"
@@ -263,7 +263,7 @@ export function JourneyForm({ mode, initialData }: JourneyFormProps) {
               : 'Gemmer...'
             : mode === 'create'
               ? 'Opret rejse'
-              : 'Gem aendringer'}
+              : 'Gem ændringer'}
         </Button>
         <Button
           type="button"

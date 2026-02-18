@@ -24,7 +24,7 @@ const mediaTypeLabels: Record<string, string> = {
 const accessLevelLabels: Record<string, string> = {
   FREE: 'Gratis',
   SUBSCRIPTION: 'Abonnement',
-  PURCHASE: 'Koeb',
+  PURCHASE: 'Køb',
 }
 
 function formatDate(date: Date): string {
@@ -45,7 +45,7 @@ export default async function ContentListPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Indhold</h1>
           <p className="text-muted-foreground">
-            Administrer alt indhold paa platformen
+            Administrer alt indhold på platformen
           </p>
         </div>
         <Button asChild>
@@ -59,7 +59,7 @@ export default async function ContentListPage() {
       {contentUnits.length === 0 ? (
         <div className="rounded-md border p-12 text-center">
           <p className="text-muted-foreground">
-            Intet indhold endnu. Opret dit foerste indhold for at komme i gang.
+            Intet indhold endnu. Opret dit første indhold for at komme i gang.
           </p>
           <Button asChild className="mt-4">
             <Link href="/admin/content/new">

@@ -208,7 +208,7 @@ export function ContentForm({
                 placeholder="auto-genereret-slug"
                 required
                 pattern="^[a-z0-9-]+$"
-                title="Slug skal bestaa af smaa bogstaver, tal og bindestreger"
+                title="Slug skal bestå af små bogstaver, tal og bindestreger"
               />
             </div>
           </div>
@@ -224,7 +224,7 @@ export function ContentForm({
                   description: e.target.value,
                 }))
               }
-              placeholder="Tilfoej en beskrivelse..."
+              placeholder="Tilføj en beskrivelse..."
               rows={4}
             />
           </div>
@@ -336,7 +336,7 @@ export function ContentForm({
         <CardContent className="space-y-4">
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="difficulty">Svaerhedsgrad</Label>
+              <Label htmlFor="difficulty">Sværhedsgrad</Label>
               <Select
                 value={formData.difficulty}
                 onValueChange={(value) =>
@@ -357,7 +357,7 @@ export function ContentForm({
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="ageMin">Minimumsalder (maaneder)</Label>
+              <Label htmlFor="ageMin">Minimumsalder (måneder)</Label>
               <Input
                 id="ageMin"
                 type="number"
@@ -373,7 +373,7 @@ export function ContentForm({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="ageMax">Maksimumsalder (maaneder)</Label>
+              <Label htmlFor="ageMax">Maksimumsalder (måneder)</Label>
               <Input
                 id="ageMax"
                 type="number"
@@ -416,7 +416,7 @@ export function ContentForm({
                 <SelectContent>
                   <SelectItem value="FREE">Gratis</SelectItem>
                   <SelectItem value="SUBSCRIPTION">Abonnement</SelectItem>
-                  <SelectItem value="PURCHASE">Koeb</SelectItem>
+                  <SelectItem value="PURCHASE">Køb</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -433,7 +433,7 @@ export function ContentForm({
                   }
                   className="size-4 rounded border-input"
                 />
-                Selvstaendig
+                Selvstændig
               </label>
               <label className="flex items-center gap-2 text-sm">
                 <input
@@ -501,7 +501,7 @@ export function ContentForm({
               : 'Gemmer...'
             : mode === 'create'
               ? 'Opret indhold'
-              : 'Gem aendringer'}
+              : 'Gem ændringer'}
         </Button>
         <Button
           type="button"

@@ -85,12 +85,43 @@ export async function assignUserToCohort(
 
     const cohort = await findOrCreateCohort(journeyId, client)
 
-    return client.cohortMember.create({
+    const member = await client.cohortMember.create({
       data: {
         cohortId: cohort.id,
         userId,
       },
     })
+
+    // Post-insert race condition guard: verify we haven't exceeded maxMembers
+    const currentCount = await client.cohortMember.count({
+      where: { cohortId: cohort.id },
+    })
+    if (currentCount > cohort.maxMembers) {
+      // Another concurrent insert pushed us over the limit — remove and retry
+      await client.cohortMember.delete({ where: { id: member.id } })
+      // Close the full cohort and create a new one
+      await client.cohort.update({
+        where: { id: cohort.id },
+        data: { isOpen: false },
+      })
+      const newCohort = await findOrCreateCohort(journeyId, client)
+      return client.cohortMember.create({
+        data: {
+          cohortId: newCohort.id,
+          userId,
+        },
+      })
+    }
+
+    // Close cohort if now full
+    if (currentCount >= cohort.maxMembers) {
+      await client.cohort.update({
+        where: { id: cohort.id },
+        data: { isOpen: false },
+      })
+    }
+
+    return member
   }
 
   if (tx) {

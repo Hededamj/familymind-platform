@@ -72,7 +72,7 @@ export function DashboardMessagesManager({
     return (
       <div className="rounded-md border p-12 text-center">
         <p className="text-muted-foreground">
-          Ingen dashboard beskeder konfigureret endnu. Koer seed-scriptet for at
+          Ingen dashboard beskeder konfigureret endnu. Kør seed-scriptet for at
           oprette standardbeskeder.
         </p>
       </div>
@@ -82,8 +82,8 @@ export function DashboardMessagesManager({
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Dashboard beskeder vises til brugere baseret paa deres nuvaerende
-        tilstand. Tilstanderne er faste og kan ikke tilfoej es eller slettes,
+        Dashboard beskeder vises til brugere baseret på deres nuværende
+        tilstand. Tilstanderne er faste og kan ikke tilføjes eller slettes,
         kun redigeres.
       </p>
 

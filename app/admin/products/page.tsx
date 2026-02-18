@@ -18,7 +18,7 @@ import { ProductActions } from './_components/product-actions'
 const productTypeLabels: Record<string, string> = {
   SUBSCRIPTION: 'Abonnement',
   COURSE: 'Kursus',
-  SINGLE: 'Enkeltstaaende',
+  SINGLE: 'Enkeltstående',
   BUNDLE: 'Pakke',
 }
 
@@ -148,7 +148,7 @@ export default async function ProductListPage({
     { value: '', label: 'Alle' },
     { value: 'SUBSCRIPTION', label: 'Abonnement' },
     { value: 'COURSE', label: 'Kursus' },
-    { value: 'SINGLE', label: 'Enkeltstaaende' },
+    { value: 'SINGLE', label: 'Enkeltstående' },
     { value: 'BUNDLE', label: 'Pakke' },
   ]
 

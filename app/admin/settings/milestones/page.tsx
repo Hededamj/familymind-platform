@@ -23,10 +23,10 @@ export default async function MilestoneSettingsPage() {
         </Link>
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
-            Milepaalsdefinitioner
+            Milepælsdefinitioner
           </h1>
           <p className="text-muted-foreground">
-            Konfigurer milepaalene og deres fejringsmeddelelser
+            Konfigurer milepælene og deres fejringsmeddelelser
           </p>
         </div>
       </div>

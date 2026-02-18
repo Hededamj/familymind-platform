@@ -29,7 +29,7 @@ export default async function EditDiscountPage({
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Rediger rabatkode</h1>
         <p className="text-muted-foreground">
-          Rediger &quot;{discount.code}&quot;
+          Rediger "{discount.code}"
         </p>
       </div>
       <DiscountForm mode="edit" initialData={discount} products={products} />

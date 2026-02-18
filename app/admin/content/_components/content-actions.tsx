@@ -114,7 +114,7 @@ export function ContentActions({
           <DialogHeader>
             <DialogTitle>Slet indhold</DialogTitle>
             <DialogDescription>
-              Er du sikker paa, at du vil slette &quot;{title}&quot;? Denne
+              Er du sikker på, at du vil slette "{title}"? Denne
               handling kan ikke fortrydes.
             </DialogDescription>
           </DialogHeader>

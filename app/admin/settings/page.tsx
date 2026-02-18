@@ -22,14 +22,14 @@ const settingsSections = [
     href: '/admin/settings/onboarding',
     title: 'Onboarding Quiz',
     description:
-      'Konfigurer spoergsmaal og svarmuligheder til onboarding-quizzen',
+      'Konfigurer spørgsmål og svarmuligheder til onboarding-quizzen',
     icon: ClipboardList,
   },
   {
     href: '/admin/settings/recommendations',
     title: 'Anbefalingsregler',
     description:
-      'Opsaet regler for automatiske anbefalinger baseret paa tags og alder',
+      'Opsæt regler for automatiske anbefalinger baseret på tags og alder',
     icon: Target,
   },
   {
@@ -42,7 +42,7 @@ const settingsSections = [
     href: '/admin/settings/dashboard',
     title: 'Dashboard Beskeder',
     description:
-      'Rediger tilstandsbaserede beskeder paa brugerens dashboard',
+      'Rediger tilstandsbaserede beskeder på brugerens dashboard',
     icon: MessageSquare,
   },
   {
@@ -56,21 +56,21 @@ const settingsSections = [
     href: '/admin/settings/notifications',
     title: 'Notifikationsplan',
     description:
-      'Konfigurer hvornaar notifikationer sendes til brugerne',
+      'Konfigurer hvornår notifikationer sendes til brugerne',
     icon: Bell,
   },
   {
     href: '/admin/settings/reengagement',
     title: 'Genaktiveringsniveauer',
     description:
-      'Konfigurer hvornaar og hvordan inaktive brugere kontaktes',
+      'Konfigurer hvornår og hvordan inaktive brugere kontaktes',
     icon: RefreshCw,
   },
   {
     href: '/admin/settings/milestones',
-    title: 'Milepaalsdefinitioner',
+    title: 'Milepælsdefinitioner',
     description:
-      'Konfigurer milepaalene og deres fejringsmeddelelser',
+      'Konfigurer milepælene og deres fejringsmeddelelser',
     icon: Trophy,
   },
 ]

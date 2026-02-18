@@ -113,13 +113,13 @@ export function OnboardingManager({
           questionType: newType,
           helperText: newHelper.trim() || undefined,
         })
-        toast.success('Spoergsmaal oprettet')
+        toast.success('Spørgsmål oprettet')
         setNewText('')
         setNewType('SINGLE_SELECT')
         setNewHelper('')
         setShowNewQuestion(false)
       } catch {
-        toast.error('Kunne ikke oprette spoergsmaal')
+        toast.error('Kunne ikke oprette spørgsmål')
       }
     })
   }
@@ -142,10 +142,10 @@ export function OnboardingManager({
           helperText: editHelper.trim() || undefined,
           isActive: editActive,
         })
-        toast.success('Spoergsmaal opdateret')
+        toast.success('Spørgsmål opdateret')
         setEditingQuestion(null)
       } catch {
-        toast.error('Kunne ikke opdatere spoergsmaal')
+        toast.error('Kunne ikke opdatere spørgsmål')
       }
     })
   }
@@ -155,11 +155,11 @@ export function OnboardingManager({
     startTransition(async () => {
       try {
         await deleteQuestionAction(deleteTarget.id)
-        toast.success('Spoergsmaal slettet')
+        toast.success('Spørgsmål slettet')
         setDeleteTarget(null)
         if (expandedId === deleteTarget.id) setExpandedId(null)
       } catch {
-        toast.error('Kunne ikke slette spoergsmaal')
+        toast.error('Kunne ikke slette spørgsmål')
       }
     })
   }
@@ -169,7 +169,7 @@ export function OnboardingManager({
       try {
         await moveQuestionAction(id, direction)
       } catch {
-        toast.error('Kunne ikke flytte spoergsmaal')
+        toast.error('Kunne ikke flytte spørgsmål')
       }
     })
   }
@@ -179,10 +179,10 @@ export function OnboardingManager({
       {/* New question form */}
       {showNewQuestion ? (
         <div className="rounded-md border p-4 space-y-4 bg-muted/30">
-          <h3 className="font-semibold">Nyt spoergsmaal</h3>
+          <h3 className="font-semibold">Nyt spørgsmål</h3>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label>Spoergsmaalstekst</Label>
+              <Label>Spørgsmålstekst</Label>
               <Input
                 value={newText}
                 onChange={(e) => setNewText(e.target.value)}
@@ -211,17 +211,17 @@ export function OnboardingManager({
             </div>
           </div>
           <div className="space-y-2">
-            <Label>Hjaelpetekst (valgfrit)</Label>
+            <Label>Hjælpetekst (valgfrit)</Label>
             <Input
               value={newHelper}
               onChange={(e) => setNewHelper(e.target.value)}
-              placeholder="Valgfri beskrivelse under spoergsmaalet"
+              placeholder="Valgfri beskrivelse under spørgsmålet"
             />
           </div>
           <div className="flex gap-2">
             <Button onClick={handleCreateQuestion} disabled={isPending || !newText.trim()}>
               <Save className="mr-2 size-4" />
-              {isPending ? 'Opretter...' : 'Gem spoergsmaal'}
+              {isPending ? 'Opretter...' : 'Gem spørgsmål'}
             </Button>
             <Button variant="outline" onClick={() => setShowNewQuestion(false)}>
               Annuller
@@ -231,7 +231,7 @@ export function OnboardingManager({
       ) : (
         <Button onClick={() => setShowNewQuestion(true)}>
           <Plus className="mr-2 size-4" />
-          Tilfoej spoergsmaal
+          Tilføj spørgsmål
         </Button>
       )}
 
@@ -239,7 +239,7 @@ export function OnboardingManager({
       {questions.length === 0 ? (
         <div className="rounded-md border p-12 text-center">
           <p className="text-muted-foreground">
-            Ingen spoergsmaal endnu. Tilfoej dit foerste spoergsmaal ovenfor.
+            Ingen spørgsmål endnu. Tilføj dit første spørgsmål ovenfor.
           </p>
         </div>
       ) : (
@@ -347,11 +347,11 @@ export function OnboardingManager({
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Rediger spoergsmaal</DialogTitle>
+            <DialogTitle>Rediger spørgsmål</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Spoergsmaalstekst</Label>
+              <Label>Spørgsmålstekst</Label>
               <Input
                 value={editText}
                 onChange={(e) => setEditText(e.target.value)}
@@ -378,7 +378,7 @@ export function OnboardingManager({
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Hjaelpetekst (valgfrit)</Label>
+              <Label>Hjælpetekst (valgfrit)</Label>
               <Input
                 value={editHelper}
                 onChange={(e) => setEditHelper(e.target.value)}
@@ -417,11 +417,11 @@ export function OnboardingManager({
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Slet spoergsmaal</DialogTitle>
+            <DialogTitle>Slet spørgsmål</DialogTitle>
             <DialogDescription>
-              Er du sikker paa, at du vil slette spoergsmaalet &quot;
-              {deleteTarget?.questionText}&quot;? Alle tilhoerende
-              svarmuligheder slettes ogsaa. Denne handling kan ikke fortrydes.
+              Er du sikker på, at du vil slette spørgsmålet "
+              {deleteTarget?.questionText}"? Alle tilhørende
+              svarmuligheder slettes også. Denne handling kan ikke fortrydes.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -534,7 +534,7 @@ function OptionsEditor({
         {!showNew && (
           <Button size="sm" variant="outline" onClick={() => setShowNew(true)}>
             <Plus className="mr-1 size-3" />
-            Tilfoej
+            Tilføj
           </Button>
         )}
       </div>
@@ -551,7 +551,7 @@ function OptionsEditor({
             <TableRow>
               <TableHead className="w-10">#</TableHead>
               <TableHead>Label</TableHead>
-              <TableHead>Vaerdi</TableHead>
+              <TableHead>Værdi</TableHead>
               <TableHead>Tag</TableHead>
               <TableHead className="w-[100px]" />
             </TableRow>
@@ -671,12 +671,12 @@ function OptionsEditor({
               <Input
                 value={newLabel}
                 onChange={(e) => setNewLabel(e.target.value)}
-                placeholder="F.eks. Soevn"
+                placeholder="F.eks. Søvn"
                 className="h-8"
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-xs">Vaerdi</Label>
+              <Label className="text-xs">Værdi</Label>
               <Input
                 value={newValue}
                 onChange={(e) => setNewValue(e.target.value)}
@@ -688,7 +688,7 @@ function OptionsEditor({
               <Label className="text-xs">Tag (valgfrit)</Label>
               <Select value={newTagId} onValueChange={setNewTagId}>
                 <SelectTrigger className="h-8 w-full" size="sm">
-                  <SelectValue placeholder="Vaelg tag" />
+                  <SelectValue placeholder="Vælg tag" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">Ingen tag</SelectItem>

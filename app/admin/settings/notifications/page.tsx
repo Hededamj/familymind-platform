@@ -26,7 +26,7 @@ export default async function NotificationScheduleSettingsPage() {
             Notifikationsplan
           </h1>
           <p className="text-muted-foreground">
-            Konfigurer hvornaar notifikationer sendes til brugerne
+            Konfigurer hvornår notifikationer sendes til brugerne
           </p>
         </div>
       </div>

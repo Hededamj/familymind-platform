@@ -85,12 +85,12 @@ export function DiscountForm({ mode, initialData, products }: DiscountFormProps)
         : parseInt(value || '0', 10)
 
     if (type === 'PERCENTAGE' && (numericValue < 0 || numericValue > 100)) {
-      toast.error('Procentvaerdi skal vaere mellem 0 og 100')
+      toast.error('Procentværdi skal være mellem 0 og 100')
       return
     }
 
     if (type === 'FIXED_AMOUNT' && numericValue < 0) {
-      toast.error('Beloeb skal vaere positivt')
+      toast.error('Beløb skal være positivt')
       return
     }
 
@@ -169,7 +169,7 @@ export function DiscountForm({ mode, initialData, products }: DiscountFormProps)
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="PERCENTAGE">Procent</SelectItem>
-                  <SelectItem value="FIXED_AMOUNT">Fast beloeb</SelectItem>
+                  <SelectItem value="FIXED_AMOUNT">Fast beløb</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -178,7 +178,7 @@ export function DiscountForm({ mode, initialData, products }: DiscountFormProps)
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="value">
-                {type === 'PERCENTAGE' ? 'Procent (%) *' : 'Beloeb (DKK) *'}
+                {type === 'PERCENTAGE' ? 'Procent (%) *' : 'Beløb (DKK) *'}
               </Label>
               <div className="relative">
                 <Input
@@ -198,12 +198,12 @@ export function DiscountForm({ mode, initialData, products }: DiscountFormProps)
               </div>
               {type === 'PERCENTAGE' && (
                 <p className="text-xs text-muted-foreground">
-                  Angiv en vaerdi mellem 0 og 100
+                  Angiv en værdi mellem 0 og 100
                 </p>
               )}
               {type === 'FIXED_AMOUNT' && (
                 <p className="text-xs text-muted-foreground">
-                  Angiv beloeb i DKK (gemmes i oere)
+                  Angiv beløb i DKK (gemmes i øre)
                 </p>
               )}
             </div>
@@ -216,10 +216,10 @@ export function DiscountForm({ mode, initialData, products }: DiscountFormProps)
                 step="1"
                 value={maxUses}
                 onChange={(e) => setMaxUses(e.target.value)}
-                placeholder="Ubegraaenset"
+                placeholder="Ubegrænset"
               />
               <p className="text-xs text-muted-foreground">
-                Lad feltet vaere tomt for ubegraaenset brug
+                Lad feltet være tomt for ubegrænset brug
               </p>
             </div>
           </div>
@@ -251,7 +251,7 @@ export function DiscountForm({ mode, initialData, products }: DiscountFormProps)
                 onChange={(e) => setValidUntil(e.target.value)}
               />
               <p className="text-xs text-muted-foreground">
-                Lad feltet vaere tomt for ingen udloebsdato
+                Lad feltet være tomt for ingen udløbsdato
               </p>
             </div>
           </div>
@@ -264,7 +264,7 @@ export function DiscountForm({ mode, initialData, products }: DiscountFormProps)
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="product">Gaelder for produkt</Label>
+            <Label htmlFor="product">Gælder for produkt</Label>
             <Select
               value={applicableProductId}
               onValueChange={setApplicableProductId}
@@ -282,7 +282,7 @@ export function DiscountForm({ mode, initialData, products }: DiscountFormProps)
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              Vaelg et specifikt produkt eller lad rabatten gaelde for alle
+              Vælg et specifikt produkt eller lad rabatten gælde for alle
             </p>
           </div>
 
@@ -310,7 +310,7 @@ export function DiscountForm({ mode, initialData, products }: DiscountFormProps)
               : 'Gemmer...'
             : mode === 'create'
               ? 'Opret rabatkode'
-              : 'Gem aendringer'}
+              : 'Gem ændringer'}
         </Button>
         <Button
           type="button"

@@ -46,7 +46,7 @@ export default async function EditProductPage({
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Rediger produkt</h1>
         <p className="text-muted-foreground">
-          Rediger &quot;{product.title}&quot;
+          Rediger "{product.title}"
         </p>
       </div>
       <ProductForm

@@ -26,7 +26,7 @@ export default async function DashboardSettingsPage() {
             Dashboard Beskeder
           </h1>
           <p className="text-muted-foreground">
-            Rediger tilstandsbaserede beskeder paa brugerens dashboard
+            Rediger tilstandsbaserede beskeder på brugerens dashboard
           </p>
         </div>
       </div>

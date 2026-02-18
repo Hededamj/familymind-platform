@@ -140,12 +140,12 @@ export function DayEditor({ day, allContentUnits }: DayEditorProps) {
     startTransition(async () => {
       try {
         await addContentToDayAction(day.id, contentUnitId)
-        toast.success('Indhold tilfojet')
+        toast.success('Indhold tilføjet')
         setShowContentDialog(false)
         setContentSearch('')
         router.refresh()
       } catch {
-        toast.error('Kunne ikke tilfoeje indhold')
+        toast.error('Kunne ikke tilføje indhold')
       }
     })
   }
@@ -170,7 +170,7 @@ export function DayEditor({ day, allContentUnits }: DayEditorProps) {
           actionText: newActionText.trim(),
           reflectionPrompt: newReflectionPrompt.trim() || undefined,
         })
-        toast.success('Handling tilfojet')
+        toast.success('Handling tilføjet')
         setNewActionText('')
         setNewReflectionPrompt('')
         setShowAddAction(false)
@@ -354,7 +354,7 @@ export function DayEditor({ day, allContentUnits }: DayEditorProps) {
             onClick={() => setShowContentDialog(true)}
           >
             <Plus className="mr-1 size-3" />
-            Tilfoej indhold
+            Tilføj indhold
           </Button>
         </div>
         {day.contents.length > 0 && (
@@ -400,7 +400,7 @@ export function DayEditor({ day, allContentUnits }: DayEditorProps) {
             onClick={() => setShowAddAction(true)}
           >
             <Plus className="mr-1 size-3" />
-            Tilfoej handling
+            Tilføj handling
           </Button>
         </div>
 
@@ -494,7 +494,7 @@ export function DayEditor({ day, allContentUnits }: DayEditorProps) {
               <Input
                 value={newActionText}
                 onChange={(e) => setNewActionText(e.target.value)}
-                placeholder="F.eks. Proev dette med dit barn i dag"
+                placeholder="F.eks. Prøv dette med dit barn i dag"
                 className="h-8"
                 disabled={isPending}
               />
@@ -516,7 +516,7 @@ export function DayEditor({ day, allContentUnits }: DayEditorProps) {
                 onClick={handleCreateAction}
                 disabled={isPending || !newActionText.trim()}
               >
-                Tilfoej
+                Tilføj
               </Button>
               <Button
                 size="sm"
@@ -674,22 +674,22 @@ export function DayEditor({ day, allContentUnits }: DayEditorProps) {
       <Dialog open={showContentDialog} onOpenChange={setShowContentDialog}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Tilfoej indhold til dag {day.position}</DialogTitle>
+            <DialogTitle>Tilføj indhold til dag {day.position}</DialogTitle>
             <DialogDescription>
-              Vaelg indhold at tilfoeje til denne dag
+              Vælg indhold at tilføje til denne dag
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <Input
               value={contentSearch}
               onChange={(e) => setContentSearch(e.target.value)}
-              placeholder="Soeg i indhold..."
+              placeholder="Søg i indhold..."
             />
             <div className="max-h-64 overflow-y-auto space-y-1">
               {availableContentUnits.length === 0 ? (
                 <p className="py-4 text-center text-sm text-muted-foreground">
                   {allContentUnits.length === 0
-                    ? 'Intet indhold tilgaengeligt. Opret indhold foerst.'
+                    ? 'Intet indhold tilgængeligt. Opret indhold først.'
                     : 'Intet matchende indhold fundet.'}
                 </p>
               ) : (
@@ -718,9 +718,9 @@ export function DayEditor({ day, allContentUnits }: DayEditorProps) {
           <DialogHeader>
             <DialogTitle>Slet dag</DialogTitle>
             <DialogDescription>
-              Er du sikker paa, at du vil slette dag {day.position}
+              Er du sikker på, at du vil slette dag {day.position}
               {day.title ? ` (${day.title})` : ''}? Alt indhold og
-              handlinger tilknyttet denne dag vil ogsaa blive fjernet.
+              handlinger tilknyttet denne dag vil også blive fjernet.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

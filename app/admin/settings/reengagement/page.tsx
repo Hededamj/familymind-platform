@@ -32,7 +32,7 @@ export default async function ReEngagementSettingsPage() {
             Genaktiveringsniveauer
           </h1>
           <p className="text-muted-foreground">
-            Konfigurer hvornaar og hvordan inaktive brugere kontaktes
+            Konfigurer hvornår og hvordan inaktive brugere kontaktes
           </p>
         </div>
       </div>

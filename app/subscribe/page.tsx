@@ -56,7 +56,7 @@ export default async function SubscribePage() {
             FamilyMind Abonnement
           </h1>
           <p className="mt-3 text-lg text-muted-foreground">
-            Alt du har brug for som for&aelig;lder &mdash; samlet &eacute;t sted.
+            Alt du har brug for som forælder — samlet ét sted.
           </p>
         </div>
 
@@ -65,7 +65,7 @@ export default async function SubscribePage() {
           <p className="text-4xl font-bold">
             149 kr
             <span className="text-lg font-normal text-muted-foreground">
-              /m&aring;ned
+              /måned
             </span>
           </p>
         </div>
@@ -75,9 +75,9 @@ export default async function SubscribePage() {
         {/* Benefits */}
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle>Det f&aring;r du med abonnementet</CardTitle>
+            <CardTitle>Det får du med abonnementet</CardTitle>
             <CardDescription>
-              Fuld adgang til alt indhold og v&aelig;rkt&oslash;jer
+              Fuld adgang til alt indhold og værktøjer
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -121,7 +121,7 @@ export default async function SubscribePage() {
             </Button>
           ) : (
             <p className="text-center text-sm text-muted-foreground">
-              Abonnement er ikke tilg&aelig;ngeligt lige nu.
+              Abonnement er ikke tilgængeligt lige nu.
             </p>
           )}
         </div>

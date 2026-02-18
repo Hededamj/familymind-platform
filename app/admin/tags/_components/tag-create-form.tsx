@@ -62,7 +62,7 @@ export function TagCreateForm() {
           id="tag-name"
           value={name}
           onChange={(e) => handleNameChange(e.target.value)}
-          placeholder="F.eks. Soevn"
+          placeholder="F.eks. Søvn"
           required
           className="w-60"
         />
@@ -80,7 +80,7 @@ export function TagCreateForm() {
       </div>
       <Button type="submit" disabled={isPending || !name.trim() || !slug.trim()}>
         <Plus className="mr-2 size-4" />
-        {isPending ? 'Opretter...' : 'Tilfoej tag'}
+        {isPending ? 'Opretter...' : 'Tilføj tag'}
       </Button>
     </form>
   )

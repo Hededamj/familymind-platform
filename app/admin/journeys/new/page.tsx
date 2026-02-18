@@ -9,7 +9,7 @@ export default async function NewJourneyPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Opret rejse</h1>
         <p className="text-muted-foreground">
-          Tilfoej en ny rejse til platformen
+          Tilføj en ny rejse til platformen
         </p>
       </div>
       <JourneyForm mode="create" />

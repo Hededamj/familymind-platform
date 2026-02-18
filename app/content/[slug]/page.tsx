@@ -126,7 +126,7 @@ export default async function ContentPage({
                     controls
                     className="w-full"
                   >
-                    Din browser underst&oslash;tter ikke lydafspilning.
+                    Din browser understøtter ikke lydafspilning.
                   </audio>
                 </div>
               )}
@@ -138,7 +138,7 @@ export default async function ContentPage({
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      &Aring;bn PDF
+                      Åbn PDF
                     </a>
                   </Button>
                 </div>
@@ -303,12 +303,12 @@ export default async function ContentPage({
             <div className="mb-4 text-center">
               {content.accessLevel === 'SUBSCRIPTION' && (
                 <Badge variant="default" className="text-sm">
-                  Kr&aelig;ver abonnement
+                  Kræver abonnement
                 </Badge>
               )}
               {content.accessLevel === 'PURCHASE' && (
                 <Badge variant="default" className="text-sm">
-                  Kr&aelig;ver k&oslash;b
+                  Kræver køb
                 </Badge>
               )}
             </div>
@@ -332,7 +332,7 @@ export default async function ContentPage({
               {user && content.accessLevel === 'SUBSCRIPTION' && (
                 <Button asChild size="lg" className="w-full">
                   <Link href="/subscribe">
-                    Start abonnement &mdash; 149 kr/md
+                    Start abonnement — 149 kr/md
                   </Link>
                 </Button>
               )}

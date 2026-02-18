@@ -113,6 +113,37 @@ export default async function DayViewPage({
   )
   const isDayCompleted = completedDayIds.has(dayId)
 
+  // Block access to future days the user hasn't reached yet
+  if (isActiveForThisJourney && !isDayCompleted && !isCurrentDay) {
+    return (
+      <div className="flex min-h-screen flex-col px-4 py-6 pb-24 sm:px-8 sm:py-8">
+        <div className="mx-auto w-full max-w-2xl">
+          <Link
+            href={`/journeys/${slug}`}
+            className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="size-4" />
+            Tilbage til oversigt
+          </Link>
+          <Card>
+            <CardContent className="py-6 text-center">
+              <Lock className="mx-auto mb-3 size-8 text-muted-foreground" />
+              <p className="mb-2 font-medium">Denne dag er ikke tilgængelig endnu</p>
+              <p className="mb-4 text-sm text-muted-foreground">
+                Gennemfør de tidligere dage for at låse op for denne dag.
+              </p>
+              <Button asChild>
+                <Link href={`/journeys/${slug}`}>
+                  Gå til forløbsoversigt
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
+  }
+
   // Resolve content access and video URLs
   const contentItems = await Promise.all(
     targetDay.contents.map(async (content) => {

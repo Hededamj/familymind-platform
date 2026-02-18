@@ -75,7 +75,7 @@ export default async function DiscountListPage() {
               <TableRow>
                 <TableHead>Kode</TableHead>
                 <TableHead>Type</TableHead>
-                <TableHead>Vaerdi</TableHead>
+                <TableHead>Værdi</TableHead>
                 <TableHead>Brug</TableHead>
                 <TableHead>Gyldig fra</TableHead>
                 <TableHead>Gyldig til</TableHead>
@@ -94,7 +94,7 @@ export default async function DiscountListPage() {
                     <Badge variant="outline">
                       {discount.type === 'PERCENTAGE'
                         ? 'Procent'
-                        : 'Fast beloeb'}
+                        : 'Fast beløb'}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -110,7 +110,7 @@ export default async function DiscountListPage() {
                   <TableCell className="text-muted-foreground">
                     {discount.validUntil
                       ? formatDate(discount.validUntil)
-                      : 'Ingen udloebsdato'}
+                      : 'Ingen udløbsdato'}
                   </TableCell>
                   <TableCell>
                     {discount.applicableProduct ? (

@@ -59,7 +59,7 @@ export default async function JourneysListPage() {
       {journeys.length === 0 ? (
         <div className="rounded-md border p-12 text-center">
           <p className="text-muted-foreground">
-            Ingen rejser endnu. Opret din foerste rejse for at komme i gang.
+            Ingen rejser endnu. Opret din første rejse for at komme i gang.
           </p>
           <Button asChild className="mt-4">
             <Link href="/admin/journeys/new">

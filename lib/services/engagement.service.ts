@@ -594,13 +594,31 @@ function computeCheckinStreak(dates: Date[]): number {
 // ---------------------------------------------------------------------------
 
 /**
+ * Escape HTML special characters to prevent XSS in email templates.
+ */
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+/** Variables that contain trusted HTML and should NOT be escaped. */
+const TRUSTED_VARS = new Set(['appUrl', 'unsubscribeUrl', 'communityUrl', 'progressUrl'])
+
+/**
  * Replace `{{key}}` patterns in a string with corresponding values.
+ * User-supplied variables are HTML-escaped; URL variables are trusted.
  */
 function interpolate(
   template: string,
   variables: Record<string, string>
 ): string {
   return template.replace(/\{\{(\w+)\}\}/g, (match, key: string) => {
-    return variables[key] ?? match
+    const value = variables[key]
+    if (value === undefined) return match
+    return TRUSTED_VARS.has(key) ? value : escapeHtml(value)
   })
 }

@@ -1,22 +1,34 @@
-const BUNNY_API_KEY = process.env.BUNNY_API_KEY!
-const BUNNY_LIBRARY_ID = process.env.BUNNY_LIBRARY_ID!
-const BUNNY_CDN_HOSTNAME = process.env.BUNNY_CDN_HOSTNAME!
-const BUNNY_TOKEN_AUTH_KEY = process.env.BUNNY_TOKEN_AUTH_KEY!
-
 const BUNNY_API_BASE = 'https://video.bunnycdn.com/library'
+
+function getBunnyConfig() {
+  const apiKey = process.env.BUNNY_API_KEY
+  const libraryId = process.env.BUNNY_LIBRARY_ID
+  const cdnHostname = process.env.BUNNY_CDN_HOSTNAME
+  const tokenAuthKey = process.env.BUNNY_TOKEN_AUTH_KEY
+
+  if (!apiKey || !libraryId || !cdnHostname || !tokenAuthKey) {
+    throw new Error(
+      'Missing Bunny.net environment variables. Required: BUNNY_API_KEY, BUNNY_LIBRARY_ID, BUNNY_CDN_HOSTNAME, BUNNY_TOKEN_AUTH_KEY'
+    )
+  }
+
+  return { apiKey, libraryId, cdnHostname, tokenAuthKey }
+}
 
 /**
  * Create a new video in the Bunny.net Stream library.
  * Returns the video ID and a direct upload URL (TUS protocol).
  */
 export async function createVideoUpload(title: string) {
+  const { apiKey, libraryId } = getBunnyConfig()
+
   const response = await fetch(
-    `${BUNNY_API_BASE}/${BUNNY_LIBRARY_ID}/videos`,
+    `${BUNNY_API_BASE}/${libraryId}/videos`,
     {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        AccessKey: BUNNY_API_KEY,
+        AccessKey: apiKey,
       },
       body: JSON.stringify({ title }),
     }
@@ -37,7 +49,7 @@ export async function createVideoUpload(title: string) {
       AuthorizationSignature: '', // Generated per-upload, see Bunny docs
       AuthorizationExpire: '',
       VideoId: video.guid as string,
-      LibraryId: BUNNY_LIBRARY_ID,
+      LibraryId: libraryId,
     },
   }
 }
@@ -53,10 +65,12 @@ export async function getSignedPlaybackUrl(
   videoId: string,
   expiresInSeconds = 86400
 ): Promise<string> {
+  const { tokenAuthKey, cdnHostname } = getBunnyConfig()
+
   // Bunny.net Stream uses token authentication for signed URLs
   // The token is a SHA256 hash of: token_auth_key + videoId + expiry
   const expiry = Math.floor(Date.now() / 1000) + expiresInSeconds
-  const hashableBase = `${BUNNY_TOKEN_AUTH_KEY}${videoId}${expiry}`
+  const hashableBase = `${tokenAuthKey}${videoId}${expiry}`
 
   // Use Web Crypto API (available in Node.js 18+)
   const encoder = new TextEncoder()
@@ -67,7 +81,7 @@ export async function getSignedPlaybackUrl(
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('')
 
-  return `https://${BUNNY_CDN_HOSTNAME}/${videoId}/playlist.m3u8?token=${token}&expires=${expiry}`
+  return `https://${cdnHostname}/${videoId}/playlist.m3u8?token=${token}&expires=${expiry}`
 }
 
 /**
@@ -75,19 +89,22 @@ export async function getSignedPlaybackUrl(
  * Bunny.net auto-generates thumbnails.
  */
 export function getThumbnailUrl(videoId: string): string {
-  return `https://${BUNNY_CDN_HOSTNAME}/${videoId}/thumbnail.jpg`
+  const { cdnHostname } = getBunnyConfig()
+  return `https://${cdnHostname}/${videoId}/thumbnail.jpg`
 }
 
 /**
  * Delete a video from the Bunny.net Stream library.
  */
 export async function deleteVideo(videoId: string): Promise<void> {
+  const { apiKey, libraryId } = getBunnyConfig()
+
   const response = await fetch(
-    `${BUNNY_API_BASE}/${BUNNY_LIBRARY_ID}/videos/${videoId}`,
+    `${BUNNY_API_BASE}/${libraryId}/videos/${videoId}`,
     {
       method: 'DELETE',
       headers: {
-        AccessKey: BUNNY_API_KEY,
+        AccessKey: apiKey,
       },
     }
   )
@@ -101,12 +118,14 @@ export async function deleteVideo(videoId: string): Promise<void> {
  * Get video details from Bunny.net Stream.
  */
 export async function getVideoDetails(videoId: string) {
+  const { apiKey, libraryId } = getBunnyConfig()
+
   const response = await fetch(
-    `${BUNNY_API_BASE}/${BUNNY_LIBRARY_ID}/videos/${videoId}`,
+    `${BUNNY_API_BASE}/${libraryId}/videos/${videoId}`,
     {
       method: 'GET',
       headers: {
-        AccessKey: BUNNY_API_KEY,
+        AccessKey: apiKey,
       },
     }
   )

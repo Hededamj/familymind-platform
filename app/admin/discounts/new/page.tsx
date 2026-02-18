@@ -16,7 +16,7 @@ export default async function NewDiscountPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Opret rabatkode</h1>
         <p className="text-muted-foreground">
-          Tilfoej en ny rabatkode til platformen
+          Tilføj en ny rabatkode til platformen
         </p>
       </div>
       <DiscountForm mode="create" products={products} />

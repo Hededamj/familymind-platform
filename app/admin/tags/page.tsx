@@ -17,7 +17,7 @@ export default async function TagsPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Tags</h1>
         <p className="text-muted-foreground">
-          Administrer tags til indhold paa platformen
+          Administrer tags til indhold på platformen
         </p>
       </div>
 

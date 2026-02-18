@@ -34,7 +34,7 @@ export default async function EditJourneyPage({
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Rediger rejse</h1>
         <p className="text-muted-foreground">
-          Rediger &quot;{journey.title}&quot;
+          Rediger "{journey.title}"
         </p>
       </div>
       <JourneyEditor journey={journey} allContentUnits={allContentUnits} />
