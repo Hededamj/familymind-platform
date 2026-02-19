@@ -130,7 +130,7 @@ export default async function CohortDetailPage({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {cohort.members.map((member) => (
+                {cohort.members.map((member: { id: string; joinedAt: Date; user: { id: string; name: string | null; email: string } }) => (
                   <TableRow key={member.id}>
                     <TableCell className="font-medium">
                       {member.user.name || 'Anonym'}
@@ -177,7 +177,7 @@ export default async function CohortDetailPage({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {bans.map((ban) => (
+                {bans.map((ban: { id: string; reason: string | null; bannedAt: Date; user: { id: string; name: string | null; email: string } }) => (
                   <TableRow key={ban.id}>
                     <TableCell className="font-medium">
                       {ban.user.name || 'Anonym'}

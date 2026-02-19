@@ -26,6 +26,10 @@ import { Separator } from '@/components/ui/separator'
 import { VideoPlayer } from '@/app/content/[slug]/_components/video-player'
 import { CheckInForm } from '../../_components/check-in-form'
 
+type JourneyData = NonNullable<Awaited<ReturnType<typeof getJourney>>>
+type PhaseData = JourneyData['phases'][number]
+type DayData = PhaseData['days'][number]
+
 function mediaTypeIcon(mediaType: string) {
   switch (mediaType) {
     case 'VIDEO':
@@ -70,8 +74,8 @@ export default async function DayViewPage({
   }
 
   // Find the specific day across all phases
-  let targetDay = null
-  let targetPhase = null
+  let targetDay: DayData | null = null
+  let targetPhase: PhaseData | null = null
   let dayNumber = 0
   let dayCounter = 0
 

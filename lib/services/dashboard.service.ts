@@ -24,7 +24,7 @@ export async function getDashboardState(userId: string) {
     ])
 
   let stateKey: DashboardState
-  let journeyProgress = null
+  let journeyProgress: Awaited<ReturnType<typeof getJourneyProgress>> | null = null
 
   if (activeJourney && activeJourney.currentDay) {
     journeyProgress = await getJourneyProgress(activeJourney.id)

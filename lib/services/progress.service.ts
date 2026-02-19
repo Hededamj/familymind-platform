@@ -67,7 +67,7 @@ export async function getUserInProgressCourses(userId: string) {
     include: { product: true },
   })
 
-  const courses = []
+  const courses: (Awaited<ReturnType<typeof getCourseProgress>> & { product: typeof entitlements[number]['product'] })[] = []
   for (const ent of entitlements) {
     const progress = await getCourseProgress(userId, ent.product.id)
     if (progress.totalLessons > 0) {
