@@ -252,6 +252,9 @@ model Entitlement {
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   organization Organization? @relation(fields: [organizationId], references: [id])
   product      Product       @relation(fields: [productId], references: [id])
+
+  @@index([userId, status])
+  @@index([stripeSubscriptionId])
 }
 
 model DiscountCode {
@@ -280,6 +283,7 @@ model UserContentProgress {
   contentUnit ContentUnit @relation(fields: [contentUnitId], references: [id], onDelete: Cascade)
 
   @@unique([userId, contentUnitId])
+  @@index([userId, completedAt])
 }
 
 // ──────────────────────────────────────────────
@@ -360,6 +364,8 @@ model UserJourney {
   journey    Journey          @relation(fields: [journeyId], references: [id])
   currentDay JourneyDay?      @relation(fields: [currentDayId], references: [id])
   checkIns   UserDayCheckIn[]
+
+  @@index([userId, status])
 }
 
 model UserDayCheckIn {
@@ -373,6 +379,8 @@ model UserDayCheckIn {
   userJourney   UserJourney   @relation(fields: [userJourneyId], references: [id], onDelete: Cascade)
   day           JourneyDay    @relation(fields: [dayId], references: [id])
   checkInOption CheckInOption @relation(fields: [checkInOptionId], references: [id])
+
+  @@index([userJourneyId])
 }
 
 model UserProfile {
@@ -504,6 +512,7 @@ model Notification {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
+  @@index([userId, readAt])
 }
 
 model UserNotificationLog {
