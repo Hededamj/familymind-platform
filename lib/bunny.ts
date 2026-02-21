@@ -6,9 +6,9 @@ function getBunnyConfig() {
   const cdnHostname = process.env.BUNNY_CDN_HOSTNAME
   const tokenAuthKey = process.env.BUNNY_TOKEN_AUTH_KEY
 
-  if (!apiKey || !libraryId || !cdnHostname || !tokenAuthKey) {
+  if (!apiKey || !libraryId || !cdnHostname) {
     throw new Error(
-      'Missing Bunny.net environment variables. Required: BUNNY_API_KEY, BUNNY_LIBRARY_ID, BUNNY_CDN_HOSTNAME, BUNNY_TOKEN_AUTH_KEY'
+      'Missing Bunny.net environment variables. Required: BUNNY_API_KEY, BUNNY_LIBRARY_ID, BUNNY_CDN_HOSTNAME'
     )
   }
 
@@ -66,6 +66,11 @@ export async function getSignedPlaybackUrl(
   expiresInSeconds = 86400
 ): Promise<string> {
   const { tokenAuthKey, cdnHostname } = getBunnyConfig()
+
+  // If token auth key is not configured, use direct (unsigned) URL
+  if (!tokenAuthKey) {
+    return `https://${cdnHostname}/${videoId}/playlist.m3u8`
+  }
 
   // Bunny.net Stream uses token authentication for signed URLs
   // The token is a SHA256 hash of: token_auth_key + videoId + expiry
