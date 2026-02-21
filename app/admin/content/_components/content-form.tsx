@@ -299,12 +299,17 @@ export function ContentForm({
               <Input
                 id="bunnyVideoId"
                 value={formData.bunnyVideoId}
-                onChange={(e) =>
+                onChange={(e) => {
+                  const videoId = e.target.value
                   setFormData((prev) => ({
                     ...prev,
-                    bunnyVideoId: e.target.value,
+                    bunnyVideoId: videoId,
+                    // Auto-generate thumbnail URL from Bunny CDN
+                    thumbnailUrl: videoId
+                      ? `https://${process.env.NEXT_PUBLIC_BUNNY_CDN_HOSTNAME ?? 'vz-b4f34ae0-620.b-cdn.net'}/${videoId}/thumbnail.jpg`
+                      : prev.thumbnailUrl,
                   }))
-                }
+                }}
                 placeholder="Bunny CDN video ID"
               />
             </div>
@@ -322,8 +327,20 @@ export function ContentForm({
                   thumbnailUrl: e.target.value,
                 }))
               }
-              placeholder="https://..."
+              placeholder="Autoudfyldes fra Bunny Video ID"
             />
+            {formData.thumbnailUrl && (
+              <div className="mt-2">
+                <img
+                  src={formData.thumbnailUrl}
+                  alt="Thumbnail preview"
+                  className="h-24 w-auto rounded border object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none'
+                  }}
+                />
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Plus } from 'lucide-react'
+import { Plus, ImageIcon } from 'lucide-react'
 import { ContentActions } from './_components/content-actions'
 
 const mediaTypeLabels: Record<string, string> = {
@@ -73,6 +73,7 @@ export default async function ContentListPage() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[60px]" />
                 <TableHead>Titel</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Adgang</TableHead>
@@ -84,6 +85,19 @@ export default async function ContentListPage() {
             <TableBody>
               {contentUnits.map((unit) => (
                 <TableRow key={unit.id}>
+                  <TableCell>
+                    {unit.thumbnailUrl ? (
+                      <img
+                        src={unit.thumbnailUrl}
+                        alt={unit.title}
+                        className="h-10 w-16 rounded object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-10 w-16 items-center justify-center rounded bg-muted">
+                        <ImageIcon className="size-4 text-muted-foreground" />
+                      </div>
+                    )}
+                  </TableCell>
                   <TableCell className="font-medium">
                     <div>
                       <div>{unit.title}</div>
