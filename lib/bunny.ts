@@ -67,26 +67,22 @@ export async function getSignedPlaybackUrl(
 ): Promise<string> {
   const { tokenAuthKey, cdnHostname } = getBunnyConfig()
 
+  const path = `/${videoId}/playlist.m3u8`
+
   // If token auth key is not configured, use direct (unsigned) URL
   if (!tokenAuthKey) {
-    return `https://${cdnHostname}/${videoId}/playlist.m3u8`
+    return `https://${cdnHostname}${path}`
   }
 
-  // Bunny.net Stream uses token authentication for signed URLs
-  // The token is a SHA256 hash of: token_auth_key + videoId + expiry
+  // Bunny.net CDN Token Auth: Base64(MD5(key + path + expiry))
+  // with URL-safe character replacement (+→- /→_ =→removed)
+  const { createHash } = await import('crypto')
   const expiry = Math.floor(Date.now() / 1000) + expiresInSeconds
-  const hashableBase = `${tokenAuthKey}${videoId}${expiry}`
+  const hashableBase = `${tokenAuthKey}${path}${expiry}`
+  const md5Hash = createHash('md5').update(hashableBase).digest('base64')
+  const token = md5Hash.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
 
-  // Use Web Crypto API (available in Node.js 18+)
-  const encoder = new TextEncoder()
-  const data = encoder.encode(hashableBase)
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
-  const hashArray = Array.from(new Uint8Array(hashBuffer))
-  const token = hashArray
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('')
-
-  return `https://${cdnHostname}/${videoId}/playlist.m3u8?token=${token}&expires=${expiry}`
+  return `https://${cdnHostname}${path}?token=${token}&expires=${expiry}`
 }
 
 /**
