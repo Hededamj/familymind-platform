@@ -104,3 +104,48 @@ export async function syncToStripeAction(productId: string) {
     return { success: false, error: message }
   }
 }
+
+export async function createModuleAction(productId: string, data: { title: string; description?: string }) {
+  await requireAdmin()
+  const result = await productService.createModule(productId, data)
+  revalidatePath(`/admin/products/${productId}/edit`)
+  return result
+}
+
+export async function updateModuleAction(id: string, data: { title?: string; description?: string }) {
+  await requireAdmin()
+  const result = await productService.updateModule(id, data)
+  revalidatePath('/admin/products')
+  return result
+}
+
+export async function deleteModuleAction(id: string) {
+  await requireAdmin()
+  await productService.deleteModule(id)
+  revalidatePath('/admin/products')
+}
+
+export async function reorderModulesAction(productId: string, moduleIds: string[]) {
+  await requireAdmin()
+  await productService.reorderModules(productId, moduleIds)
+  revalidatePath(`/admin/products/${productId}/edit`)
+}
+
+export async function assignLessonToModuleAction(lessonId: string, moduleId: string | null) {
+  await requireAdmin()
+  await productService.assignLessonToModule(lessonId, moduleId)
+  revalidatePath('/admin/products')
+}
+
+export async function updateProductImagesAction(id: string, data: { coverImageUrl?: string; thumbnailUrl?: string }) {
+  await requireAdmin()
+  await productService.updateProductImages(id, data)
+  revalidatePath('/admin/products')
+}
+
+export async function updateLandingPageAction(id: string, landingPage: Record<string, unknown>) {
+  await requireAdmin()
+  // Cast is safe: the form sends a JSON-serializable object with string/string[] values
+  await productService.updateProductLandingPage(id, landingPage as import('@prisma/client').Prisma.InputJsonValue)
+  revalidatePath('/admin/products')
+}

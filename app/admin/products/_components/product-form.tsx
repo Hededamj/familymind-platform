@@ -32,6 +32,13 @@ import {
   addBundleItemAction,
   removeBundleItemAction,
   syncToStripeAction,
+  createModuleAction,
+  updateModuleAction,
+  deleteModuleAction,
+  reorderModulesAction,
+  assignLessonToModuleAction,
+  updateProductImagesAction,
+  updateLandingPageAction,
 } from '../actions'
 import {
   ArrowUp,
@@ -61,11 +68,20 @@ type ContentUnit = {
   mediaType: string
 }
 
+type CourseModule = {
+  id: string
+  title: string
+  description: string | null
+  position: number
+}
+
 type CourseLesson = {
   id: string
   contentUnitId: string
+  moduleId: string | null
   position: number
   contentUnit: ContentUnit
+  module: CourseModule | null
 }
 
 type BundleItem = {
@@ -86,6 +102,8 @@ type ProductFormData = {
   priceAmountDKK: string
   priceCurrency: string
   isActive: boolean
+  coverImageUrl: string
+  thumbnailUrl: string
 }
 
 type Product = {
@@ -99,7 +117,11 @@ type Product = {
   stripeProductId: string | null
   stripePriceId: string | null
   isActive: boolean
+  coverImageUrl: string | null
+  thumbnailUrl: string | null
+  landingPage: unknown
   courseLessons: CourseLesson[]
+  modules: CourseModule[]
   bundleItems: BundleItem[]
 }
 
@@ -134,6 +156,28 @@ export function ProductForm({
   const [bundleItems, setBundleItems] = useState<BundleItem[]>(
     initialData?.bundleItems ?? []
   )
+  const [modules, setModules] = useState<CourseModule[]>(
+    initialData?.modules ?? []
+  )
+  const [showModuleDialog, setShowModuleDialog] = useState(false)
+  const [newModuleTitle, setNewModuleTitle] = useState('')
+
+  type LandingPageData = {
+    subtitle: string
+    benefits: string[]
+    ctaText: string
+    ctaUrl: string
+  }
+
+  const [landingPage, setLandingPage] = useState<LandingPageData>(() => {
+    const lp = (initialData?.landingPage as Record<string, unknown>) || {}
+    return {
+      subtitle: (lp.subtitle as string) || '',
+      benefits: (lp.benefits as string[]) || [],
+      ctaText: (lp.ctaText as string) || '',
+      ctaUrl: (lp.ctaUrl as string) || '',
+    }
+  })
 
   const [formData, setFormData] = useState<ProductFormData>({
     title: initialData?.title ?? '',
@@ -145,6 +189,8 @@ export function ProductForm({
       : '',
     priceCurrency: initialData?.priceCurrency ?? 'DKK',
     isActive: initialData?.isActive ?? true,
+    coverImageUrl: initialData?.coverImageUrl ?? '',
+    thumbnailUrl: initialData?.thumbnailUrl ?? '',
   })
 
   // In edit mode, consider slug as manually edited
@@ -220,8 +266,10 @@ export function ProductForm({
             {
               id: crypto.randomUUID(), // temporary ID until revalidation
               contentUnitId: unit.id,
+              moduleId: null,
               position: prev.length + 1,
               contentUnit: unit,
+              module: null,
             },
           ])
         }
@@ -344,6 +392,97 @@ export function ProductForm({
     }
   }
 
+  async function handleCreateModule() {
+    if (!initialData || !newModuleTitle.trim()) return
+    startTransition(async () => {
+      try {
+        const mod = await createModuleAction(initialData.id, { title: newModuleTitle.trim() })
+        setModules(prev => [...prev, { ...mod, description: mod.description ?? null }])
+        setNewModuleTitle('')
+        setShowModuleDialog(false)
+        toast.success('Modul oprettet')
+      } catch {
+        toast.error('Kunne ikke oprette modul')
+      }
+    })
+  }
+
+  async function handleDeleteModule(moduleId: string) {
+    startTransition(async () => {
+      try {
+        await deleteModuleAction(moduleId)
+        setModules(prev => prev.filter(m => m.id !== moduleId))
+        // Unassign lessons from this module locally
+        setLessons(prev => prev.map(l => l.moduleId === moduleId ? { ...l, moduleId: null, module: null } : l))
+        toast.success('Modul slettet')
+      } catch {
+        toast.error('Kunne ikke slette modul')
+      }
+    })
+  }
+
+  async function handleMoveModule(index: number, direction: 'up' | 'down') {
+    if (!initialData) return
+    const newModules = [...modules]
+    const swapIndex = direction === 'up' ? index - 1 : index + 1
+    if (swapIndex < 0 || swapIndex >= newModules.length) return
+    ;[newModules[index], newModules[swapIndex]] = [newModules[swapIndex], newModules[index]]
+    const reordered = newModules.map((m, i) => ({ ...m, position: i + 1 }))
+    setModules(reordered)
+    startTransition(async () => {
+      try {
+        await reorderModulesAction(initialData.id, reordered.map(m => m.id))
+      } catch {
+        setModules(modules)
+        toast.error('Kunne ikke omsortere moduler')
+      }
+    })
+  }
+
+  async function handleAssignLessonToModule(lessonId: string, moduleId: string | null) {
+    startTransition(async () => {
+      try {
+        await assignLessonToModuleAction(lessonId, moduleId)
+        setLessons(prev => prev.map(l => l.id === lessonId ? { ...l, moduleId, module: moduleId ? modules.find(m => m.id === moduleId) || null : null } : l))
+        toast.success('Lektion flyttet')
+      } catch {
+        toast.error('Kunne ikke flytte lektion')
+      }
+    })
+  }
+
+  async function handleSaveImages() {
+    if (!initialData) return
+    startTransition(async () => {
+      try {
+        await updateProductImagesAction(initialData.id, {
+          coverImageUrl: formData.coverImageUrl || undefined,
+          thumbnailUrl: formData.thumbnailUrl || undefined,
+        })
+        toast.success('Billeder gemt')
+      } catch {
+        toast.error('Kunne ikke gemme billeder')
+      }
+    })
+  }
+
+  async function handleSaveLandingPage() {
+    if (!initialData) return
+    startTransition(async () => {
+      try {
+        await updateLandingPageAction(initialData.id, {
+          subtitle: landingPage.subtitle,
+          benefits: landingPage.benefits.filter(Boolean),
+          ctaText: landingPage.ctaText,
+          ctaUrl: landingPage.ctaUrl,
+        })
+        toast.success('Landing page gemt')
+      } catch {
+        toast.error('Kunne ikke gemme landing page')
+      }
+    })
+  }
+
   // Content units not yet added as lessons
   const availableLessonUnits = availableContentUnits.filter(
     (unit) => !lessons.some((l) => l.contentUnitId === unit.id)
@@ -418,6 +557,36 @@ export function ProductForm({
               rows={4}
             />
           </div>
+
+          {mode === 'edit' && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="coverImageUrl">Coverbillede URL</Label>
+                <Input
+                  id="coverImageUrl"
+                  value={formData.coverImageUrl}
+                  onChange={(e) => setFormData(prev => ({ ...prev, coverImageUrl: e.target.value }))}
+                  placeholder="https://..."
+                />
+                <p className="text-xs text-muted-foreground">Bruges på landing page og browse-side</p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="thumbnailUrl">Thumbnail URL</Label>
+                <Input
+                  id="thumbnailUrl"
+                  value={formData.thumbnailUrl}
+                  onChange={(e) => setFormData(prev => ({ ...prev, thumbnailUrl: e.target.value }))}
+                  placeholder="https://..."
+                />
+                <p className="text-xs text-muted-foreground">Lille billede til kort og lister</p>
+              </div>
+            </div>
+          )}
+          {mode === 'edit' && (formData.coverImageUrl || formData.thumbnailUrl) && (
+            <Button type="button" variant="outline" size="sm" onClick={handleSaveImages} disabled={isPending}>
+              Gem billeder
+            </Button>
+          )}
 
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
@@ -503,6 +672,92 @@ export function ProductForm({
         </CardContent>
       </Card>
 
+      {/* Modules (only for COURSE type in edit mode) */}
+      {formData.type === 'COURSE' && mode === 'edit' && initialData && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle>Moduler</CardTitle>
+              <Button type="button" size="sm" variant="outline" onClick={() => setShowModuleDialog(true)} disabled={isPending}>
+                <Plus className="mr-2 size-4" />
+                Tilføj modul
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {modules.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Ingen moduler oprettet endnu. Moduler grupperer lektioner i logiske sektioner.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {modules.map((mod, index) => {
+                  const moduleLessons = lessons.filter(l => l.moduleId === mod.id)
+                  return (
+                    <div key={mod.id} className="rounded-lg border p-4">
+                      <div className="flex items-center gap-3">
+                        <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                          {index + 1}
+                        </span>
+                        <div className="flex-1">
+                          <div className="text-sm font-medium">{mod.title}</div>
+                          {mod.description && <div className="text-xs text-muted-foreground">{mod.description}</div>}
+                          <div className="text-xs text-muted-foreground">{moduleLessons.length} lektioner</div>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Button type="button" variant="ghost" size="sm" className="size-8 p-0" onClick={() => handleMoveModule(index, 'up')} disabled={index === 0 || isPending}>
+                            <ArrowUp className="size-4" /><span className="sr-only">Flyt op</span>
+                          </Button>
+                          <Button type="button" variant="ghost" size="sm" className="size-8 p-0" onClick={() => handleMoveModule(index, 'down')} disabled={index === modules.length - 1 || isPending}>
+                            <ArrowDown className="size-4" /><span className="sr-only">Flyt ned</span>
+                          </Button>
+                          <Button type="button" variant="ghost" size="sm" className="size-8 p-0 text-destructive hover:text-destructive" onClick={() => handleDeleteModule(mod.id)} disabled={isPending}>
+                            <X className="size-4" /><span className="sr-only">Slet</span>
+                          </Button>
+                        </div>
+                      </div>
+                      {moduleLessons.length > 0 && (
+                        <div className="mt-3 space-y-1 border-t pt-3">
+                          {moduleLessons.map(l => (
+                            <div key={l.id} className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <span className="size-1.5 rounded-full bg-muted-foreground/40" />
+                              {l.contentUnit.title}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+            {/* Unassigned lessons */}
+            {lessons.filter(l => !l.moduleId).length > 0 && modules.length > 0 && (
+              <div className="mt-4 rounded-lg border border-dashed p-4">
+                <p className="mb-2 text-sm font-medium text-muted-foreground">Ikke-tildelte lektioner</p>
+                <div className="space-y-2">
+                  {lessons.filter(l => !l.moduleId).map(l => (
+                    <div key={l.id} className="flex items-center gap-2">
+                      <span className="flex-1 text-sm">{l.contentUnit.title}</span>
+                      <Select onValueChange={(v) => handleAssignLessonToModule(l.id, v)} defaultValue="">
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Flyt til modul" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {modules.map(m => (
+                            <SelectItem key={m.id} value={m.id}>{m.title}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Course Lessons (only for COURSE type in edit mode) */}
       {formData.type === 'COURSE' && mode === 'edit' && initialData && (
         <Card>
@@ -546,6 +801,22 @@ export function ProductForm({
                         {lesson.contentUnit.slug}
                       </div>
                     </div>
+                    {modules.length > 0 && (
+                      <Select
+                        value={lesson.moduleId || 'none'}
+                        onValueChange={(v) => handleAssignLessonToModule(lesson.id, v === 'none' ? null : v)}
+                      >
+                        <SelectTrigger className="w-[140px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Ingen modul</SelectItem>
+                          {modules.map(m => (
+                            <SelectItem key={m.id} value={m.id}>{m.title}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
                     <div className="flex items-center gap-1">
                       <Button
                         type="button"
@@ -750,6 +1021,55 @@ export function ProductForm({
         </Card>
       )}
 
+      {/* Landing Page (for COURSE and BUNDLE types in edit mode) */}
+      {(formData.type === 'COURSE' || formData.type === 'BUNDLE') && mode === 'edit' && initialData && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Landing page</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>Undertitel</Label>
+              <Input
+                value={landingPage.subtitle}
+                onChange={(e) => setLandingPage(prev => ({ ...prev, subtitle: e.target.value }))}
+                placeholder="Kort undertitel til hero-sektionen"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Fordele (én per linje)</Label>
+              <Textarea
+                value={landingPage.benefits.join('\n')}
+                onChange={(e) => setLandingPage(prev => ({ ...prev, benefits: e.target.value.split('\n') }))}
+                rows={4}
+                placeholder={"Forstå hvad der driver dit barns angst\nLær konkrete værktøjer\nSkab ro i hverdagen"}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>CTA knaptekst</Label>
+                <Input
+                  value={landingPage.ctaText}
+                  onChange={(e) => setLandingPage(prev => ({ ...prev, ctaText: e.target.value }))}
+                  placeholder="Start nu"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>CTA link</Label>
+                <Input
+                  value={landingPage.ctaUrl}
+                  onChange={(e) => setLandingPage(prev => ({ ...prev, ctaUrl: e.target.value }))}
+                  placeholder="/subscribe"
+                />
+              </div>
+            </div>
+            <Button type="button" variant="outline" onClick={handleSaveLandingPage} disabled={isPending}>
+              Gem landing page
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Subscription Info */}
       {formData.type === 'SUBSCRIPTION' && (
         <Card>
@@ -924,6 +1244,29 @@ export function ProductForm({
                 ))}
               </div>
             )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Module Dialog */}
+      <Dialog open={showModuleDialog} onOpenChange={setShowModuleDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Tilføj modul</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Modultitel *</Label>
+              <Input
+                value={newModuleTitle}
+                onChange={(e) => setNewModuleTitle(e.target.value)}
+                placeholder="F.eks. Grundlæggende teknikker"
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setShowModuleDialog(false)}>Annuller</Button>
+              <Button type="button" onClick={handleCreateModule} disabled={!newModuleTitle.trim() || isPending}>Opret modul</Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
