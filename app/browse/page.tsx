@@ -1,12 +1,17 @@
+import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import { listProducts } from '@/lib/services/product.service'
+import { getTenantConfig } from '@/lib/services/tenant.service'
 import { ProductCard } from './_components/product-card'
 import { BrowseFilters } from './_components/browse-filters'
 import { Compass } from 'lucide-react'
 
-export const metadata = {
-  title: 'Udforsk | FamilyMind',
-  description: 'Gennemse kurser, enkeltindhold og pakker',
+export async function generateMetadata(): Promise<Metadata> {
+  const tenant = await getTenantConfig()
+  return {
+    title: `Udforsk | ${tenant.brandName}`,
+    description: 'Gennemse kurser, enkeltindhold og pakker',
+  }
 }
 
 export default async function BrowsePage({

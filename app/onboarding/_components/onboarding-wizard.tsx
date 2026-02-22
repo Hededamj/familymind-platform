@@ -31,6 +31,7 @@ type OnboardingQuestion = {
 
 type Props = {
   questions: OnboardingQuestion[]
+  brandName: string
 }
 
 // ---------- Helpers ----------
@@ -49,7 +50,7 @@ function formatMonths(months: number): string {
 
 // ---------- Component ----------
 
-export function OnboardingWizard({ questions }: Props) {
+export function OnboardingWizard({ questions, brandName }: Props) {
   const [currentStep, setCurrentStep] = useState(0)
   const [responses, setResponses] = useState<
     Record<string, string[]>
@@ -302,7 +303,7 @@ export function OnboardingWizard({ questions }: Props) {
       <div className="px-4 pt-6 pb-2">
         <div className="mx-auto max-w-lg">
           {/* Logo */}
-          <p className="mb-4 text-center font-serif text-lg">FamilyMind</p>
+          <p className="mb-4 text-center font-serif text-lg">{brandName}</p>
           <div className="mb-2 flex items-center justify-between text-sm text-muted-foreground">
             <span>
               Trin {currentStep + 1} af {totalSteps}
