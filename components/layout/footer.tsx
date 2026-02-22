@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 
 export function Footer() {
@@ -17,13 +18,19 @@ export function Footer() {
   }
 
   return (
-    <footer className="border-t border-border bg-white">
-      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-8">
-        <div className="grid gap-8 sm:grid-cols-3">
+    <footer className="bg-[#1A1A1A] text-white/70">
+      <div className="mx-auto max-w-6xl px-4 py-14 sm:px-8">
+        <div className="grid gap-10 sm:grid-cols-3">
           {/* Brand */}
           <div>
-            <span className="font-serif text-xl">FamilyMind</span>
-            <p className="mt-2 text-sm text-muted-foreground">
+            <Image
+              src="/images/logo.png"
+              alt="FamilyMind"
+              width={140}
+              height={36}
+              className="mb-3 h-8 w-auto"
+            />
+            <p className="text-sm leading-relaxed text-white/50">
               Din strukturerede forældreguide — evidensbaseret
               viden og praktiske værktøjer til hele familien.
             </p>
@@ -31,20 +38,20 @@ export function Footer() {
 
           {/* Links */}
           <div>
-            <h4 className="mb-3 text-sm font-semibold font-sans">Platform</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
+            <h4 className="mb-3 text-sm font-semibold text-white">Platform</h4>
+            <ul className="space-y-2.5 text-sm">
               <li>
-                <Link href="/browse" className="hover:text-foreground">
+                <Link href="/browse" className="transition-colors hover:text-white">
                   Opdag indhold
                 </Link>
               </li>
               <li>
-                <Link href="/subscribe" className="hover:text-foreground">
+                <Link href="/subscribe" className="transition-colors hover:text-white">
                   Abonnement
                 </Link>
               </li>
               <li>
-                <Link href="/dashboard" className="hover:text-foreground">
+                <Link href="/dashboard" className="transition-colors hover:text-white">
                   Min side
                 </Link>
               </li>
@@ -53,14 +60,14 @@ export function Footer() {
 
           {/* Contact */}
           <div>
-            <h4 className="mb-3 text-sm font-semibold font-sans">Kontakt</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
+            <h4 className="mb-3 text-sm font-semibold text-white">Kontakt</h4>
+            <ul className="space-y-2.5 text-sm">
               <li>
                 <a
                   href="https://mettehummel.dk"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-foreground"
+                  className="transition-colors hover:text-white"
                 >
                   mettehummel.dk
                 </a>
@@ -69,7 +76,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 border-t border-border pt-6 text-center text-xs text-muted-foreground">
+        <div className="mt-12 border-t border-white/10 pt-6 text-center text-xs text-white/40">
           &copy; {new Date().getFullYear()} FamilyMind. Alle rettigheder forbeholdes.
         </div>
       </div>
