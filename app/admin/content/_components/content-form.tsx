@@ -420,12 +420,14 @@ export function ContentForm({
               <Label htmlFor="accessLevel">Adgangsniveau</Label>
               <Select
                 value={formData.accessLevel}
-                onValueChange={(value) =>
+                onValueChange={(value) => {
+                  const level = value as ContentFormData['accessLevel']
                   setFormData((prev) => ({
                     ...prev,
-                    accessLevel: value as ContentFormData['accessLevel'],
+                    accessLevel: level,
+                    isFree: level === 'FREE',
                   }))
-                }
+                }}
               >
                 <SelectTrigger id="accessLevel" className="w-full">
                   <SelectValue />
@@ -456,12 +458,14 @@ export function ContentForm({
                 <input
                   type="checkbox"
                   checked={formData.isFree}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const checked = e.target.checked
                     setFormData((prev) => ({
                       ...prev,
-                      isFree: e.target.checked,
+                      isFree: checked,
+                      accessLevel: checked ? 'FREE' : prev.accessLevel === 'FREE' ? 'SUBSCRIPTION' : prev.accessLevel,
                     }))
-                  }
+                  }}
                   className="size-4 rounded border-input"
                 />
                 Gratis
