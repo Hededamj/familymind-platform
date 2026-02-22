@@ -2,10 +2,21 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
+import { LogOut } from 'lucide-react'
 
 export function Topbar() {
   const pathname = usePathname()
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session)
+    })
+  }, [])
 
   // Don't show topbar on admin (has sidebar), dashboard (has own header), or onboarding
   if (pathname?.startsWith('/admin')) return null
@@ -13,6 +24,13 @@ export function Topbar() {
   if (pathname?.startsWith('/onboarding')) return null
 
   const isAuth = pathname === '/login' || pathname === '/signup'
+
+  async function handleLogout() {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    setIsLoggedIn(false)
+    window.location.href = '/'
+  }
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-white/80 backdrop-blur-md">
@@ -56,6 +74,16 @@ export function Topbar() {
             <Button asChild variant="ghost" size="sm">
               <Link href="/">Tilbage</Link>
             </Button>
+          ) : isLoggedIn ? (
+            <>
+              <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+                <Link href="/dashboard">Dashboard</Link>
+              </Button>
+              <Button variant="ghost" size="sm" onClick={handleLogout}>
+                <LogOut className="mr-1.5 size-3.5" />
+                Log ud
+              </Button>
+            </>
           ) : (
             <>
               <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
