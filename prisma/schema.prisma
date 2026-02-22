@@ -204,32 +204,53 @@ model Product {
   stripeProductId  String?
   stripePriceId    String?
   isActive         Boolean     @default(true)
+  coverImageUrl    String?
+  thumbnailUrl     String?
+  landingPage      Json?
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt
 
   courseLessons     CourseLesson[]
+  modules           CourseModule[]
   bundleItems       BundleItem[]   @relation("BundleProduct")
   includedInBundles BundleItem[]   @relation("IncludedProduct")
   entitlements      Entitlement[]
   discountCodes     DiscountCode[]
+  journeys          Journey[]
 }
 
 model CourseLesson {
-  id            String @id @default(uuid()) @db.Uuid
-  productId     String @db.Uuid
-  contentUnitId String @db.Uuid
+  id            String  @id @default(uuid()) @db.Uuid
+  productId     String  @db.Uuid
+  contentUnitId String  @db.Uuid
+  moduleId      String? @db.Uuid
   position      Int
 
-  product     Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
-  contentUnit ContentUnit @relation(fields: [contentUnitId], references: [id], onDelete: Cascade)
+  product     Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  contentUnit ContentUnit   @relation(fields: [contentUnitId], references: [id], onDelete: Cascade)
+  module      CourseModule? @relation(fields: [moduleId], references: [id], onDelete: SetNull)
 
   @@unique([productId, contentUnitId])
+}
+
+model CourseModule {
+  id          String  @id @default(uuid()) @db.Uuid
+  productId   String  @db.Uuid
+  title       String
+  description String?
+  position    Int
+
+  product Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  lessons CourseLesson[]
+
+  @@index([productId])
 }
 
 model BundleItem {
   id                String @id @default(uuid()) @db.Uuid
   bundleProductId   String @db.Uuid
   includedProductId String @db.Uuid
+  position          Int    @default(0)
 
   bundle          Product @relation("BundleProduct", fields: [bundleProductId], references: [id], onDelete: Cascade)
   includedProduct Product @relation("IncludedProduct", fields: [includedProductId], references: [id], onDelete: Cascade)
@@ -299,9 +320,12 @@ model Journey {
   targetAgeMax  Int? // months
   estimatedDays Int?
   isActive      Boolean  @default(true)
+  productId     String?  @db.Uuid
+  coverImageUrl String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
+  product      Product?       @relation(fields: [productId], references: [id], onDelete: SetNull)
   phases       JourneyPhase[]
   userJourneys UserJourney[]
   cohorts      Cohort[]
