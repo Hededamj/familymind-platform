@@ -3,6 +3,7 @@ import { Settings, ArrowRight, Compass, TrendingUp } from 'lucide-react'
 import { redirect } from 'next/navigation'
 import { requireAuth } from '@/lib/auth'
 import { getDashboardState } from '@/lib/services/dashboard.service'
+import { getTenantConfig } from '@/lib/services/tenant.service'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { DashboardMessageBanner } from './_components/dashboard-message-banner'
@@ -27,6 +28,8 @@ export default async function DashboardPage() {
     redirect('/onboarding')
   }
 
+  const tenant = await getTenantConfig()
+
   const {
     stateKey,
     message,
@@ -46,7 +49,7 @@ export default async function DashboardPage() {
         <div className="mb-8 flex items-center justify-between">
           <div>
             <Link href="/" className="mb-2 block font-serif text-lg text-primary">
-              FamilyMind
+              {tenant.brandName}
             </Link>
             <h1 className="font-serif text-2xl sm:text-3xl">
               {getGreeting()}, {displayName}
@@ -155,7 +158,7 @@ function NewUserView({
         />
       ) : (
         <DashboardMessageBanner
-          heading="Velkommen til FamilyMind!"
+          heading="Velkommen!"
           body="Start dit første forløb eller udforsk vores kurser for at komme i gang."
           ctaLabel="Udforsk indhold"
           ctaUrl="/browse"

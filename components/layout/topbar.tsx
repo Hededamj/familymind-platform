@@ -4,7 +4,12 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 
-export function Topbar() {
+type TopbarProps = {
+  brandName: string
+  logoUrl: string | null
+}
+
+export function Topbar({ brandName, logoUrl }: TopbarProps) {
   const pathname = usePathname()
 
   // Don't show topbar on admin (has sidebar), dashboard (has own header), or onboarding
@@ -19,9 +24,13 @@ export function Topbar() {
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-8">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <span className="font-serif text-xl font-normal text-foreground">
-            FamilyMind
-          </span>
+          {logoUrl ? (
+            <img src={logoUrl} alt={brandName} className="h-8" />
+          ) : (
+            <span className="font-serif text-xl font-normal text-foreground">
+              {brandName}
+            </span>
+          )}
         </Link>
 
         {/* Navigation */}

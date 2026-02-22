@@ -143,7 +143,64 @@ model Organization {
   name      String
   slug      String   @unique
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
+  // ── Brand ──
+  brandName       String
+  tagline         String?
+  description     String?
+  logoUrl         String?
+  faviconUrl      String?
+  websiteUrl      String?
+
+  // ── Farver (hex) ──
+  colorPrimary           String @default("#86A0A6")
+  colorPrimaryForeground String @default("#1A1A1A")
+  colorAccent            String @default("#E8715A")
+  colorSuccess           String @default("#2A6B5A")
+  colorBackground        String @default("#FAFAF8")
+  colorSand              String @default("#F5F0EB")
+  colorForeground        String @default("#1A1A1A")
+  colorBorder            String @default("#E8E4DF")
+
+  // ── Kontakt ──
+  contactEmail String?
+  contactPhone String?
+  contactUrl   String?
+
+  // ── Email ──
+  emailFromName  String?
+  emailFromEmail String?
+
+  // ── Landing page hero ──
+  heroHeading    String?
+  heroSubheading String?
+  heroCtaText    String?
+  heroCtaUrl     String?
+
+  // ── Om-sektion ──
+  aboutHeading  String?
+  aboutName     String?
+  aboutBio      String?
+  aboutUrl      String?
+  aboutImageUrl String?
+
+  // ── Landing page JSON ──
+  landingBenefits     Json?
+  landingSteps        Json?
+  landingFeatures     Json?
+  landingTestimonials Json?
+  landingFaq          Json?
+
+  // ── Priser (display) ──
+  subscriptionPriceDisplay  String?
+  subscriptionPeriodDisplay String?
+
+  // ── Footer ──
+  footerCopyright String?
+  footerLinks     Json?
+
+  // ── Relations ──
   users        User[]
   entitlements Entitlement[]
 }

@@ -46,10 +46,10 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
-  /* Custom FamilyMind colors */
-  --color-sand: #F5F0EB;
+  /* Custom colors — sand/success overridden by tenant config inline vars */
+  --color-sand: var(--color-sand, #F5F0EB);
   --color-sand-dark: #EDE6DF;
-  --color-success: #2A6B5A;
+  --color-success: var(--color-success, #2A6B5A);
   --color-success-light: rgba(42, 107, 90, 0.1);
   --color-coral: #E8715A;
   --color-coral-light: rgba(232, 113, 90, 0.1);
@@ -58,7 +58,7 @@
 
 :root {
   --radius: 0.75rem;
-  /* Warm white background — not pure white */
+  /* Fallback values — overridden by tenant config inline vars in layout.tsx */
   --background: #FAFAF8;
   --foreground: #1A1A1A;
   /* Cards: pure white on warm background */

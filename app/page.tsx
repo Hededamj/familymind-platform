@@ -1,6 +1,22 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Check, BookOpen, Video, Users, Heart, Star, ChevronDown } from "lucide-react"
+import {
+  Check, BookOpen, Video, Users, Heart, Star, ChevronDown,
+  UserPlus, Compass, TrendingUp, type LucideIcon,
+} from "lucide-react"
+import { getTenantConfig } from "@/lib/services/tenant.service"
+
+const iconMap: Record<string, LucideIcon> = {
+  BookOpen,
+  Video,
+  Users,
+  Heart,
+  UserPlus,
+  Compass,
+  TrendingUp,
+  Check,
+  Star,
+}
 
 function FAQItem({ question, answer }: { question: string; answer: string }) {
   return (
@@ -16,26 +32,33 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
   )
 }
 
-export default function Home() {
+export default async function Home() {
+  const tenant = await getTenantConfig()
+
   return (
     <div>
       {/* ─── Hero ─────────────────────────────────────────────── */}
       <section className="bg-sand">
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-8 sm:py-28">
           <div className="mx-auto max-w-3xl text-center">
-            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-              Evidensbaseret forældreguide
-            </p>
+            {tenant.tagline && (
+              <p className="mb-4 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                {tenant.tagline}
+              </p>
+            )}
             <h1 className="font-serif text-4xl leading-tight sm:text-5xl md:text-6xl">
-              Giv dit barn den bedste start
+              {tenant.heroHeading || `Velkommen til ${tenant.brandName}`}
             </h1>
-            <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-              Din strukturerede vej til et trygt og kærligt forældreskab
-              — med viden der virker og værktøjer du kan bruge i dag.
-            </p>
+            {tenant.heroSubheading && (
+              <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
+                {tenant.heroSubheading}
+              </p>
+            )}
             <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
               <Button asChild size="lg" className="rounded-xl px-8 text-base">
-                <Link href="/signup">Prøv FamilyMind gratis</Link>
+                <Link href={tenant.heroCtaUrl || "/signup"}>
+                  {tenant.heroCtaText || `Prøv ${tenant.brandName} gratis`}
+                </Link>
               </Button>
               <Button asChild variant="ghost" size="lg" className="text-base text-muted-foreground">
                 <Link href="#hvordan">Se hvordan det virker</Link>
@@ -46,276 +69,211 @@ export default function Home() {
       </section>
 
       {/* ─── Social Proof ─────────────────────────────────────── */}
-      <section className="border-b border-border bg-white py-8">
-        <div className="mx-auto flex max-w-3xl flex-col items-center gap-3 px-4 text-center sm:px-8">
-          <div className="flex gap-1 text-amber-400">
-            {[...Array(5)].map((_, i) => (
-              <Star key={i} className="size-4 fill-current" />
-            ))}
+      {tenant.landingTestimonials && tenant.landingTestimonials.length > 0 && (
+        <section className="border-b border-border bg-white py-8">
+          <div className="mx-auto flex max-w-3xl flex-col items-center gap-3 px-4 text-center sm:px-8">
+            <div className="flex gap-1 text-amber-400">
+              {[...Array(tenant.landingTestimonials[0].stars)].map((_, i) => (
+                <Star key={i} className="size-4 fill-current" />
+              ))}
+            </div>
+            <p className="text-sm italic text-muted-foreground">
+              &ldquo;{tenant.landingTestimonials[0].quote}&rdquo;
+            </p>
+            <p className="text-xs font-medium text-foreground">
+              — {tenant.landingTestimonials[0].name}
+            </p>
           </div>
-          <p className="text-sm italic text-muted-foreground">
-            &ldquo;FamilyMind har givet os en helt ny måde at forstå vores børn på.
-            Vi føler os tryggere som forældre.&rdquo;
-          </p>
-          <p className="text-xs font-medium text-foreground">
-            — Maria, mor til 2
-          </p>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ─── Hvordan det virker ────────────────────────────────── */}
-      <section id="hvordan" className="bg-white">
-        <div className="mx-auto max-w-5xl px-4 py-20 sm:px-8">
-          <div className="mb-12 text-center">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.08em] text-primary">
-              Tre enkle trin
-            </p>
-            <h2 className="font-serif text-3xl sm:text-4xl">
-              Sådan kommer du i gang
-            </h2>
-          </div>
+      {tenant.landingSteps && tenant.landingSteps.length > 0 && (
+        <section id="hvordan" className="bg-white">
+          <div className="mx-auto max-w-5xl px-4 py-20 sm:px-8">
+            <div className="mb-12 text-center">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.08em] text-primary">
+                Tre enkle trin
+              </p>
+              <h2 className="font-serif text-3xl sm:text-4xl">
+                Sådan kommer du i gang
+              </h2>
+            </div>
 
-          <div className="grid gap-8 sm:grid-cols-3">
-            <div className="text-center">
-              <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-sand">
-                <BookOpen className="size-6 text-primary" />
-              </div>
-              <h3 className="mb-2 font-serif text-lg">1. Start dit forløb</h3>
-              <p className="text-sm leading-relaxed text-muted-foreground">
-                Svar på et par spørgsmål og få et forløb der passer
-                præcis til din familie og dit barns alder.
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-sand">
-                <Video className="size-6 text-primary" />
-              </div>
-              <h3 className="mb-2 font-serif text-lg">2. Lær i dit tempo</h3>
-              <p className="text-sm leading-relaxed text-muted-foreground">
-                Korte videoer, artikler og øvelser — én dag ad gangen.
-                Brug 10-15 minutter når det passer dig.
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-sand">
-                <Heart className="size-6 text-primary" />
-              </div>
-              <h3 className="mb-2 font-serif text-lg">3. Mærk forskellen</h3>
-              <p className="text-sm leading-relaxed text-muted-foreground">
-                Se positive forandringer i din hverdag. Bliv en tryggere
-                forælder med værktøjer der virker.
-              </p>
+            <div className="grid gap-8 sm:grid-cols-3">
+              {tenant.landingSteps.map((step, i) => {
+                const Icon = iconMap[step.icon] || BookOpen
+                return (
+                  <div key={i} className="text-center">
+                    <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-sand">
+                      <Icon className="size-6 text-primary" />
+                    </div>
+                    <h3 className="mb-2 font-serif text-lg">
+                      {i + 1}. {step.title}
+                    </h3>
+                    <p className="text-sm leading-relaxed text-muted-foreground">
+                      {step.description}
+                    </p>
+                  </div>
+                )
+              })}
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ─── Indhold preview ──────────────────────────────────── */}
-      <section className="bg-sand">
-        <div className="mx-auto max-w-5xl px-4 py-20 sm:px-8">
-          <div className="mb-12 text-center">
-            <h2 className="font-serif text-3xl sm:text-4xl">
-              Alt hvad du har brug for
-            </h2>
-            <p className="mt-3 text-muted-foreground">
-              Ét sted med al den viden og støtte din familie fortjener
-            </p>
-          </div>
-
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {/* Forløb */}
-            <div className="card-hover rounded-2xl border border-border bg-white p-6">
-              <div className="mb-3 flex size-10 items-center justify-center rounded-xl bg-primary/10">
-                <BookOpen className="size-5 text-primary" />
-              </div>
-              <h3 className="mb-1 font-serif text-lg">Strukturerede forløb</h3>
-              <p className="text-sm leading-relaxed text-muted-foreground">
-                Dag-for-dag guides tilpasset dit barns alder.
-                Følg en klar plan med video, øvelser og refleksion.
+      {tenant.landingFeatures && tenant.landingFeatures.length > 0 && (
+        <section className="bg-sand">
+          <div className="mx-auto max-w-5xl px-4 py-20 sm:px-8">
+            <div className="mb-12 text-center">
+              <h2 className="font-serif text-3xl sm:text-4xl">
+                Alt hvad du har brug for
+              </h2>
+              <p className="mt-3 text-muted-foreground">
+                Ét sted med al den viden og støtte din familie fortjener
               </p>
             </div>
 
-            {/* Videokurser */}
-            <div className="card-hover rounded-2xl border border-border bg-white p-6">
-              <div className="mb-3 flex size-10 items-center justify-center rounded-xl bg-success-light">
-                <Video className="size-5 text-success" />
-              </div>
-              <h3 className="mb-1 font-serif text-lg">Videokurser</h3>
-              <p className="text-sm leading-relaxed text-muted-foreground">
-                Dybdegående kurser om specifikke emner — fra søvn
-                til følelsesregulering og kommunikation.
-              </p>
-            </div>
-
-            {/* Fællesskab */}
-            <div className="card-hover rounded-2xl border border-border bg-white p-6">
-              <div className="mb-3 flex size-10 items-center justify-center rounded-xl bg-coral-light">
-                <Users className="size-5 text-coral" />
-              </div>
-              <h3 className="mb-1 font-serif text-lg">Fællesskab</h3>
-              <p className="text-sm leading-relaxed text-muted-foreground">
-                Del erfaringer og få støtte fra andre forældre
-                på samme rejse som dig.
-              </p>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {tenant.landingFeatures.map((feature, i) => {
+                const Icon = iconMap[feature.icon] || BookOpen
+                return (
+                  <div key={i} className="card-hover rounded-2xl border border-border bg-white p-6">
+                    <div className="mb-3 flex size-10 items-center justify-center rounded-xl bg-primary/10">
+                      <Icon className="size-5 text-primary" />
+                    </div>
+                    <h3 className="mb-1 font-serif text-lg">{feature.title}</h3>
+                    <p className="text-sm leading-relaxed text-muted-foreground">
+                      {feature.description}
+                    </p>
+                  </div>
+                )
+              })}
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ─── Testimonials ─────────────────────────────────────── */}
-      <section className="bg-white">
-        <div className="mx-auto max-w-5xl px-4 py-20 sm:px-8">
-          <div className="mb-12 text-center">
-            <h2 className="font-serif text-3xl sm:text-4xl">
-              Det siger andre forældre
-            </h2>
-          </div>
+      {tenant.landingTestimonials && tenant.landingTestimonials.length > 0 && (
+        <section className="bg-white">
+          <div className="mx-auto max-w-5xl px-4 py-20 sm:px-8">
+            <div className="mb-12 text-center">
+              <h2 className="font-serif text-3xl sm:text-4xl">
+                Det siger andre forældre
+              </h2>
+            </div>
 
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="rounded-2xl border border-border p-6">
-              <div className="mb-3 flex gap-1 text-amber-400">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="size-3.5 fill-current" />
-                ))}
-              </div>
-              <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
-                &ldquo;FamilyMind har ændret vores aftener fuldstændigt.
-                Sengetiden er gået fra kamp til hygge.&rdquo;
-              </p>
-              <p className="text-sm font-medium">Maria</p>
-              <p className="text-xs text-muted-foreground">Mor til 2 børn</p>
-            </div>
-            <div className="rounded-2xl border border-border p-6">
-              <div className="mb-3 flex gap-1 text-amber-400">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="size-3.5 fill-current" />
-                ))}
-              </div>
-              <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
-                &ldquo;Endelig en platform der giver konkrete værktøjer
-                og ikke bare teorier. Det virker i praksis.&rdquo;
-              </p>
-              <p className="text-sm font-medium">Thomas</p>
-              <p className="text-xs text-muted-foreground">Far til 1 barn</p>
-            </div>
-            <div className="rounded-2xl border border-border p-6">
-              <div className="mb-3 flex gap-1 text-amber-400">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="size-3.5 fill-current" />
-                ))}
-              </div>
-              <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
-                &ldquo;Jeg føler mig som en bedre mor. De små daglige
-                øvelser har gjort en kæmpe forskel for os.&rdquo;
-              </p>
-              <p className="text-sm font-medium">Line</p>
-              <p className="text-xs text-muted-foreground">Mor til 3 børn</p>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {tenant.landingTestimonials.map((t, i) => (
+                <div key={i} className="rounded-2xl border border-border p-6">
+                  <div className="mb-3 flex gap-1 text-amber-400">
+                    {[...Array(t.stars)].map((_, j) => (
+                      <Star key={j} className="size-3.5 fill-current" />
+                    ))}
+                  </div>
+                  <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
+                    &ldquo;{t.quote}&rdquo;
+                  </p>
+                  <p className="text-sm font-medium">{t.name}</p>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ─── Pris ─────────────────────────────────────────────── */}
-      <section className="bg-sand">
-        <div className="mx-auto max-w-lg px-4 py-20 sm:px-8">
-          <div className="mb-8 text-center">
-            <h2 className="font-serif text-3xl sm:text-4xl">
-              Én pris. Alt inkluderet.
-            </h2>
-            <p className="mt-3 text-muted-foreground">
-              Ingen bindingsperiode — afmeld når som helst
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-border bg-white p-8 shadow-sm">
-            <div className="mb-6 text-center">
-              <span className="font-serif text-5xl">149 kr</span>
-              <span className="text-muted-foreground"> /måned</span>
+      {tenant.subscriptionPriceDisplay && (
+        <section className="bg-sand">
+          <div className="mx-auto max-w-lg px-4 py-20 sm:px-8">
+            <div className="mb-8 text-center">
+              <h2 className="font-serif text-3xl sm:text-4xl">
+                Én pris. Alt inkluderet.
+              </h2>
+              <p className="mt-3 text-muted-foreground">
+                Ingen bindingsperiode — afmeld når som helst
+              </p>
             </div>
 
-            <ul className="mb-8 space-y-3">
-              {[
-                'Alle strukturerede forløb',
-                'Videokurser og artikler',
-                'Daglige øvelser og refleksion',
-                'Check-ins og fremgangssporing',
-                'Personlige anbefalinger',
-                'Adgang til fællesskabet',
-              ].map((item) => (
-                <li key={item} className="flex items-start gap-3 text-sm">
-                  <Check className="mt-0.5 size-4 shrink-0 text-success" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
+            <div className="rounded-2xl border border-border bg-white p-8 shadow-sm">
+              <div className="mb-6 text-center">
+                <span className="font-serif text-5xl">{tenant.subscriptionPriceDisplay}</span>
+                {tenant.subscriptionPeriodDisplay && (
+                  <span className="text-muted-foreground"> {tenant.subscriptionPeriodDisplay}</span>
+                )}
+              </div>
 
-            <Button asChild size="lg" className="w-full rounded-xl text-base">
-              <Link href="/signup">Start i dag</Link>
-            </Button>
+              {tenant.landingBenefits && tenant.landingBenefits.length > 0 && (
+                <ul className="mb-8 space-y-3">
+                  {tenant.landingBenefits.map((item) => (
+                    <li key={item} className="flex items-start gap-3 text-sm">
+                      <Check className="mt-0.5 size-4 shrink-0 text-success" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
 
-            <p className="mt-3 text-center text-xs text-muted-foreground">
-              Prøv gratis — betal først når du er klar
-            </p>
+              <Button asChild size="lg" className="w-full rounded-xl text-base">
+                <Link href="/signup">Start i dag</Link>
+              </Button>
+
+              <p className="mt-3 text-center text-xs text-muted-foreground">
+                Prøv gratis — betal først når du er klar
+              </p>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      {/* ─── Om Mette ─────────────────────────────────────────── */}
-      <section className="bg-white">
-        <div className="mx-auto max-w-3xl px-4 py-20 sm:px-8">
-          <div className="text-center">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-              Bag FamilyMind
-            </p>
-            <h2 className="font-serif text-3xl sm:text-4xl">Mette Hummel</h2>
-            <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted-foreground">
-              Mette er familieterapeut med mange års erfaring i at hjælpe
-              familier med at skabe trygge og kærlige relationer.
-              FamilyMind er bygget på hendes evidensbaserede metoder
-              og gør professionel forældrevejledning tilgængelig for alle.
-            </p>
-            <Button asChild variant="ghost" className="mt-4 text-primary">
-              <a href="https://mettehummel.dk" target="_blank" rel="noopener noreferrer">
-                Læs mere om Mette
-              </a>
-            </Button>
+      {/* ─── Om ─────────────────────────────────────────────── */}
+      {tenant.aboutName && (
+        <section className="bg-white">
+          <div className="mx-auto max-w-3xl px-4 py-20 sm:px-8">
+            <div className="text-center">
+              {tenant.aboutHeading && (
+                <p className="mb-2 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                  {tenant.aboutHeading}
+                </p>
+              )}
+              <h2 className="font-serif text-3xl sm:text-4xl">{tenant.aboutName}</h2>
+              {tenant.aboutBio && (
+                <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted-foreground">
+                  {tenant.aboutBio}
+                </p>
+              )}
+              {tenant.aboutUrl && (
+                <Button asChild variant="ghost" className="mt-4 text-primary">
+                  <a href={tenant.aboutUrl} target="_blank" rel="noopener noreferrer">
+                    Læs mere om {tenant.aboutName}
+                  </a>
+                </Button>
+              )}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ─── FAQ ──────────────────────────────────────────────── */}
-      <section className="bg-sand">
-        <div className="mx-auto max-w-2xl px-4 py-20 sm:px-8">
-          <div className="mb-10 text-center">
-            <h2 className="font-serif text-3xl sm:text-4xl">
-              Ofte stillede spørgsmål
-            </h2>
-          </div>
+      {tenant.landingFaq && tenant.landingFaq.length > 0 && (
+        <section className="bg-sand">
+          <div className="mx-auto max-w-2xl px-4 py-20 sm:px-8">
+            <div className="mb-10 text-center">
+              <h2 className="font-serif text-3xl sm:text-4xl">
+                Ofte stillede spørgsmål
+              </h2>
+            </div>
 
-          <div>
-            <FAQItem
-              question="Hvem er FamilyMind for?"
-              answer="FamilyMind er for alle forældre der ønsker at styrke relationen til deres børn. Indholdet er tilpasset børn i alderen 0-6 år, men mange principper kan bruges til ældre børn."
-            />
-            <FAQItem
-              question="Hvor lang tid tager det hver dag?"
-              answer="Hvert dags-modul tager 10-15 minutter. Du kan se videoer og læse artikler når det passer dig — der er ingen faste tidspunkter."
-            />
-            <FAQItem
-              question="Kan jeg afmelde når som helst?"
-              answer="Ja, du kan afmelde dit abonnement når som helst. Der er ingen bindingsperiode. Du beholder adgang til udgangen af din betalingsperiode."
-            />
-            <FAQItem
-              question="Er indholdet evidensbaseret?"
-              answer="Ja, alt indhold er udviklet af Mette Hummel, autoriseret familieterapeut, og bygger på anerkendt forskning inden for børnepsykologi og forældreskab."
-            />
-            <FAQItem
-              question="Kan vi bruge det som par?"
-              answer="Absolut! Mange forældre bruger FamilyMind sammen. Det kan være en fantastisk måde at blive enige om fælles strategier og styrke jeres samarbejde."
-            />
+            <div>
+              {tenant.landingFaq.map((faq, i) => (
+                <FAQItem key={i} question={faq.question} answer={faq.answer} />
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ─── Final CTA ────────────────────────────────────────── */}
       <section className="bg-[#1A1A1A]">

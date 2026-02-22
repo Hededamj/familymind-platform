@@ -15,6 +15,123 @@ async function createIfNotExists<T>(
 }
 
 async function main() {
+  // -- Default Organization: FamilyMind --
+  await prisma.organization.upsert({
+    where: { slug: 'familymind' },
+    update: {},
+    create: {
+      name: 'FamilyMind',
+      slug: 'familymind',
+      brandName: 'FamilyMind',
+      tagline: 'Din strukturerede forældreguide',
+      description: 'Evidensbaseret viden og praktiske værktøjer til hele familien.',
+      websiteUrl: 'https://mettehummel.dk',
+      colorPrimary: '#86A0A6',
+      colorPrimaryForeground: '#1A1A1A',
+      colorAccent: '#E8715A',
+      colorSuccess: '#2A6B5A',
+      colorBackground: '#FAFAF8',
+      colorSand: '#F5F0EB',
+      colorForeground: '#1A1A1A',
+      colorBorder: '#E8E4DF',
+      contactUrl: 'https://mettehummel.dk',
+      emailFromName: 'FamilyMind',
+      emailFromEmail: 'noreply@familymind.dk',
+      heroHeading: 'Giv dit barn den bedste start',
+      heroSubheading: 'Din strukturerede vej til et trygt og kærligt forældreskab — med viden der virker og værktøjer du kan bruge i dag.',
+      heroCtaText: 'Prøv gratis',
+      heroCtaUrl: '/signup',
+      aboutHeading: 'Bag FamilyMind',
+      aboutName: 'Mette Hummel',
+      aboutBio: 'Mette er familieterapeut med mange års erfaring i at hjælpe forældre. FamilyMind er bygget på hendes evidensbaserede metoder og den nyeste forskning i børnepsykologi.',
+      aboutUrl: 'https://mettehummel.dk',
+      subscriptionPriceDisplay: '149 kr',
+      subscriptionPeriodDisplay: '/måned',
+      footerCopyright: 'FamilyMind. Alle rettigheder forbeholdes.',
+      landingBenefits: [
+        'Alle strukturerede forløb',
+        'Videokurser og artikler',
+        'Daglige øvelser og refleksion',
+        'Check-ins og fremgangssporing',
+        'Personlige anbefalinger',
+        'Adgang til fællesskabet',
+      ],
+      landingSteps: [
+        {
+          title: 'Opret din profil',
+          description: 'Fortæl os lidt om din familie, så vi kan tilpasse indholdet til jeres behov.',
+          icon: 'UserPlus',
+        },
+        {
+          title: 'Vælg dit forløb',
+          description: 'Få en personlig anbefaling baseret på din situation, eller udforsk alle forløb.',
+          icon: 'Compass',
+        },
+        {
+          title: 'Voks dag for dag',
+          description: 'Følg dit forløb med video, øvelser og daglige refleksioner i dit eget tempo.',
+          icon: 'TrendingUp',
+        },
+      ],
+      landingFeatures: [
+        {
+          title: 'Strukturerede forløb',
+          description: 'Dag-for-dag programmer udviklet af fagfolk. Hver dag har video, øvelse og refleksion.',
+          icon: 'BookOpen',
+        },
+        {
+          title: 'Videokurser',
+          description: 'Korte, praktiske videoer du kan se når det passer dig. Nye kurser tilføjes løbende.',
+          icon: 'Video',
+        },
+        {
+          title: 'Fællesskab',
+          description: 'Del erfaringer med andre forældre på samme rejse. Moderet af fagfolk.',
+          icon: 'Users',
+        },
+      ],
+      landingTestimonials: [
+        {
+          name: 'Anna M.',
+          quote: 'FamilyMind har givet os en helt ny måde at håndtere konflikter på. Vores aftener er blevet meget roligere.',
+          stars: 5,
+        },
+        {
+          name: 'Lars P.',
+          quote: 'Endelig en forældreguide der ikke dømmer. Det føles som at have en terapeut i lommen.',
+          stars: 5,
+        },
+        {
+          name: 'Sofie K.',
+          quote: 'Forløbene er geniale. Små bidder hver dag — det er overkommeligt selv når hverdagen er kaotisk.',
+          stars: 5,
+        },
+      ],
+      landingFaq: [
+        {
+          question: 'Hvem er platformen for?',
+          answer: 'Platformen er for alle forældre der ønsker at styrke relationen til deres børn — uanset om du har specifikke udfordringer eller bare vil blive bedre.',
+        },
+        {
+          question: 'Hvad koster det?',
+          answer: 'Abonnementet koster 149 kr/md og giver adgang til alt indhold. Ingen binding — afmeld når som helst.',
+        },
+        {
+          question: 'Er indholdet evidensbaseret?',
+          answer: 'Ja, alt indhold er udviklet af autoriserede terapeuter og bygger på den nyeste forskning i børnepsykologi og familieterapi.',
+        },
+        {
+          question: 'Kan jeg prøve gratis?',
+          answer: 'Ja, du kan oprette en profil og se udvalgt gratis indhold. Du betaler først når du er klar.',
+        },
+        {
+          question: 'Hvad er et forløb?',
+          answer: 'Et forløb er et struktureret program med daglige trin — video, øvelse og refleksion. Typisk 14-30 dage.',
+        },
+      ],
+    },
+  })
+
   // -- Check-in Options (4 defaults) --
   const checkInOptions = await Promise.all([
     createIfNotExists(
@@ -37,7 +154,7 @@ async function main() {
 
   // -- Dashboard Messages (5 states) --
   await Promise.all([
-    prisma.dashboardMessage.upsert({ where: { stateKey: 'new_user' }, update: {}, create: { stateKey: 'new_user', heading: 'Velkommen til FamilyMind!', body: 'Vi har fundet nogle anbefalinger til dig baseret på din profil.', ctaLabel: 'Se anbefalinger', ctaUrl: '/browse' } }),
+    prisma.dashboardMessage.upsert({ where: { stateKey: 'new_user' }, update: {}, create: { stateKey: 'new_user', heading: 'Velkommen!', body: 'Vi har fundet nogle anbefalinger til dig baseret på din profil.', ctaLabel: 'Se anbefalinger', ctaUrl: '/browse' } }),
     prisma.dashboardMessage.upsert({ where: { stateKey: 'active_journey' }, update: {}, create: { stateKey: 'active_journey', heading: 'Fortsæt din rejse', body: 'Du er godt på vej. Fortsæt hvor du slap.', ctaLabel: 'Fortsæt', ctaUrl: '/dashboard' } }),
     prisma.dashboardMessage.upsert({ where: { stateKey: 'active_journey_plus_courses' }, update: {}, create: { stateKey: 'active_journey_plus_courses', heading: 'Din dag venter', body: 'Fortsæt din rejse og dine kurser nedenfor.', ctaLabel: 'Fortsæt', ctaUrl: '/dashboard' } }),
     prisma.dashboardMessage.upsert({ where: { stateKey: 'no_journey_has_courses' }, update: {}, create: { stateKey: 'no_journey_has_courses', heading: 'Klar til en rejse?', body: 'Du følger kurser, men har du overvejet en struktureret rejse?', ctaLabel: 'Udforsk rejser', ctaUrl: '/browse' } }),
@@ -49,7 +166,7 @@ async function main() {
     prisma.emailTemplate.upsert({ where: { templateKey: 'weekly_plan' }, update: {}, create: { templateKey: 'weekly_plan', subject: 'Din uge er klar, {{userName}}', bodyHtml: '<h1>Hej {{userName}}</h1><p>Din nye uge i {{journeyTitle}} er klar. Log ind og se hvad der venter dig.</p>', description: 'Sent weekly when a new journey week is ready' } }),
     prisma.emailTemplate.upsert({ where: { templateKey: 'midweek_nudge' }, update: {}, create: { templateKey: 'midweek_nudge', subject: 'Husk din rejse, {{userName}}', bodyHtml: '<h1>Hej {{userName}}</h1><p>Du har ikke åbnet dit indhold endnu i denne uge. Tag et kig?</p>', description: 'Sent mid-week if user has not opened content' } }),
     prisma.emailTemplate.upsert({ where: { templateKey: 'reflection' }, update: {}, create: { templateKey: 'reflection', subject: 'Tid til refleksion', bodyHtml: '<h1>Hej {{userName}}</h1><p>Du har set dit indhold — nu er det tid til at reflektere. Hvordan gik det?</p>', description: 'Sent if user consumed content but has not checked in' } }),
-    prisma.emailTemplate.upsert({ where: { templateKey: 'monthly_progress' }, update: {}, create: { templateKey: 'monthly_progress', subject: 'Din månedlige fremgang', bodyHtml: '<h1>Hej {{userName}}</h1><p>Her er din fremgang denne måned i FamilyMind.</p>', description: 'Monthly progress summary' } }),
+    prisma.emailTemplate.upsert({ where: { templateKey: 'monthly_progress' }, update: {}, create: { templateKey: 'monthly_progress', subject: 'Din månedlige fremgang', bodyHtml: '<h1>Hej {{userName}}</h1><p>Her er din fremgang denne måned i {{brandName}}.</p>', description: 'Monthly progress summary' } }),
     prisma.emailTemplate.upsert({ where: { templateKey: 'reengagement_tier1' }, update: {}, create: { templateKey: 'reengagement_tier1', subject: 'Vi savner dig, {{userName}}', bodyHtml: '<h1>Hej {{userName}}</h1><p>Det er et stykke tid siden vi har set dig. Hvad med at tage et hurtigt kig?</p>', description: 'Re-engagement tier 1: gentle reminder' } }),
     prisma.emailTemplate.upsert({ where: { templateKey: 'reengagement_tier2' }, update: {}, create: { templateKey: 'reengagement_tier2', subject: 'Din rejse venter stadig', bodyHtml: '<h1>Hej {{userName}}</h1><p>Din rejse i {{journeyTitle}} venter stadig på dig. Hop ind igen?</p>', description: 'Re-engagement tier 2: journey reminder' } }),
     prisma.emailTemplate.upsert({ where: { templateKey: 'reengagement_tier3' }, update: {}, create: { templateKey: 'reengagement_tier3', subject: 'Nyt indhold du måske har misset', bodyHtml: '<h1>Hej {{userName}}</h1><p>Der er kommet nyt indhold siden sidst. Se hvad der er nyt.</p>', description: 'Re-engagement tier 3: new content highlight' } }),
@@ -128,8 +245,8 @@ async function main() {
     () => prisma.onboardingQuestion.create({ data: { questionText: 'Hvornår har du mest tid til at lære?', questionType: 'SINGLE_SELECT', position: 4, isActive: true } })
   )
   const q5 = await createIfNotExists(
-    () => prisma.onboardingQuestion.findFirst({ where: { questionText: 'Hvad er dit mål med FamilyMind?' } }),
-    () => prisma.onboardingQuestion.create({ data: { questionText: 'Hvad er dit mål med FamilyMind?', questionType: 'SINGLE_SELECT', position: 5, isActive: true } })
+    () => prisma.onboardingQuestion.findFirst({ where: { questionText: 'Hvad er dit mål?' } }),
+    () => prisma.onboardingQuestion.create({ data: { questionText: 'Hvad er dit mål?', questionType: 'SINGLE_SELECT', position: 5, isActive: true } })
   )
 
   // Create tags (idempotent via slug)
