@@ -16,13 +16,13 @@ export function DashboardMessageBanner({
   ctaUrl,
 }: DashboardMessageBannerProps) {
   return (
-    <div className="rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6">
-      <h2 className="text-xl font-bold tracking-tight sm:text-2xl">
+    <div className="rounded-2xl bg-sand p-6">
+      <h2 className="font-serif text-xl sm:text-2xl">
         {heading}
       </h2>
-      <p className="mt-2 text-muted-foreground">{body}</p>
+      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{body}</p>
       {ctaLabel && ctaUrl && (
-        <Button asChild className="mt-4" size="lg">
+        <Button asChild className="mt-4 rounded-xl" size="lg">
           <Link href={ctaUrl}>
             {ctaLabel}
             <ArrowRight className="ml-2 size-4" />

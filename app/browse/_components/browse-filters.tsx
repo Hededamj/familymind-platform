@@ -1,7 +1,6 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Button } from '@/components/ui/button'
 
 const productTypes = [
   { value: '', label: 'Alle' },
@@ -28,14 +27,17 @@ export function BrowseFilters() {
   return (
     <div className="flex flex-wrap gap-2">
       {productTypes.map((pt) => (
-        <Button
+        <button
           key={pt.value}
-          variant={currentType === pt.value ? 'default' : 'outline'}
-          size="sm"
           onClick={() => handleFilter(pt.value)}
+          className={`rounded-full px-5 py-2 text-sm font-medium transition-colors ${
+            currentType === pt.value
+              ? 'bg-primary text-white'
+              : 'border border-border bg-white text-muted-foreground hover:border-primary hover:text-primary'
+          }`}
         >
           {pt.label}
-        </Button>
+        </button>
       ))}
     </div>
   )

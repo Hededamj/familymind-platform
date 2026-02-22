@@ -1,12 +1,7 @@
 import Link from 'next/link'
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { BookOpen, Package, Video, CreditCard } from 'lucide-react'
 
 type Product = {
   id: string
@@ -27,14 +22,11 @@ const typeLabels: Record<string, string> = {
   SUBSCRIPTION: 'Abonnement',
 }
 
-const typeVariants: Record<
-  string,
-  'default' | 'secondary' | 'outline' | 'destructive'
-> = {
-  SUBSCRIPTION: 'default',
-  COURSE: 'secondary',
-  SINGLE: 'outline',
-  BUNDLE: 'default',
+const typeIcons: Record<string, typeof BookOpen> = {
+  COURSE: Video,
+  SINGLE: BookOpen,
+  BUNDLE: Package,
+  SUBSCRIPTION: CreditCard,
 }
 
 export function ProductCard({ product }: { product: Product }) {
@@ -56,38 +48,53 @@ export function ProductCard({ product }: { product: Product }) {
       ? '/subscribe'
       : `/products/${product.slug}`
 
+  const Icon = typeIcons[product.type] ?? BookOpen
+
   return (
-    <Card className="flex flex-col">
-      <CardHeader>
+    <Link
+      href={href}
+      className="card-hover group flex flex-col rounded-2xl border border-border bg-white"
+    >
+      {/* Thumbnail area */}
+      <div className="flex aspect-[16/9] items-center justify-center rounded-t-2xl bg-sand">
+        <Icon className="size-10 text-primary/30" />
+      </div>
+
+      {/* Content */}
+      <div className="flex flex-1 flex-col p-5">
         <Badge
-          variant={typeVariants[product.type] ?? 'secondary'}
-          className="w-fit"
+          variant="secondary"
+          className="mb-2 w-fit rounded-full text-xs"
         >
           {typeLabels[product.type] ?? product.type}
         </Badge>
-        <h3 className="text-lg font-semibold">{product.title}</h3>
+
+        <h3 className="font-serif text-lg group-hover:text-primary">
+          {product.title}
+        </h3>
+
         {subtitle && (
-          <p className="text-sm text-muted-foreground">{subtitle}</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">{subtitle}</p>
         )}
-      </CardHeader>
-      <CardContent className="flex-1">
+
         {product.description && (
-          <p className="text-sm text-muted-foreground line-clamp-3">
+          <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground line-clamp-2">
             {product.description}
           </p>
         )}
-      </CardContent>
-      <CardFooter className="flex items-center justify-between">
-        <span className="text-lg font-bold">
-          {price}
-          {product.type === 'SUBSCRIPTION' && (
-            <span className="text-sm font-normal">/md</span>
-          )}
-        </span>
-        <Button asChild size="sm">
-          <Link href={href}>Se mere</Link>
-        </Button>
-      </CardFooter>
-    </Card>
+
+        <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
+          <span className="text-lg font-semibold">
+            {price}
+            {product.type === 'SUBSCRIPTION' && (
+              <span className="text-sm font-normal text-muted-foreground">/md</span>
+            )}
+          </span>
+          <span className="text-sm font-medium text-primary">
+            Se mere &rarr;
+          </span>
+        </div>
+      </div>
+    </Link>
   )
 }

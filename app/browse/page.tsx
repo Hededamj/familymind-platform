@@ -1,8 +1,8 @@
 import { Suspense } from 'react'
-import Link from 'next/link'
 import { listProducts } from '@/lib/services/product.service'
 import { ProductCard } from './_components/product-card'
 import { BrowseFilters } from './_components/browse-filters'
+import { Compass } from 'lucide-react'
 
 export const metadata = {
   title: 'Udforsk | FamilyMind',
@@ -22,28 +22,20 @@ export default async function BrowsePage({
     : products
 
   return (
-    <div className="flex min-h-screen flex-col px-4 py-8 sm:px-8">
+    <div className="px-4 py-12 sm:px-8">
       <div className="mx-auto w-full max-w-6xl">
-        {/* Back link */}
-        <Link
-          href="/"
-          className="mb-6 inline-block text-sm text-muted-foreground hover:text-foreground"
-        >
-          &larr; Tilbage
-        </Link>
-
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+        <div className="mb-10 text-center">
+          <h1 className="font-serif text-3xl sm:text-4xl">
             Udforsk
           </h1>
           <p className="mt-2 text-muted-foreground">
-            Find kurser, indhold og pakker til hele familien.
+            Find forløb, kurser og værktøjer der passer til din familie
           </p>
         </div>
 
         {/* Filters */}
-        <div className="mb-8">
+        <div className="mb-8 flex justify-center">
           <Suspense fallback={null}>
             <BrowseFilters />
           </Suspense>
@@ -51,7 +43,8 @@ export default async function BrowsePage({
 
         {/* Product grid */}
         {filteredProducts.length === 0 ? (
-          <div className="rounded-md border p-12 text-center">
+          <div className="mx-auto max-w-sm rounded-2xl border border-border p-12 text-center">
+            <Compass className="mx-auto mb-4 size-10 text-muted-foreground/40" />
             <p className="text-muted-foreground">Ingen produkter fundet.</p>
           </div>
         ) : (

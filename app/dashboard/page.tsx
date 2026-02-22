@@ -12,6 +12,13 @@ import { RecommendationSection } from './_components/recommendation-section'
 import { CompletedJourneyCard } from './_components/completed-journey-card'
 import { NotificationBell } from './_components/notification-bell'
 
+function getGreeting(): string {
+  const hour = new Date().getHours()
+  if (hour < 10) return 'Godmorgen'
+  if (hour < 17) return 'Hej'
+  return 'God aften'
+}
+
 export default async function DashboardPage() {
   const user = await requireAuth()
 
@@ -36,27 +43,27 @@ export default async function DashboardPage() {
     <div className="flex min-h-screen flex-col px-4 py-6 sm:px-8 sm:py-8">
       <div className="mx-auto w-full max-w-2xl">
         {/* Header */}
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-              Hej, {displayName}!
+            <Link href="/" className="mb-2 block font-serif text-lg text-primary">
+              FamilyMind
+            </Link>
+            <h1 className="font-serif text-2xl sm:text-3xl">
+              {getGreeting()}, {displayName}
             </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Velkommen tilbage til FamilyMind
-            </p>
           </div>
           <div className="flex items-center gap-1">
             <NotificationBell />
             <Link
               href="/dashboard/progress"
-              className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+              className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary"
             >
               <TrendingUp className="size-4" />
               <span className="hidden sm:inline">Fremgang</span>
             </Link>
             <Link
               href="/dashboard/settings"
-              className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+              className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary"
             >
               <Settings className="size-4" />
               <span className="hidden sm:inline">Indstillinger</span>
