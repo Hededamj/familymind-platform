@@ -66,9 +66,9 @@
   --card-foreground: #1A1A1A;
   --popover: #FFFFFF;
   --popover-foreground: #1A1A1A;
-  /* FamilyMind Primary: Warm Blue #3878FF */
-  --primary: #3878FF;
-  --primary-foreground: #FFFFFF;
+  /* FamilyMind Primary: Dæmpet Nordisk Blågrøn #86A0A6 */
+  --primary: #86A0A6;
+  --primary-foreground: #1A1A1A;
   /* Secondary: Warm sand */
   --secondary: #F5F0EB;
   --secondary-foreground: #1A1A1A;
@@ -83,9 +83,9 @@
   /* Borders: Warm tone */
   --border: #E8E4DF;
   --input: #E8E4DF;
-  --ring: #3878FF;
+  --ring: #86A0A6;
   /* Charts */
-  --chart-1: #3878FF;
+  --chart-1: #86A0A6;
   --chart-2: #2A6B5A;
   --chart-3: #E8715A;
   --chart-4: #D4A853;
@@ -93,12 +93,12 @@
   /* Admin sidebar */
   --sidebar: #1A1A1A;
   --sidebar-foreground: rgba(255, 255, 255, 0.7);
-  --sidebar-primary: #3878FF;
+  --sidebar-primary: #86A0A6;
   --sidebar-primary-foreground: #FFFFFF;
   --sidebar-accent: rgba(255, 255, 255, 0.1);
   --sidebar-accent-foreground: #FFFFFF;
   --sidebar-border: rgba(255, 255, 255, 0.1);
-  --sidebar-ring: #3878FF;
+  --sidebar-ring: #86A0A6;
 }
 
 .dark {
@@ -108,7 +108,7 @@
   --card-foreground: #F5F0EB;
   --popover: #1A1A18;
   --popover-foreground: #F5F0EB;
-  --primary: #5B96FF;
+  --primary: #A3BCC2;
   --primary-foreground: #0F0F0E;
   --secondary: #252523;
   --secondary-foreground: #F5F0EB;
@@ -119,20 +119,20 @@
   --destructive: #E05A4F;
   --border: #333330;
   --input: #333330;
-  --ring: #5B96FF;
-  --chart-1: #5B96FF;
+  --ring: #A3BCC2;
+  --chart-1: #A3BCC2;
   --chart-2: #4ABA9E;
   --chart-3: #E8715A;
   --chart-4: #D4A853;
   --chart-5: #A88ED6;
   --sidebar: #0F0F0E;
   --sidebar-foreground: rgba(255, 255, 255, 0.7);
-  --sidebar-primary: #5B96FF;
+  --sidebar-primary: #A3BCC2;
   --sidebar-primary-foreground: #F5F0EB;
   --sidebar-accent: rgba(255, 255, 255, 0.1);
   --sidebar-accent-foreground: #F5F0EB;
   --sidebar-border: rgba(255, 255, 255, 0.1);
-  --sidebar-ring: #5B96FF;
+  --sidebar-ring: #A3BCC2;
 }
 
 @layer base {

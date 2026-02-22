@@ -757,8 +757,8 @@ export function ProductForm({
             <CardTitle>Abonnement</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="flex items-start gap-3 rounded-md border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950">
-              <Info className="mt-0.5 size-4 shrink-0 text-blue-600 dark:text-blue-400" />
+            <div className="flex items-start gap-3 rounded-md border border-primary/20 bg-primary/5 p-4">
+              <Info className="mt-0.5 size-4 shrink-0 text-primary" />
               <div className="space-y-1 text-sm">
                 <p>
                   Abonnementsproduktet giver adgang til alt indhold markeret med

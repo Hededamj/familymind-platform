@@ -318,19 +318,19 @@ export default function Home() {
       </section>
 
       {/* ─── Final CTA ────────────────────────────────────────── */}
-      <section className="bg-primary">
+      <section className="bg-[#1A1A1A]">
         <div className="mx-auto max-w-2xl px-4 py-16 text-center sm:px-8">
           <h2 className="font-serif text-3xl text-white sm:text-4xl">
             Klar til at komme i gang?
           </h2>
-          <p className="mx-auto mt-4 max-w-md text-base text-white/80">
+          <p className="mx-auto mt-4 max-w-md text-base text-white/70">
             Begynd din rejse mod et tryggere og mere kærligt forældreskab.
             Det tager kun 2 minutter at oprette din konto.
           </p>
           <Button
             asChild
             size="lg"
-            className="mt-8 rounded-xl bg-white px-8 text-base text-primary hover:bg-white/90"
+            className="mt-8 rounded-xl bg-primary px-8 text-base text-primary-foreground hover:bg-primary/90"
           >
             <Link href="/signup">Opret din konto gratis</Link>
           </Button>

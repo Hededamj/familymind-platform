@@ -32,7 +32,7 @@ export function BrowseFilters() {
           onClick={() => handleFilter(pt.value)}
           className={`rounded-full px-5 py-2 text-sm font-medium transition-colors ${
             currentType === pt.value
-              ? 'bg-primary text-white'
+              ? 'bg-primary text-primary-foreground'
               : 'border border-border bg-white text-muted-foreground hover:border-primary hover:text-primary'
           }`}
         >
