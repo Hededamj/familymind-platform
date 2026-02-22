@@ -56,7 +56,7 @@ export default async function ContentPage({
   const user = await getCurrentUser()
   const hasAccess = user
     ? await canAccessContent(user.id, content.id)
-    : content.accessLevel === 'FREE'
+    : content.isFree || content.accessLevel === 'FREE'
 
   // Resolve thumbnail
   const thumbnailUrl = content.bunnyVideoId
