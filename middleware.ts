@@ -40,10 +40,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // Auth routes: redirect to dashboard if already authenticated
+  // Auth routes: redirect if already authenticated
   if ((path === '/login' || path === '/signup') && user) {
     const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
+    url.pathname = '/auth/callback'
     return NextResponse.redirect(url)
   }
 

@@ -43,6 +43,24 @@ function LoginForm() {
       return
     }
 
+    // If no explicit redirect was given, check if user is admin
+    const explicitRedirect = searchParams.get('redirectTo')
+    if (!explicitRedirect) {
+      try {
+        const res = await fetch('/api/auth/role')
+        if (res.ok) {
+          const { role } = await res.json()
+          if (role === 'ADMIN') {
+            router.push('/admin')
+            router.refresh()
+            return
+          }
+        }
+      } catch {
+        // Fall through to default redirect
+      }
+    }
+
     router.push(redirectTo)
     router.refresh()
   }
