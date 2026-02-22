@@ -13,10 +13,11 @@ import * as React from 'react'
 
 interface EmailLayoutProps {
   preview?: string
+  brandName?: string
   children: React.ReactNode
 }
 
-export function EmailLayout({ preview, children }: EmailLayoutProps) {
+export function EmailLayout({ preview, brandName = 'FamilyMind', children }: EmailLayoutProps) {
   return (
     <Html>
       <Head />
@@ -25,7 +26,7 @@ export function EmailLayout({ preview, children }: EmailLayoutProps) {
         <Container style={container}>
           {/* Header / Logo */}
           <Section style={header}>
-            <Text style={logo}>FamilyMind</Text>
+            <Text style={logo}>{brandName}</Text>
           </Section>
 
           {/* Content */}
@@ -35,7 +36,7 @@ export function EmailLayout({ preview, children }: EmailLayoutProps) {
           <Hr style={hr} />
           <Section style={footer}>
             <Text style={footerText}>
-              Du modtager denne e-mail, fordi du har en konto hos FamilyMind.
+              Du modtager denne e-mail, fordi du har en konto hos {brandName}.
             </Text>
             <Text style={footerText}>
               <Link href="{{unsubscribeUrl}}" style={footerLink}>
@@ -47,7 +48,7 @@ export function EmailLayout({ preview, children }: EmailLayoutProps) {
               </Link>
             </Text>
             <Text style={footerCopyright}>
-              &copy; {new Date().getFullYear()} FamilyMind. Alle rettigheder forbeholdes.
+              &copy; {new Date().getFullYear()} {brandName}. Alle rettigheder forbeholdes.
             </Text>
           </Section>
         </Container>

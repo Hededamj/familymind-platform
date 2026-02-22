@@ -154,7 +154,7 @@ async function main() {
 
   // -- Dashboard Messages (5 states) --
   await Promise.all([
-    prisma.dashboardMessage.upsert({ where: { stateKey: 'new_user' }, update: {}, create: { stateKey: 'new_user', heading: 'Velkommen til FamilyMind!', body: 'Vi har fundet nogle anbefalinger til dig baseret på din profil.', ctaLabel: 'Se anbefalinger', ctaUrl: '/browse' } }),
+    prisma.dashboardMessage.upsert({ where: { stateKey: 'new_user' }, update: {}, create: { stateKey: 'new_user', heading: 'Velkommen!', body: 'Vi har fundet nogle anbefalinger til dig baseret på din profil.', ctaLabel: 'Se anbefalinger', ctaUrl: '/browse' } }),
     prisma.dashboardMessage.upsert({ where: { stateKey: 'active_journey' }, update: {}, create: { stateKey: 'active_journey', heading: 'Fortsæt din rejse', body: 'Du er godt på vej. Fortsæt hvor du slap.', ctaLabel: 'Fortsæt', ctaUrl: '/dashboard' } }),
     prisma.dashboardMessage.upsert({ where: { stateKey: 'active_journey_plus_courses' }, update: {}, create: { stateKey: 'active_journey_plus_courses', heading: 'Din dag venter', body: 'Fortsæt din rejse og dine kurser nedenfor.', ctaLabel: 'Fortsæt', ctaUrl: '/dashboard' } }),
     prisma.dashboardMessage.upsert({ where: { stateKey: 'no_journey_has_courses' }, update: {}, create: { stateKey: 'no_journey_has_courses', heading: 'Klar til en rejse?', body: 'Du følger kurser, men har du overvejet en struktureret rejse?', ctaLabel: 'Udforsk rejser', ctaUrl: '/browse' } }),
@@ -166,7 +166,7 @@ async function main() {
     prisma.emailTemplate.upsert({ where: { templateKey: 'weekly_plan' }, update: {}, create: { templateKey: 'weekly_plan', subject: 'Din uge er klar, {{userName}}', bodyHtml: '<h1>Hej {{userName}}</h1><p>Din nye uge i {{journeyTitle}} er klar. Log ind og se hvad der venter dig.</p>', description: 'Sent weekly when a new journey week is ready' } }),
     prisma.emailTemplate.upsert({ where: { templateKey: 'midweek_nudge' }, update: {}, create: { templateKey: 'midweek_nudge', subject: 'Husk din rejse, {{userName}}', bodyHtml: '<h1>Hej {{userName}}</h1><p>Du har ikke åbnet dit indhold endnu i denne uge. Tag et kig?</p>', description: 'Sent mid-week if user has not opened content' } }),
     prisma.emailTemplate.upsert({ where: { templateKey: 'reflection' }, update: {}, create: { templateKey: 'reflection', subject: 'Tid til refleksion', bodyHtml: '<h1>Hej {{userName}}</h1><p>Du har set dit indhold — nu er det tid til at reflektere. Hvordan gik det?</p>', description: 'Sent if user consumed content but has not checked in' } }),
-    prisma.emailTemplate.upsert({ where: { templateKey: 'monthly_progress' }, update: {}, create: { templateKey: 'monthly_progress', subject: 'Din månedlige fremgang', bodyHtml: '<h1>Hej {{userName}}</h1><p>Her er din fremgang denne måned i FamilyMind.</p>', description: 'Monthly progress summary' } }),
+    prisma.emailTemplate.upsert({ where: { templateKey: 'monthly_progress' }, update: {}, create: { templateKey: 'monthly_progress', subject: 'Din månedlige fremgang', bodyHtml: '<h1>Hej {{userName}}</h1><p>Her er din fremgang denne måned i {{brandName}}.</p>', description: 'Monthly progress summary' } }),
     prisma.emailTemplate.upsert({ where: { templateKey: 'reengagement_tier1' }, update: {}, create: { templateKey: 'reengagement_tier1', subject: 'Vi savner dig, {{userName}}', bodyHtml: '<h1>Hej {{userName}}</h1><p>Det er et stykke tid siden vi har set dig. Hvad med at tage et hurtigt kig?</p>', description: 'Re-engagement tier 1: gentle reminder' } }),
     prisma.emailTemplate.upsert({ where: { templateKey: 'reengagement_tier2' }, update: {}, create: { templateKey: 'reengagement_tier2', subject: 'Din rejse venter stadig', bodyHtml: '<h1>Hej {{userName}}</h1><p>Din rejse i {{journeyTitle}} venter stadig på dig. Hop ind igen?</p>', description: 'Re-engagement tier 2: journey reminder' } }),
     prisma.emailTemplate.upsert({ where: { templateKey: 'reengagement_tier3' }, update: {}, create: { templateKey: 'reengagement_tier3', subject: 'Nyt indhold du måske har misset', bodyHtml: '<h1>Hej {{userName}}</h1><p>Der er kommet nyt indhold siden sidst. Se hvad der er nyt.</p>', description: 'Re-engagement tier 3: new content highlight' } }),
@@ -245,8 +245,8 @@ async function main() {
     () => prisma.onboardingQuestion.create({ data: { questionText: 'Hvornår har du mest tid til at lære?', questionType: 'SINGLE_SELECT', position: 4, isActive: true } })
   )
   const q5 = await createIfNotExists(
-    () => prisma.onboardingQuestion.findFirst({ where: { questionText: 'Hvad er dit mål med FamilyMind?' } }),
-    () => prisma.onboardingQuestion.create({ data: { questionText: 'Hvad er dit mål med FamilyMind?', questionType: 'SINGLE_SELECT', position: 5, isActive: true } })
+    () => prisma.onboardingQuestion.findFirst({ where: { questionText: 'Hvad er dit mål?' } }),
+    () => prisma.onboardingQuestion.create({ data: { questionText: 'Hvad er dit mål?', questionType: 'SINGLE_SELECT', position: 5, isActive: true } })
   )
 
   // Create tags (idempotent via slug)

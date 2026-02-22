@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { getResend } from '@/lib/resend'
+import { getTenantConfig } from '@/lib/services/tenant.service'
 import type { InAppNotificationType } from '@prisma/client'
 
 // ---------------------------------------------------------------------------
@@ -36,9 +37,13 @@ export async function sendTemplatedEmail(
     return null
   }
 
+  // Load tenant config for brand-aware email settings
+  const tenant = await getTenantConfig()
+
   // Interpolate variables into subject and body
   const vars: Record<string, string> = {
     userName: user.name || user.email.split('@')[0],
+    brandName: tenant.brandName,
     appUrl: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
     unsubscribeUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/settings`,
     ...variables,
@@ -58,7 +63,8 @@ export async function sendTemplatedEmail(
 
   const resend = getResend()
   const fromAddress =
-    process.env.RESEND_FROM_EMAIL || 'FamilyMind <noreply@familymind.dk>'
+    process.env.RESEND_FROM_EMAIL ||
+    `${tenant.emailFromName || tenant.brandName} <${tenant.emailFromEmail || 'noreply@familymind.dk'}>`
 
   const { data, error } = await resend.emails.send({
     from: fromAddress,

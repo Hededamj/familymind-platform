@@ -15,9 +15,17 @@ import {
   Bell,
   RefreshCw,
   Trophy,
+  Palette,
 } from 'lucide-react'
 
 const settingsSections = [
+  {
+    href: '/admin/settings/branding',
+    title: 'Branding',
+    description:
+      'Tilpas brandnavn, farver, tekster og visuel identitet',
+    icon: Palette,
+  },
   {
     href: '/admin/settings/onboarding',
     title: 'Onboarding Quiz',
