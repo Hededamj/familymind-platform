@@ -27,16 +27,16 @@ export default async function SettingsPage() {
           Tilbage
         </Link>
 
-        <h1 className="mb-1 font-serif text-3xl">Indstillinger</h1>
+        <h1 className="mb-1 font-serif text-3xl">Min konto</h1>
         <p className="mb-8 text-sm text-muted-foreground">
-          Administrer din konto og dit abonnement
+          Din profil og dit abonnement
         </p>
 
         {/* Profile section */}
         <div className="mb-6">
           <div className="mb-3 flex items-center gap-2">
             <User className="size-4 text-muted-foreground" />
-            <h2 className="font-serif text-lg">Profil</h2>
+            <h2 className="font-serif text-lg">Om dig</h2>
           </div>
           <div className="rounded-2xl border border-border bg-white p-6">
             <div className="space-y-4">
@@ -67,7 +67,7 @@ export default async function SettingsPage() {
         <div>
           <div className="mb-3 flex items-center gap-2">
             <CreditCard className="size-4 text-muted-foreground" />
-            <h2 className="font-serif text-lg">Abonnement</h2>
+            <h2 className="font-serif text-lg">Dit abonnement</h2>
           </div>
           <div className="rounded-2xl border border-border bg-white p-6">
             {subscriptionEntitlement ? (
@@ -110,7 +110,7 @@ export default async function SettingsPage() {
           <div className="rounded-2xl border border-border bg-white p-6">
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">
-                Log ud af din konto
+                Vil du skifte bruger eller logge ud?
               </p>
               <LogoutButton />
             </div>

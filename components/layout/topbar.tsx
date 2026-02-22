@@ -53,7 +53,7 @@ export function Topbar() {
                   : 'text-muted-foreground'
               }`}
             >
-              Udforsk
+              Opdag
             </Link>
             <Link
               href="/subscribe"
@@ -77,7 +77,7 @@ export function Topbar() {
           ) : isLoggedIn ? (
             <>
               <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
-                <Link href="/dashboard">Dashboard</Link>
+                <Link href="/dashboard">Min side</Link>
               </Button>
               <Button variant="ghost" size="sm" onClick={handleLogout}>
                 <LogOut className="mr-1.5 size-3.5" />

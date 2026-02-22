@@ -27,10 +27,10 @@ export default async function BrowsePage({
         {/* Header */}
         <div className="mb-10 text-center">
           <h1 className="font-serif text-3xl sm:text-4xl">
-            Udforsk
+            Opdag
           </h1>
           <p className="mt-2 text-muted-foreground">
-            Find forløb, kurser og værktøjer der passer til din familie
+            Forløb, kurser og værktøjer til din familie
           </p>
         </div>
 

@@ -70,7 +70,7 @@ export default async function SubscribePage() {
               </p>
               <Button asChild variant="outline" className="rounded-xl">
                 <Link href="/dashboard/settings">
-                  Administrer abonnement
+                  Mit abonnement
                 </Link>
               </Button>
             </div>

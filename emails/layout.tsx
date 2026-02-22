@@ -43,7 +43,7 @@ export function EmailLayout({ preview, children }: EmailLayoutProps) {
               </Link>
               {' | '}
               <Link href="{{appUrl}}/dashboard/settings" style={footerLink}>
-                Administrer indstillinger
+                Min konto
               </Link>
             </Text>
             <Text style={footerCopyright}>

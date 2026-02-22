@@ -88,7 +88,7 @@ export default async function ContentPage({
             className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="size-4" />
-            Tilbage
+            Tilbage til min side
           </Link>
 
           {/* Video player */}

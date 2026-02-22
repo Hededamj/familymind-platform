@@ -35,7 +35,7 @@ export function Footer() {
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
                 <Link href="/browse" className="hover:text-foreground">
-                  Udforsk indhold
+                  Opdag indhold
                 </Link>
               </li>
               <li>
@@ -45,7 +45,7 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/dashboard" className="hover:text-foreground">
-                  Mit dashboard
+                  Min side
                 </Link>
               </li>
             </ul>
