@@ -3,8 +3,9 @@ import { requireAuth } from '@/lib/auth'
 import { getUserEntitlements } from '@/lib/services/entitlement.service'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, User, CreditCard } from 'lucide-react'
+import { ArrowLeft, User, CreditCard, LogOut } from 'lucide-react'
 import { ManageSubscriptionButton } from './_components/manage-subscription-button'
+import { LogoutButton } from './_components/logout-button'
 
 export default async function SettingsPage() {
   const user = await requireAuth()
@@ -97,6 +98,22 @@ export default async function SettingsPage() {
                 </Button>
               </div>
             )}
+          </div>
+        </div>
+
+        {/* Logout section */}
+        <div className="mt-6">
+          <div className="mb-3 flex items-center gap-2">
+            <LogOut className="size-4 text-muted-foreground" />
+            <h2 className="font-serif text-lg">Konto</h2>
+          </div>
+          <div className="rounded-2xl border border-border bg-white p-6">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                Log ud af din konto
+              </p>
+              <LogoutButton />
+            </div>
           </div>
         </div>
       </div>

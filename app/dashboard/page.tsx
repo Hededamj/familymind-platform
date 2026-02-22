@@ -11,6 +11,7 @@ import { CourseProgressCard } from './_components/course-progress-card'
 import { RecommendationSection } from './_components/recommendation-section'
 import { CompletedJourneyCard } from './_components/completed-journey-card'
 import { NotificationBell } from './_components/notification-bell'
+import { LogoutButton } from './settings/_components/logout-button'
 
 function getGreeting(): string {
   const hour = new Date().getHours()
@@ -68,6 +69,7 @@ export default async function DashboardPage() {
               <Settings className="size-4" />
               <span className="hidden sm:inline">Indstillinger</span>
             </Link>
+            <LogoutButton variant="icon" />
           </div>
         </div>
 
