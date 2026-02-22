@@ -1,31 +1,23 @@
 import Link from 'next/link'
-import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth'
 import { getUserEntitlements } from '@/lib/services/entitlement.service'
 import { prisma } from '@/lib/prisma'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
+import { Check } from 'lucide-react'
 import { SubscribeCTA } from './_components/subscribe-cta'
 
 const benefits = [
-  'Adgang til alle rejser og struktureret indhold',
-  'Nye kurser og videoer l\u00f8bende',
-  'Ugentlige planer og p\u00e5mindelser',
-  'Check-ins og refleksion',
+  'Alle strukturerede forløb',
+  'Videokurser og artikler',
+  'Daglige øvelser og refleksion',
+  'Check-ins og fremgangssporing',
   'Personlige anbefalinger',
+  'Adgang til fællesskabet',
 ]
 
 export default async function SubscribePage() {
   const user = await getCurrentUser()
 
-  // Check if user already has an active subscription
   let hasSubscription = false
   if (user) {
     const entitlements = await getUserEntitlements(user.id)
@@ -34,87 +26,58 @@ export default async function SubscribePage() {
     )
   }
 
-  // Find the subscription product
   const subscriptionProduct = await prisma.product.findFirst({
     where: { type: 'SUBSCRIPTION', isActive: true },
   })
 
   return (
-    <div className="flex min-h-screen flex-col px-4 py-8 sm:px-8">
+    <div className="bg-sand px-4 py-16 sm:px-8">
       <div className="mx-auto w-full max-w-lg">
-        {/* Back link */}
-        <Link
-          href="/"
-          className="mb-6 inline-block text-sm text-muted-foreground hover:text-foreground"
-        >
-          &larr; Tilbage
-        </Link>
-
         {/* Header */}
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+        <div className="mb-10 text-center">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.08em] text-primary">
             FamilyMind Abonnement
+          </p>
+          <h1 className="font-serif text-3xl sm:text-4xl">
+            Alt du har brug for — samlet ét sted
           </h1>
-          <p className="mt-3 text-lg text-muted-foreground">
-            Alt du har brug for som forælder — samlet ét sted.
+          <p className="mt-3 text-muted-foreground">
+            Ingen bindingsperiode. Afmeld når som helst.
           </p>
         </div>
 
-        {/* Price */}
-        <div className="mb-8 text-center">
-          <p className="text-4xl font-bold">
-            149 kr
-            <span className="text-lg font-normal text-muted-foreground">
-              /måned
-            </span>
-          </p>
-        </div>
+        {/* Price card */}
+        <div className="rounded-2xl border border-border bg-white p-8 shadow-sm">
+          <div className="mb-6 text-center">
+            <span className="font-serif text-5xl">149 kr</span>
+            <span className="text-muted-foreground"> /måned</span>
+          </div>
 
-        <Separator className="mb-8" />
+          <ul className="mb-8 space-y-3">
+            {benefits.map((benefit) => (
+              <li key={benefit} className="flex items-start gap-3 text-sm">
+                <Check className="mt-0.5 size-4 shrink-0 text-success" />
+                <span>{benefit}</span>
+              </li>
+            ))}
+          </ul>
 
-        {/* Benefits */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Det får du med abonnementet</CardTitle>
-            <CardDescription>
-              Fuld adgang til alt indhold og værktøjer
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-4">
-              {benefits.map((benefit) => (
-                <li key={benefit} className="flex items-start gap-3">
-                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-                    &#10003;
-                  </span>
-                  <span className="text-sm">{benefit}</span>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-
-        {/* CTA */}
-        <div className="mt-6">
+          {/* CTA */}
           {hasSubscription ? (
-            <Card>
-              <CardContent className="pt-6">
-                <p className="text-center font-medium text-green-600">
-                  Du er allerede abonnent
-                </p>
-                <div className="mt-4 flex justify-center">
-                  <Button asChild>
-                    <Link href="/dashboard/settings">
-                      Administrer abonnement
-                    </Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="text-center">
+              <p className="mb-4 text-sm font-medium text-success">
+                Du er allerede abonnent
+              </p>
+              <Button asChild variant="outline" className="rounded-xl">
+                <Link href="/dashboard/settings">
+                  Administrer abonnement
+                </Link>
+              </Button>
+            </div>
           ) : user && subscriptionProduct ? (
             <SubscribeCTA productId={subscriptionProduct.id} />
           ) : !user ? (
-            <Button asChild className="w-full" size="lg">
+            <Button asChild className="w-full rounded-xl" size="lg">
               <Link href="/login?redirect=/subscribe">
                 Log ind for at starte abonnement
               </Link>
@@ -125,6 +88,10 @@ export default async function SubscribePage() {
             </p>
           )}
         </div>
+
+        <p className="mt-4 text-center text-xs text-muted-foreground">
+          Prøv gratis — betal først når du er klar
+        </p>
       </div>
     </div>
   )

@@ -40,7 +40,7 @@ export default async function PostDetailPage({
   }
 
   return (
-    <div className="flex min-h-screen flex-col px-4 py-6 sm:px-8 sm:py-8">
+    <div className="px-4 py-6 sm:px-8 sm:py-8">
       <div className="mx-auto w-full max-w-2xl">
         {/* Back link */}
         <Link

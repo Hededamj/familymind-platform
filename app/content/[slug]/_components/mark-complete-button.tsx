@@ -25,18 +25,22 @@ export function MarkCompleteButton({
       try {
         await markCompletedAction(contentUnitId)
         setCompleted(true)
-        toast.success('Indhold markeret som f\u00e6rdigt!')
+        toast.success('Indhold markeret som fuldført!')
       } catch {
-        toast.error('Noget gik galt. Pr\u00f8v igen.')
+        toast.error('Noget gik galt. Prøv igen.')
       }
     })
   }
 
   if (completed) {
     return (
-      <Button variant="outline" disabled className="w-full sm:w-auto">
+      <Button
+        variant="outline"
+        disabled
+        className="w-full rounded-xl border-success/30 bg-success/5 text-success sm:w-auto"
+      >
         <Check className="mr-2 size-4" />
-        F\u00e6rdig
+        Fuldført
       </Button>
     )
   }
@@ -45,14 +49,14 @@ export function MarkCompleteButton({
     <Button
       onClick={handleClick}
       disabled={isPending}
-      className="w-full sm:w-auto"
+      className="w-full rounded-xl sm:w-auto"
     >
       {isPending ? (
         <Loader2 className="mr-2 size-4 animate-spin" />
       ) : (
         <Check className="mr-2 size-4" />
       )}
-      Mark\u00e9r som f\u00e6rdig
+      Markér som fuldført
     </Button>
   )
 }

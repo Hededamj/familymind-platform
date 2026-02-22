@@ -120,7 +120,7 @@ export default async function DayViewPage({
   // Block access to future days the user hasn't reached yet
   if (isActiveForThisJourney && !isDayCompleted && !isCurrentDay) {
     return (
-      <div className="flex min-h-screen flex-col px-4 py-6 pb-24 sm:px-8 sm:py-8">
+      <div className="px-4 py-6 pb-24 sm:px-8 sm:py-8">
         <div className="mx-auto w-full max-w-2xl">
           <Link
             href={`/journeys/${slug}`}
@@ -129,20 +129,18 @@ export default async function DayViewPage({
             <ArrowLeft className="size-4" />
             Tilbage til oversigt
           </Link>
-          <Card>
-            <CardContent className="py-6 text-center">
-              <Lock className="mx-auto mb-3 size-8 text-muted-foreground" />
-              <p className="mb-2 font-medium">Denne dag er ikke tilgængelig endnu</p>
-              <p className="mb-4 text-sm text-muted-foreground">
-                Gennemfør de tidligere dage for at låse op for denne dag.
-              </p>
-              <Button asChild>
-                <Link href={`/journeys/${slug}`}>
-                  Gå til forløbsoversigt
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
+          <div className="rounded-2xl border border-border bg-white p-8 text-center">
+            <Lock className="mx-auto mb-3 size-8 text-muted-foreground/40" />
+            <p className="mb-2 font-serif text-lg">Denne dag er ikke tilgængelig endnu</p>
+            <p className="mb-4 text-sm text-muted-foreground">
+              Gennemfør de tidligere dage for at låse op for denne dag.
+            </p>
+            <Button asChild className="rounded-xl">
+              <Link href={`/journeys/${slug}`}>
+                Gå til forløbsoversigt
+              </Link>
+            </Button>
+          </div>
         </div>
       </div>
     )
@@ -182,7 +180,7 @@ export default async function DayViewPage({
   const checkInOptions = await getCheckInOptions()
 
   return (
-    <div className="flex min-h-screen flex-col px-4 py-6 pb-24 sm:px-8 sm:py-8">
+    <div className="px-4 py-6 pb-24 sm:px-8 sm:py-8">
       <div className="mx-auto w-full max-w-2xl">
         {/* Back link */}
         <Link
@@ -196,16 +194,16 @@ export default async function DayViewPage({
         {/* Day header */}
         <div className="mb-6">
           <div className="mb-2 flex flex-wrap items-center gap-2">
-            <Badge variant="secondary">{targetPhase.title}</Badge>
+            <Badge variant="secondary" className="rounded-full text-xs">{targetPhase.title}</Badge>
             <span className="text-xs text-muted-foreground uppercase tracking-wide">
               Dag {dayNumber} af {totalDays}
             </span>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+          <h1 className="font-serif text-2xl sm:text-3xl">
             {targetDay.title || `Dag ${dayNumber}`}
           </h1>
           {isDayCompleted && (
-            <Badge variant="outline" className="mt-2 text-green-600">
+            <Badge variant="outline" className="mt-2 rounded-full text-success">
               Gennemført
             </Badge>
           )}
@@ -214,7 +212,7 @@ export default async function DayViewPage({
         {/* Content section */}
         {contentItems.length > 0 && (
           <section className="mb-6 space-y-4">
-            <h2 className="text-lg font-semibold">Dagens indhold</h2>
+            <h2 className="font-serif text-lg">Dagens indhold</h2>
             {contentItems.map((content) => (
               <Card key={content.id} className="overflow-hidden">
                 {/* Video player for accessible VIDEO content */}
@@ -306,15 +304,15 @@ export default async function DayViewPage({
         {/* Action card */}
         {targetDay.actions.length > 0 && (
           <section className="mb-6 space-y-4">
-            <h2 className="text-lg font-semibold">Dagens handling</h2>
+            <h2 className="font-serif text-lg">Dagens handling</h2>
             {targetDay.actions.map((action) => (
               <Card
                 key={action.id}
-                className="border-orange-200 bg-orange-50/50 dark:border-orange-900 dark:bg-orange-950/20"
+                className="border-coral/20 bg-coral-light"
               >
                 <CardContent className="pt-6">
                   <div className="flex items-start gap-3">
-                    <ClipboardList className="mt-0.5 size-5 flex-shrink-0 text-orange-500" />
+                    <ClipboardList className="mt-0.5 size-5 flex-shrink-0 text-coral" />
                     <div className="min-w-0 flex-1">
                       <p className="font-medium">{action.actionText}</p>
                       {action.reflectionPrompt && (
@@ -353,18 +351,16 @@ export default async function DayViewPage({
 
         {/* Already completed day message */}
         {isDayCompleted && !isCurrentDay && (
-          <Card className="border-green-200 bg-green-50/50 dark:border-green-900 dark:bg-green-950/20">
-            <CardContent className="py-6 text-center">
-              <p className="text-sm font-medium text-green-700 dark:text-green-400">
-                Du har allerede gennemført denne dag.
-              </p>
-              <Button asChild variant="outline" className="mt-4" size="sm">
-                <Link href={`/journeys/${slug}`}>
-                  Tilbage til oversigt
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
+          <div className="rounded-2xl border border-success/20 bg-success-light p-6 text-center">
+            <p className="text-sm font-medium text-success">
+              Du har allerede gennemført denne dag.
+            </p>
+            <Button asChild variant="outline" className="mt-4 rounded-xl" size="sm">
+              <Link href={`/journeys/${slug}`}>
+                Tilbage til oversigt
+              </Link>
+            </Button>
+          </div>
         )}
 
         {/* Not started yet */}

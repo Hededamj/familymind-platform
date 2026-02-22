@@ -17,11 +17,13 @@ export default function AdminError({
 
   return (
     <div className="p-6 text-center">
-      <h2 className="mb-2 text-lg font-semibold">Fejl i admin</h2>
+      <h2 className="mb-2 font-serif text-lg">Fejl i admin</h2>
       <p className="mb-4 text-sm text-muted-foreground">
         {error.message || 'Noget gik galt. Prøv igen.'}
       </p>
-      <Button onClick={reset}>Prøv igen</Button>
+      <Button onClick={reset} className="rounded-xl">
+        Prøv igen
+      </Button>
     </div>
   )
 }

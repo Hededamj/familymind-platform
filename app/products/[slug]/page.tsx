@@ -4,18 +4,11 @@ import { getProduct } from '@/lib/services/product.service'
 import { getCurrentUser } from '@/lib/auth'
 import { getUserEntitlements } from '@/lib/services/entitlement.service'
 import { getCourseProgress } from '@/lib/services/progress.service'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
+import { Progress } from '@/components/ui/progress'
 import { BuyButton } from './_components/buy-button'
-import { Check, Circle, CircleDot } from 'lucide-react'
+import { ArrowLeft, Check, Circle, CircleDot, Package } from 'lucide-react'
 
 function formatPrice(amountCents: number, currency: string): string {
   return new Intl.NumberFormat('da-DK', {
@@ -69,26 +62,27 @@ export default async function ProductDetailPage({
       : null
 
   return (
-    <div className="flex min-h-screen flex-col px-4 py-8 sm:px-8">
+    <div className="px-4 py-6 sm:px-8 sm:py-8">
       <div className="mx-auto w-full max-w-2xl">
         {/* Back link */}
         <Link
-          href="/"
-          className="mb-6 inline-block text-sm text-muted-foreground hover:text-foreground"
+          href="/browse"
+          className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
         >
-          &larr; Tilbage
+          <ArrowLeft className="size-4" />
+          Tilbage
         </Link>
 
         {/* Product header */}
         <div className="mb-6">
-          <div className="mb-2 flex items-center gap-2">
-            <Badge variant="secondary">{productTypeLabel(product.type)}</Badge>
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+          <Badge variant="secondary" className="mb-3 rounded-full text-xs">
+            {productTypeLabel(product.type)}
+          </Badge>
+          <h1 className="font-serif text-2xl sm:text-3xl">
             {product.title}
           </h1>
           {product.description && (
-            <p className="mt-3 text-lg text-muted-foreground">
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
               {product.description}
             </p>
           )}
@@ -96,80 +90,73 @@ export default async function ProductDetailPage({
 
         {/* Price */}
         <div className="mb-6">
-          <p className="text-2xl font-semibold">
+          <p className="font-serif text-3xl">
             {formatPrice(product.priceAmountCents, product.priceCurrency)}
             {product.type === 'SUBSCRIPTION' && (
               <span className="text-base font-normal text-muted-foreground">
                 {' '}
-                / måned
+                /måned
               </span>
             )}
           </p>
         </div>
 
-        <Separator className="mb-6" />
+        <div className="mb-6 border-t border-border" />
 
         {/* Course lessons with progress */}
         {product.type === 'COURSE' && product.courseLessons.length > 0 && (
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Indhold i kurset</CardTitle>
-              <CardDescription>
+          <div className="mb-6">
+            <div className="mb-4">
+              <h2 className="font-serif text-lg">Indhold i kurset</h2>
+              <p className="text-sm text-muted-foreground">
                 {courseProgress
-                  ? `${courseProgress.completedLessons} af ${courseProgress.totalLessons} lektioner f\u00e6rdig`
+                  ? `${courseProgress.completedLessons} af ${courseProgress.totalLessons} lektioner fuldført`
                   : `${product.courseLessons.length} ${product.courseLessons.length === 1 ? 'lektion' : 'lektioner'}`}
-              </CardDescription>
-              {/* Progress bar */}
+              </p>
               {courseProgress && (
                 <div className="mt-3">
                   <div className="mb-1 flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Fremskridt</span>
                     <span className="font-medium">{courseProgress.percentComplete}%</span>
                   </div>
-                  <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-                    <div
-                      className="h-full rounded-full bg-primary transition-all"
-                      style={{ width: `${courseProgress.percentComplete}%` }}
-                    />
-                  </div>
+                  <Progress value={courseProgress.percentComplete} className="h-2" />
                 </div>
               )}
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-3">
+            </div>
+
+            <div className="rounded-2xl border border-border bg-white">
+              <ul className="divide-y divide-border">
                 {courseProgress
                   ? courseProgress.lessons.map((lesson, index) => (
-                      <li key={lesson.id} className="flex items-start gap-3">
-                        <span className="flex h-6 w-6 shrink-0 items-center justify-center">
-                          {lesson.completed ? (
-                            <Check className="size-5 text-green-600" />
-                          ) : lesson.started ? (
-                            <CircleDot className="size-5 text-blue-500" />
-                          ) : (
-                            <Circle className="size-5 text-muted-foreground" />
-                          )}
-                        </span>
-                        <div className="flex-1">
-                          <Link
-                            href={`/content/${lesson.slug}`}
-                            className="font-medium hover:underline"
-                          >
-                            {index + 1}. {lesson.title}
-                          </Link>
-                        </div>
+                      <li key={lesson.id} className="flex items-center gap-3 px-5 py-4">
+                        {lesson.completed ? (
+                          <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-success text-white">
+                            <Check className="size-3.5" />
+                          </div>
+                        ) : lesson.started ? (
+                          <CircleDot className="size-6 shrink-0 text-primary" />
+                        ) : (
+                          <Circle className="size-6 shrink-0 text-muted-foreground/40" />
+                        )}
+                        <Link
+                          href={`/content/${lesson.slug}`}
+                          className="flex-1 text-sm font-medium hover:text-primary"
+                        >
+                          {index + 1}. {lesson.title}
+                        </Link>
                       </li>
                     ))
                   : product.courseLessons.map((lesson, index) => (
-                      <li key={lesson.id} className="flex items-start gap-3">
-                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium">
+                      <li key={lesson.id} className="flex items-center gap-3 px-5 py-4">
+                        <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-sand text-xs font-medium">
                           {index + 1}
                         </span>
-                        <div>
-                          <p className="font-medium">
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">
                             {lesson.contentUnit.title}
                           </p>
                           {lesson.contentUnit.durationMinutes && (
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-xs text-muted-foreground">
                               {lesson.contentUnit.durationMinutes} min.
                             </p>
                           )}
@@ -177,30 +164,34 @@ export default async function ProductDetailPage({
                       </li>
                     ))}
               </ul>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         )}
 
         {/* Bundle items */}
         {product.type === 'BUNDLE' && product.bundleItems.length > 0 && (
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Inkluderet i pakken</CardTitle>
-              <CardDescription>
+          <div className="mb-6">
+            <div className="mb-4">
+              <h2 className="font-serif text-lg">Inkluderet i pakken</h2>
+              <p className="text-sm text-muted-foreground">
                 {product.bundleItems.length}{' '}
                 {product.bundleItems.length === 1 ? 'produkt' : 'produkter'}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-3">
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-border bg-white">
+              <ul className="divide-y divide-border">
                 {product.bundleItems.map((item) => (
-                  <li key={item.id} className="flex items-start gap-3">
-                    <div>
-                      <p className="font-medium">
+                  <li key={item.id} className="flex items-center gap-3 px-5 py-4">
+                    <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-sand">
+                      <Package className="size-4 text-muted-foreground" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">
                         {item.includedProduct.title}
                       </p>
                       {item.includedProduct.description && (
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-xs text-muted-foreground line-clamp-1">
                           {item.includedProduct.description}
                         </p>
                       )}
@@ -208,29 +199,25 @@ export default async function ProductDetailPage({
                   </li>
                 ))}
               </ul>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         )}
 
         {/* Purchase section */}
-        <div className="mt-6">
+        <div className="mt-8">
           {alreadyOwned ? (
-            <Card>
-              <CardContent className="pt-6">
-                <p className="text-center font-medium text-green-600">
-                  Du har allerede adgang til dette produkt.
-                </p>
-                <div className="mt-4 flex justify-center">
-                  <Button asChild>
-                    <Link href="/dashboard">Gå til dashboard</Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="rounded-2xl border border-border bg-white p-6 text-center">
+              <p className="mb-4 text-sm font-medium text-success">
+                Du har allerede adgang til dette produkt.
+              </p>
+              <Button asChild variant="outline" className="rounded-xl">
+                <Link href="/dashboard">Gå til dashboard</Link>
+              </Button>
+            </div>
           ) : user ? (
             <BuyButton productId={product.id} productType={product.type} />
           ) : (
-            <Button asChild className="w-full" size="lg">
+            <Button asChild className="w-full rounded-xl" size="lg">
               <Link href={`/login?redirect=/products/${product.slug}`}>
                 Log ind for at købe
               </Link>

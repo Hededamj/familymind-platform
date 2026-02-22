@@ -23,7 +23,7 @@ export function VideoPlayer({ src, poster }: { src: string; poster?: string }) {
   }, [src])
 
   return (
-    <div className="aspect-video w-full overflow-hidden rounded-lg bg-black">
+    <div className="aspect-video w-full overflow-hidden rounded-2xl bg-black">
       <video
         ref={videoRef}
         poster={poster}

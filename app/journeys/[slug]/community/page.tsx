@@ -39,7 +39,7 @@ export default async function CommunityFeedPage({
   const feed = await getCohortFeed(cohort.id, undefined, user.id)
 
   return (
-    <div className="flex min-h-screen flex-col px-4 py-6 sm:px-8 sm:py-8">
+    <div className="px-4 py-6 sm:px-8 sm:py-8">
       <div className="mx-auto w-full max-w-2xl">
         {/* Back link */}
         <Link
@@ -52,14 +52,14 @@ export default async function CommunityFeedPage({
 
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+          <h1 className="font-serif text-2xl sm:text-3xl">
             Fællesskab
           </h1>
-          <p className="mt-1 text-muted-foreground">
+          <p className="mt-1 text-sm text-muted-foreground">
             {journey.title} — {cohort.name ?? 'Din gruppe'}
           </p>
           <div className="mt-3 flex items-center gap-2">
-            <Badge variant="secondary" className="gap-1">
+            <Badge variant="secondary" className="gap-1 rounded-full text-xs">
               <Users className="size-3" />
               {cohort._count.members} medlemmer
             </Badge>

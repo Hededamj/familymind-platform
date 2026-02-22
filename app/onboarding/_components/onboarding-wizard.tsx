@@ -2,13 +2,6 @@
 
 import { useState, useTransition } from 'react'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Slider } from '@/components/ui/slider'
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
@@ -308,6 +301,8 @@ export function OnboardingWizard({ questions }: Props) {
       {/* Top progress area */}
       <div className="px-4 pt-6 pb-2">
         <div className="mx-auto max-w-lg">
+          {/* Logo */}
+          <p className="mb-4 text-center font-serif text-lg">FamilyMind</p>
           <div className="mb-2 flex items-center justify-between text-sm text-muted-foreground">
             <span>
               Trin {currentStep + 1} af {totalSteps}
@@ -320,30 +315,30 @@ export function OnboardingWizard({ questions }: Props) {
 
       {/* Question card */}
       <div className="flex flex-1 items-start justify-center px-4 pt-6 pb-32 sm:items-center sm:pb-24 sm:pt-0">
-        <Card className="w-full max-w-lg border-0 shadow-none sm:border sm:shadow-sm">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xl sm:text-2xl">
+        <div className="w-full max-w-lg">
+          <div className="mb-2 pb-2">
+            <h2 className="font-serif text-xl sm:text-2xl">
               {question.questionText}
-            </CardTitle>
+            </h2>
             {question.helperText && (
-              <CardDescription className="text-base">
+              <p className="mt-1 text-sm text-muted-foreground sm:text-base">
                 {question.helperText}
-              </CardDescription>
+              </p>
             )}
-          </CardHeader>
-          <CardContent>{renderQuestion()}</CardContent>
-        </Card>
+          </div>
+          <div className="mt-4">{renderQuestion()}</div>
+        </div>
       </div>
 
       {/* Bottom navigation - fixed on mobile */}
-      <div className="fixed inset-x-0 bottom-0 border-t bg-background/95 px-4 py-4 backdrop-blur-sm sm:relative sm:border-t-0 sm:bg-transparent sm:backdrop-blur-none">
+      <div className="fixed inset-x-0 bottom-0 border-t border-border bg-background/95 px-4 py-4 backdrop-blur-sm sm:relative sm:border-t-0 sm:bg-transparent sm:backdrop-blur-none">
         <div className="mx-auto flex max-w-lg items-center gap-3">
           <Button
             variant="outline"
             size="lg"
             onClick={handleBack}
             disabled={currentStep === 0 || isPending}
-            className="h-12 flex-1 text-base"
+            className="h-12 flex-1 rounded-xl text-base"
           >
             <ChevronLeft className="mr-1 size-5" />
             Tilbage
@@ -352,7 +347,7 @@ export function OnboardingWizard({ questions }: Props) {
             size="lg"
             onClick={handleNext}
             disabled={!hasAnswer || isPending}
-            className="h-12 flex-1 text-base"
+            className="h-12 flex-1 rounded-xl text-base"
           >
             {isPending ? (
               <>

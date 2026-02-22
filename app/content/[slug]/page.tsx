@@ -8,8 +8,7 @@ import { getContentProgress } from '@/lib/services/progress.service'
 import { getSignedPlaybackUrl, getThumbnailUrl } from '@/lib/bunny'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
+import { ArrowLeft, Clock, Lock } from 'lucide-react'
 import { VideoPlayer } from './_components/video-player'
 import { MarkCompleteButton } from './_components/mark-complete-button'
 import { TrackStarted } from './_components/track-started'
@@ -24,21 +23,6 @@ function difficultyLabel(difficulty: string): string {
       return 'Avanceret'
     default:
       return difficulty
-  }
-}
-
-function difficultyVariant(
-  difficulty: string
-): 'default' | 'secondary' | 'destructive' | 'outline' {
-  switch (difficulty) {
-    case 'INTRODUCTORY':
-      return 'secondary'
-    case 'INTERMEDIATE':
-      return 'default'
-    case 'ADVANCED':
-      return 'destructive'
-    default:
-      return 'outline'
   }
 }
 
@@ -93,7 +77,7 @@ export default async function ContentPage({
     const isCompleted = !!progress?.completedAt
 
     return (
-      <div className="flex min-h-screen flex-col px-4 py-8 sm:px-8">
+      <div className="px-4 py-6 sm:px-8 sm:py-8">
         <div className="mx-auto w-full max-w-3xl">
           {/* Track content as started for authenticated users */}
           {user && <TrackStarted contentUnitId={content.id} />}
@@ -101,9 +85,10 @@ export default async function ContentPage({
           {/* Back link */}
           <Link
             href="/dashboard"
-            className="mb-6 inline-block text-sm text-muted-foreground hover:text-foreground"
+            className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
           >
-            &larr; Tilbage
+            <ArrowLeft className="size-4" />
+            Tilbage
           </Link>
 
           {/* Video player */}
@@ -120,7 +105,7 @@ export default async function ContentPage({
           {content.mediaType !== 'VIDEO' && content.mediaUrl && (
             <div className="mb-6">
               {content.mediaType === 'AUDIO' && (
-                <div className="rounded-lg border bg-muted p-6">
+                <div className="rounded-2xl border border-border bg-sand p-6">
                   <audio
                     src={content.mediaUrl}
                     controls
@@ -131,8 +116,8 @@ export default async function ContentPage({
                 </div>
               )}
               {content.mediaType === 'PDF' && (
-                <div className="rounded-lg border bg-muted p-6 text-center">
-                  <Button asChild>
+                <div className="rounded-2xl border border-border bg-sand p-6 text-center">
+                  <Button asChild className="rounded-xl">
                     <a
                       href={content.mediaUrl}
                       target="_blank"
@@ -148,45 +133,50 @@ export default async function ContentPage({
 
           {/* Content header */}
           <div className="mb-4">
-            <div className="mb-2 flex flex-wrap items-center gap-2">
-              <Badge variant="outline">{mediaTypeLabel(content.mediaType)}</Badge>
-              <Badge variant={difficultyVariant(content.difficulty)}>
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <Badge variant="secondary" className="rounded-full text-xs">
+                {mediaTypeLabel(content.mediaType)}
+              </Badge>
+              <Badge variant="outline" className="rounded-full text-xs">
                 {difficultyLabel(content.difficulty)}
               </Badge>
               {content.durationMinutes && (
-                <span className="text-sm text-muted-foreground">
+                <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                  <Clock className="size-3" />
                   {content.durationMinutes} min.
                 </span>
               )}
             </div>
-            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+            <h1 className="font-serif text-2xl sm:text-3xl">
               {content.title}
             </h1>
           </div>
 
           {/* Tags */}
           {content.tags.length > 0 && (
-            <div className="mb-4 flex flex-wrap gap-1.5">
+            <div className="mb-6 flex flex-wrap gap-1.5">
               {content.tags.map((ct) => (
-                <Badge key={ct.tagId} variant="secondary">
+                <Badge
+                  key={ct.tagId}
+                  variant="secondary"
+                  className="rounded-full text-xs font-normal"
+                >
                   {ct.tag.name}
                 </Badge>
               ))}
             </div>
           )}
 
-          <Separator className="mb-4" />
-
           {/* Description */}
           {content.description && (
-            <div className="prose prose-sm max-w-none text-muted-foreground sm:prose-base">
+            <div className="mb-8 text-sm leading-relaxed text-muted-foreground sm:text-base">
               <p>{content.description}</p>
             </div>
           )}
 
           {/* Mark as complete button */}
           {user && (
-            <div className="mt-8 border-t pt-6">
+            <div className="border-t border-border pt-6">
               <MarkCompleteButton
                 contentUnitId={content.id}
                 isCompleted={isCompleted}
@@ -201,18 +191,19 @@ export default async function ContentPage({
   // ─── Gated View ───────────────────────────────────────────────
 
   return (
-    <div className="flex min-h-screen flex-col px-4 py-8 sm:px-8">
+    <div className="px-4 py-6 sm:px-8 sm:py-8">
       <div className="mx-auto w-full max-w-3xl">
         {/* Back link */}
         <Link
-          href="/dashboard"
-          className="mb-6 inline-block text-sm text-muted-foreground hover:text-foreground"
+          href="/browse"
+          className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
         >
-          &larr; Tilbage
+          <ArrowLeft className="size-4" />
+          Tilbage
         </Link>
 
         {/* Thumbnail with lock overlay */}
-        <div className="relative mb-6 aspect-video w-full overflow-hidden rounded-lg bg-muted">
+        <div className="relative mb-6 aspect-video w-full overflow-hidden rounded-2xl bg-sand">
           {thumbnailUrl ? (
             <Image
               src={thumbnailUrl}
@@ -224,7 +215,7 @@ export default async function ContentPage({
           ) : (
             <div className="flex h-full items-center justify-center">
               <svg
-                className="h-16 w-16 text-muted-foreground/30"
+                className="size-16 text-muted-foreground/20"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -239,39 +230,30 @@ export default async function ContentPage({
             </div>
           )}
           {/* Lock overlay */}
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+          <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px]">
             <div className="rounded-full bg-white/20 p-4 backdrop-blur-sm">
-              <svg
-                className="h-10 w-10 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                />
-              </svg>
+              <Lock className="size-8 text-white" />
             </div>
           </div>
         </div>
 
         {/* Content header */}
         <div className="mb-4">
-          <div className="mb-2 flex flex-wrap items-center gap-2">
-            <Badge variant="outline">{mediaTypeLabel(content.mediaType)}</Badge>
-            <Badge variant={difficultyVariant(content.difficulty)}>
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <Badge variant="secondary" className="rounded-full text-xs">
+              {mediaTypeLabel(content.mediaType)}
+            </Badge>
+            <Badge variant="outline" className="rounded-full text-xs">
               {difficultyLabel(content.difficulty)}
             </Badge>
             {content.durationMinutes && (
-              <span className="text-sm text-muted-foreground">
+              <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                <Clock className="size-3" />
                 {content.durationMinutes} min.
               </span>
             )}
           </div>
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+          <h1 className="font-serif text-2xl sm:text-3xl">
             {content.title}
           </h1>
         </div>
@@ -280,7 +262,11 @@ export default async function ContentPage({
         {content.tags.length > 0 && (
           <div className="mb-4 flex flex-wrap gap-1.5">
             {content.tags.map((ct) => (
-              <Badge key={ct.tagId} variant="secondary">
+              <Badge
+                key={ct.tagId}
+                variant="secondary"
+                className="rounded-full text-xs font-normal"
+              >
                 {ct.tag.name}
               </Badge>
             ))}
@@ -289,70 +275,66 @@ export default async function ContentPage({
 
         {/* Brief description */}
         {content.description && (
-          <p className="mb-6 text-muted-foreground line-clamp-3">
+          <p className="mb-6 text-sm leading-relaxed text-muted-foreground line-clamp-3">
             {content.description}
           </p>
         )}
 
-        <Separator className="mb-6" />
-
         {/* Access gating card */}
-        <Card>
-          <CardContent className="pt-6">
-            {/* Access level badge */}
-            <div className="mb-4 text-center">
-              {content.accessLevel === 'SUBSCRIPTION' && (
-                <Badge variant="default" className="text-sm">
-                  Kræver abonnement
-                </Badge>
-              )}
-              {content.accessLevel === 'PURCHASE' && (
-                <Badge variant="default" className="text-sm">
-                  Kræver køb
-                </Badge>
-              )}
-            </div>
+        <div className="rounded-2xl border border-border bg-white p-8 text-center">
+          {content.accessLevel === 'SUBSCRIPTION' && (
+            <Badge className="mb-4 rounded-full bg-primary/10 text-primary hover:bg-primary/10">
+              Kræver abonnement
+            </Badge>
+          )}
+          {content.accessLevel === 'PURCHASE' && (
+            <Badge className="mb-4 rounded-full bg-primary/10 text-primary hover:bg-primary/10">
+              Kræver køb
+            </Badge>
+          )}
 
-            <p className="mb-6 text-center text-muted-foreground">
-              {user
-                ? 'Du har ikke adgang til dette indhold endnu.'
-                : 'Log ind for at se dette indhold.'}
-            </p>
+          <p className="mb-6 text-muted-foreground">
+            {user
+              ? 'Få adgang til dette og alt andet indhold med et abonnement.'
+              : 'Log ind for at se dette indhold.'}
+          </p>
 
-            {/* CTA buttons */}
-            <div className="flex flex-col gap-3">
-              {!user && (
-                <Button asChild size="lg" className="w-full">
+          <div className="flex flex-col gap-3">
+            {!user && (
+              <>
+                <Button asChild size="lg" className="w-full rounded-xl">
                   <Link href={`/login?redirect=/content/${content.slug}`}>
-                    Log ind for at se indhold
+                    Log ind
                   </Link>
                 </Button>
-              )}
-
-              {user && content.accessLevel === 'SUBSCRIPTION' && (
-                <Button asChild size="lg" className="w-full">
-                  <Link href="/subscribe">
-                    Start abonnement — 149 kr/md
-                  </Link>
-                </Button>
-              )}
-
-              {user && content.accessLevel === 'PURCHASE' && (
-                <Button asChild size="lg" className="w-full">
-                  <Link href="/">Se produkter</Link>
-                </Button>
-              )}
-
-              {!user && (
-                <Button asChild variant="outline" size="lg" className="w-full">
-                  <Link href={`/login?redirect=/content/${content.slug}`}>
+                <Button
+                  asChild
+                  variant="outline"
+                  size="lg"
+                  className="w-full rounded-xl"
+                >
+                  <Link href={`/signup?redirect=/content/${content.slug}`}>
                     Opret konto
                   </Link>
                 </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+              </>
+            )}
+
+            {user && content.accessLevel === 'SUBSCRIPTION' && (
+              <Button asChild size="lg" className="w-full rounded-xl">
+                <Link href="/subscribe">
+                  Start abonnement — 149 kr/md
+                </Link>
+              </Button>
+            )}
+
+            {user && content.accessLevel === 'PURCHASE' && (
+              <Button asChild size="lg" className="w-full rounded-xl">
+                <Link href="/browse">Se produkter</Link>
+              </Button>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   )
