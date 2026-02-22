@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import type { Prisma } from '@prisma/client'
 import {
   createProductSchema,
   updateProductSchema,
@@ -33,11 +34,16 @@ export async function listProducts(filters?: {
       ...(filters?.isActive !== undefined && { isActive: filters.isActive }),
     },
     include: {
+      modules: { orderBy: { position: 'asc' } },
       courseLessons: {
-        include: { contentUnit: true },
+        include: { contentUnit: true, module: true },
         orderBy: { position: 'asc' },
       },
-      bundleItems: { include: { includedProduct: true } },
+      bundleItems: {
+        include: { includedProduct: true },
+        orderBy: { position: 'asc' },
+      },
+      journeys: { where: { isActive: true }, select: { id: true, slug: true, title: true } },
     },
     orderBy: { createdAt: 'desc' },
   })
@@ -47,11 +53,16 @@ export async function getProduct(slug: string) {
   return prisma.product.findUnique({
     where: { slug },
     include: {
+      modules: { orderBy: { position: 'asc' } },
       courseLessons: {
-        include: { contentUnit: true },
+        include: { contentUnit: true, module: true },
         orderBy: { position: 'asc' },
       },
-      bundleItems: { include: { includedProduct: true } },
+      bundleItems: {
+        include: { includedProduct: true },
+        orderBy: { position: 'asc' },
+      },
+      journeys: { where: { isActive: true }, select: { id: true, slug: true, title: true } },
     },
   })
 }
@@ -60,11 +71,16 @@ export async function getProductById(id: string) {
   return prisma.product.findUnique({
     where: { id },
     include: {
+      modules: { orderBy: { position: 'asc' } },
       courseLessons: {
-        include: { contentUnit: true },
+        include: { contentUnit: true, module: true },
         orderBy: { position: 'asc' },
       },
-      bundleItems: { include: { includedProduct: true } },
+      bundleItems: {
+        include: { includedProduct: true },
+        orderBy: { position: 'asc' },
+      },
+      journeys: { where: { isActive: true }, select: { id: true, slug: true, title: true } },
     },
   })
 }
@@ -119,6 +135,66 @@ export async function removeProductFromBundle(
 ) {
   return prisma.bundleItem.deleteMany({
     where: { bundleProductId, includedProductId },
+  })
+}
+
+// Course module management
+export async function createModule(productId: string, data: { title: string; description?: string }) {
+  const maxPos = await prisma.courseModule.aggregate({
+    where: { productId },
+    _max: { position: true },
+  })
+  return prisma.courseModule.create({
+    data: {
+      productId,
+      title: data.title,
+      description: data.description,
+      position: (maxPos._max.position ?? 0) + 1,
+    },
+  })
+}
+
+export async function updateModule(id: string, data: { title?: string; description?: string }) {
+  return prisma.courseModule.update({ where: { id }, data })
+}
+
+export async function deleteModule(id: string) {
+  return prisma.$transaction(async (tx) => {
+    // Unassign lessons from this module before deleting
+    await tx.courseLesson.updateMany({
+      where: { moduleId: id },
+      data: { moduleId: null },
+    })
+    return tx.courseModule.delete({ where: { id } })
+  })
+}
+
+export async function reorderModules(productId: string, moduleIds: string[]) {
+  const updates = moduleIds.map((id, index) =>
+    prisma.courseModule.update({ where: { id }, data: { position: index + 1 } })
+  )
+  return prisma.$transaction(updates)
+}
+
+export async function assignLessonToModule(lessonId: string, moduleId: string | null) {
+  return prisma.courseLesson.update({
+    where: { id: lessonId },
+    data: { moduleId },
+  })
+}
+
+// Landing page and images
+export async function updateProductLandingPage(id: string, landingPage: Prisma.InputJsonValue) {
+  return prisma.product.update({
+    where: { id },
+    data: { landingPage },
+  })
+}
+
+export async function updateProductImages(id: string, data: { coverImageUrl?: string; thumbnailUrl?: string }) {
+  return prisma.product.update({
+    where: { id },
+    data,
   })
 }
 

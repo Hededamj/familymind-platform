@@ -10,6 +10,8 @@ export async function createJourney(data: {
   targetAgeMin?: number
   targetAgeMax?: number
   estimatedDays?: number
+  productId?: string
+  coverImageUrl?: string
 }) {
   return prisma.journey.create({ data })
 }
@@ -22,6 +24,8 @@ export async function updateJourney(id: string, data: Partial<{
   targetAgeMax: number | null
   estimatedDays: number | null
   isActive: boolean
+  productId: string | null
+  coverImageUrl: string | null
 }>) {
   return prisma.journey.update({ where: { id }, data })
 }
@@ -38,6 +42,7 @@ export async function listJourneys(filters?: { isActive?: boolean }) {
         include: { days: true },
         orderBy: { position: 'asc' },
       },
+      product: { select: { id: true, title: true, slug: true, type: true } },
     },
     orderBy: { createdAt: 'desc' },
   })
@@ -59,6 +64,9 @@ export async function getJourney(slug: string) {
         },
         orderBy: { position: 'asc' },
       },
+      product: {
+        select: { id: true, title: true, slug: true, type: true, thumbnailUrl: true },
+      },
     },
   })
 }
@@ -79,6 +87,9 @@ export async function getJourneyById(id: string) {
           },
         },
         orderBy: { position: 'asc' },
+      },
+      product: {
+        select: { id: true, title: true, slug: true, type: true, thumbnailUrl: true },
       },
     },
   })
