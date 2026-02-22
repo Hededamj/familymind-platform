@@ -64,7 +64,7 @@ export async function sendTemplatedEmail(
   const resend = getResend()
   const fromAddress =
     process.env.RESEND_FROM_EMAIL ||
-    `${tenant.emailFromName || tenant.brandName} <${tenant.emailFromEmail || 'noreply@familymind.dk'}>`
+    `${tenant.emailFromName || tenant.brandName} <${tenant.emailFromEmail || 'noreply@example.com'}>`
 
   const { data, error } = await resend.emails.send({
     from: fromAddress,

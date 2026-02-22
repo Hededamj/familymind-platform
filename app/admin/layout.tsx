@@ -11,6 +11,7 @@ import {
   Tag,
   Users,
   Shield,
+  Palette,
 } from 'lucide-react'
 
 const navItems = [
@@ -21,6 +22,7 @@ const navItems = [
   { href: '/admin/journeys', label: 'Forløb', icon: Map },
   { href: '/admin/cohorts', label: 'Kohorter', icon: Users },
   { href: '/admin/moderation', label: 'Moderering', icon: Shield },
+  { href: '/admin/settings/branding', label: 'Branding', icon: Palette },
   { href: '/admin/settings', label: 'Indstillinger', icon: Settings },
 ]
 

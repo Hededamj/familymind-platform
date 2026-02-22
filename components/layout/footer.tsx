@@ -5,7 +5,6 @@ import { usePathname } from 'next/navigation'
 
 type FooterProps = {
   brandName: string
-  tagline: string | null
   description: string | null
   contactUrl: string | null
   footerCopyright: string | null
@@ -69,7 +68,9 @@ export function Footer({
                   Mit dashboard
                 </Link>
               </li>
-              {footerLinks?.map((link) => (
+              {footerLinks
+                ?.filter((link) => link.url.startsWith('/') || link.url.startsWith('https://'))
+                .map((link) => (
                 <li key={link.url}>
                   <a
                     href={link.url}

@@ -146,7 +146,7 @@ model Organization {
   updatedAt DateTime @updatedAt
 
   // ── Brand ──
-  brandName       String
+  brandName       String   @default("Unnamed")
   tagline         String?
   description     String?
   logoUrl         String?

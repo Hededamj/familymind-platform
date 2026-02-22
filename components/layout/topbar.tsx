@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 
@@ -24,8 +25,8 @@ export function Topbar({ brandName, logoUrl }: TopbarProps) {
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-8">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          {logoUrl ? (
-            <img src={logoUrl} alt={brandName} className="h-8" />
+          {logoUrl && logoUrl.startsWith('https://') ? (
+            <Image src={logoUrl} alt={brandName} width={120} height={32} className="h-8 w-auto" />
           ) : (
             <span className="font-serif text-xl font-normal text-foreground">
               {brandName}

@@ -1,46 +1,71 @@
 'use server'
 
+import { z } from 'zod'
 import { requireAdmin } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { getTenantConfig } from '@/lib/services/tenant.service'
 import { revalidatePath } from 'next/cache'
 
-const PATH = '/admin/settings/branding'
+// ── Validation helpers ──
 
-export async function updateBrandingAction(data: {
-  brandName: string
-  tagline?: string
-  description?: string
-  logoUrl?: string
-  faviconUrl?: string
-  websiteUrl?: string
-  contactEmail?: string
-  contactPhone?: string
-  contactUrl?: string
-  emailFromName?: string
-  emailFromEmail?: string
-  colorPrimary?: string
-  colorPrimaryForeground?: string
-  colorAccent?: string
-  colorSuccess?: string
-  colorBackground?: string
-  colorSand?: string
-  colorForeground?: string
-  colorBorder?: string
-  heroHeading?: string
-  heroSubheading?: string
-  heroCtaText?: string
-  heroCtaUrl?: string
-  aboutHeading?: string
-  aboutName?: string
-  aboutBio?: string
-  aboutUrl?: string
-  aboutImageUrl?: string
-  subscriptionPriceDisplay?: string
-  subscriptionPeriodDisplay?: string
-  footerCopyright?: string
-}) {
+const hexColor = z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Ugyldig hex-farve')
+
+/** Allow only relative paths (/foo) or https:// URLs */
+const safeUrl = z
+  .string()
+  .refine(
+    (v) => v === '' || v.startsWith('/') || v.startsWith('https://'),
+    'URL skal starte med / eller https://'
+  )
+
+const optionalSafeUrl = safeUrl.optional()
+
+// ── Schema ──
+
+const brandingSchema = z.object({
+  brandName: z.string().min(1, 'Brandnavn er påkrævet').max(100),
+  tagline: z.string().max(200).optional(),
+  description: z.string().max(1000).optional(),
+  logoUrl: optionalSafeUrl,
+  faviconUrl: optionalSafeUrl,
+  websiteUrl: optionalSafeUrl,
+  contactEmail: z.string().email('Ugyldig e-mail').or(z.literal('')).optional(),
+  contactPhone: z.string().max(50).optional(),
+  contactUrl: optionalSafeUrl,
+  emailFromName: z.string().max(100).optional(),
+  emailFromEmail: z.string().email('Ugyldig e-mail').or(z.literal('')).optional(),
+  colorPrimary: hexColor.optional(),
+  colorPrimaryForeground: hexColor.optional(),
+  colorAccent: hexColor.optional(),
+  colorSuccess: hexColor.optional(),
+  colorBackground: hexColor.optional(),
+  colorSand: hexColor.optional(),
+  colorForeground: hexColor.optional(),
+  colorBorder: hexColor.optional(),
+  heroHeading: z.string().max(200).optional(),
+  heroSubheading: z.string().max(500).optional(),
+  heroCtaText: z.string().max(100).optional(),
+  heroCtaUrl: optionalSafeUrl,
+  aboutHeading: z.string().max(200).optional(),
+  aboutName: z.string().max(100).optional(),
+  aboutBio: z.string().max(2000).optional(),
+  aboutUrl: optionalSafeUrl,
+  aboutImageUrl: optionalSafeUrl,
+  subscriptionPriceDisplay: z.string().max(50).optional(),
+  subscriptionPeriodDisplay: z.string().max(50).optional(),
+  footerCopyright: z.string().max(200).optional(),
+})
+
+// ── Action ──
+
+export async function updateBrandingAction(rawData: unknown) {
   await requireAdmin()
+
+  const result = brandingSchema.safeParse(rawData)
+  if (!result.success) {
+    throw new Error(result.error.issues.map((i) => i.message).join(', '))
+  }
+  const data = result.data
 
   const tenant = await getTenantConfig()
 
@@ -81,6 +106,13 @@ export async function updateBrandingAction(data: {
     },
   })
 
-  revalidatePath(PATH)
+  // Revalidate all pages that read tenant config
+  revalidatePath('/admin/settings/branding')
   revalidatePath('/', 'layout')
+  revalidatePath('/')
+  revalidatePath('/browse')
+  revalidatePath('/subscribe')
+  revalidatePath('/dashboard')
+  revalidatePath('/login')
+  revalidatePath('/signup')
 }

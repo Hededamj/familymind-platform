@@ -1,10 +1,18 @@
 import Link from "next/link"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import {
   Check, BookOpen, Video, Users, Heart, Star, ChevronDown,
   UserPlus, Compass, TrendingUp, type LucideIcon,
 } from "lucide-react"
 import { getTenantConfig } from "@/lib/services/tenant.service"
+
+/** Only allow relative paths or https:// URLs to prevent open redirect / XSS */
+function safeHref(url: string | null | undefined, fallback: string): string {
+  if (!url) return fallback
+  if (url.startsWith('/') || url.startsWith('https://')) return url
+  return fallback
+}
 
 const iconMap: Record<string, LucideIcon> = {
   BookOpen,
@@ -56,7 +64,7 @@ export default async function Home() {
             )}
             <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
               <Button asChild size="lg" className="rounded-xl px-8 text-base">
-                <Link href={tenant.heroCtaUrl || "/signup"}>
+                <Link href={safeHref(tenant.heroCtaUrl, "/signup")}>
                   {tenant.heroCtaText || `Prøv ${tenant.brandName} gratis`}
                 </Link>
               </Button>
@@ -232,25 +240,38 @@ export default async function Home() {
       {tenant.aboutName && (
         <section className="bg-white">
           <div className="mx-auto max-w-3xl px-4 py-20 sm:px-8">
-            <div className="text-center">
-              {tenant.aboutHeading && (
-                <p className="mb-2 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-                  {tenant.aboutHeading}
-                </p>
+            <div className="flex flex-col items-center gap-8 sm:flex-row sm:items-start sm:text-left">
+              {tenant.aboutImageUrl && tenant.aboutImageUrl.startsWith('https://') && (
+                <div className="relative size-32 shrink-0 overflow-hidden rounded-full sm:size-40">
+                  <Image
+                    src={tenant.aboutImageUrl}
+                    alt={tenant.aboutName || ''}
+                    fill
+                    className="object-cover"
+                    sizes="160px"
+                  />
+                </div>
               )}
-              <h2 className="font-serif text-3xl sm:text-4xl">{tenant.aboutName}</h2>
-              {tenant.aboutBio && (
-                <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted-foreground">
-                  {tenant.aboutBio}
-                </p>
-              )}
-              {tenant.aboutUrl && (
-                <Button asChild variant="ghost" className="mt-4 text-primary">
-                  <a href={tenant.aboutUrl} target="_blank" rel="noopener noreferrer">
-                    Læs mere om {tenant.aboutName}
-                  </a>
-                </Button>
-              )}
+              <div className={tenant.aboutImageUrl ? '' : 'text-center'}>
+                {tenant.aboutHeading && (
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                    {tenant.aboutHeading}
+                  </p>
+                )}
+                <h2 className="font-serif text-3xl sm:text-4xl">{tenant.aboutName}</h2>
+                {tenant.aboutBio && (
+                  <p className="mt-4 max-w-xl text-base leading-relaxed text-muted-foreground">
+                    {tenant.aboutBio}
+                  </p>
+                )}
+                {tenant.aboutUrl && (tenant.aboutUrl.startsWith('/') || tenant.aboutUrl.startsWith('https://')) && (
+                  <Button asChild variant="ghost" className="mt-4 text-primary">
+                    <a href={tenant.aboutUrl} target="_blank" rel="noopener noreferrer">
+                      Læs mere om {tenant.aboutName}
+                    </a>
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </section>

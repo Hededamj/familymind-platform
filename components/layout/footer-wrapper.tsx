@@ -6,7 +6,6 @@ export async function FooterWrapper() {
   return (
     <Footer
       brandName={tenant.brandName}
-      tagline={tenant.tagline}
       description={tenant.description}
       contactUrl={tenant.contactUrl}
       footerCopyright={tenant.footerCopyright}
