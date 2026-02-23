@@ -1,12 +1,15 @@
 import { Suspense } from 'react'
 import { listProducts } from '@/lib/services/product.service'
+import { listJourneys } from '@/lib/services/journey.service'
 import { ProductCard } from './_components/product-card'
+import { BundleCard } from './_components/bundle-card'
+import { JourneyCard } from './_components/journey-card'
 import { BrowseFilters } from './_components/browse-filters'
 import { Compass } from 'lucide-react'
 
 export const metadata = {
   title: 'Udforsk | FamilyMind',
-  description: 'Gennemse kurser, enkeltindhold og pakker',
+  description: 'Gennemse kurser, pakker og forløb',
 }
 
 export default async function BrowsePage({
@@ -15,43 +18,98 @@ export default async function BrowsePage({
   searchParams: Promise<{ type?: string }>
 }) {
   const { type } = await searchParams
-  const products = await listProducts({ isActive: true })
 
-  const filteredProducts = type
-    ? products.filter((p) => p.type === type)
-    : products
+  const [products, journeys] = await Promise.all([
+    listProducts({ isActive: true }),
+    listJourneys({ isActive: true }),
+  ])
+
+  const bundles = products.filter(p => p.type === 'BUNDLE')
+  const courses = products.filter(p => p.type === 'COURSE')
+  const singles = products.filter(p => p.type === 'SINGLE')
+  const standaloneJourneys = journeys.filter(j => !j.productId)
+
+  // If filter is active, only show that section
+  const showBundles = !type || type === 'BUNDLE'
+  const showCourses = !type || type === 'COURSE'
+  const showJourneys = !type || type === 'JOURNEY'
+  const showSingles = !type || type === 'SINGLE'
+
+  const isEmpty = (showBundles ? bundles.length : 0) +
+    (showCourses ? courses.length : 0) +
+    (showJourneys ? standaloneJourneys.length : 0) +
+    (showSingles ? singles.length : 0) === 0
 
   return (
     <div className="px-4 py-12 sm:px-8">
       <div className="mx-auto w-full max-w-6xl">
-        {/* Header */}
         <div className="mb-10 text-center">
-          <h1 className="font-serif text-3xl sm:text-4xl">
-            Opdag
-          </h1>
+          <h1 className="font-serif text-3xl sm:text-4xl">Opdag</h1>
           <p className="mt-2 text-muted-foreground">
-            Forløb, kurser og værktøjer til din familie
+            Kurser, pakker og forløb til din familie
           </p>
         </div>
 
-        {/* Filters */}
         <div className="mb-8 flex justify-center">
           <Suspense fallback={null}>
             <BrowseFilters />
           </Suspense>
         </div>
 
-        {/* Product grid */}
-        {filteredProducts.length === 0 ? (
+        {isEmpty ? (
           <div className="mx-auto max-w-sm rounded-2xl border border-border p-12 text-center">
             <Compass className="mx-auto mb-4 size-10 text-muted-foreground/40" />
-            <p className="text-muted-foreground">Ingen produkter fundet.</p>
+            <p className="text-muted-foreground">Ingen resultater fundet.</p>
           </div>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+          <div className="space-y-12">
+            {/* Bundles */}
+            {showBundles && bundles.length > 0 && (
+              <section>
+                <h2 className="mb-4 font-serif text-xl">Pakker</h2>
+                <div className="grid gap-6 sm:grid-cols-2">
+                  {bundles.map(bundle => (
+                    <BundleCard key={bundle.id} product={bundle} />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Courses */}
+            {showCourses && courses.length > 0 && (
+              <section>
+                <h2 className="mb-4 font-serif text-xl">Kurser</h2>
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {courses.map(course => (
+                    <ProductCard key={course.id} product={course} />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Standalone journeys */}
+            {showJourneys && standaloneJourneys.length > 0 && (
+              <section>
+                <h2 className="mb-4 font-serif text-xl">Guidede forløb</h2>
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {standaloneJourneys.map(journey => (
+                    <JourneyCard key={journey.id} journey={journey} />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Singles */}
+            {showSingles && singles.length > 0 && (
+              <section>
+                <h2 className="mb-4 font-serif text-xl">Enkeltstående indhold</h2>
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {singles.map(single => (
+                    <ProductCard key={single.id} product={single} />
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
         )}
       </div>

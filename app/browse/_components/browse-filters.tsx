@@ -4,9 +4,10 @@ import { useRouter, useSearchParams } from 'next/navigation'
 
 const productTypes = [
   { value: '', label: 'Alle' },
-  { value: 'COURSE', label: 'Kurser' },
-  { value: 'SINGLE', label: 'Enkeltstående' },
   { value: 'BUNDLE', label: 'Pakker' },
+  { value: 'COURSE', label: 'Kurser' },
+  { value: 'JOURNEY', label: 'Forløb' },
+  { value: 'SINGLE', label: 'Enkeltstående' },
 ] as const
 
 export function BrowseFilters() {
