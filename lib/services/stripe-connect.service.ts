@@ -46,6 +46,14 @@ export async function handleConnectCallback(
     throw new Error('Stripe OAuth returnerede intet account ID')
   }
 
+  // Tjek at kontoen ikke allerede er forbundet til en anden organisation
+  const existing = await prisma.organization.findFirst({
+    where: { stripeAccountId, id: { not: organizationId } },
+  })
+  if (existing) {
+    throw new Error('Denne Stripe-konto er allerede forbundet til en anden organisation')
+  }
+
   // Hent account-status fra Stripe
   const account = await stripe.accounts.retrieve(stripeAccountId)
   const status = resolveAccountStatus(account)

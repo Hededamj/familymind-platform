@@ -143,7 +143,7 @@ model Organization {
   id                  String    @id @default(uuid()) @db.Uuid
   name                String
   slug                String    @unique
-  stripeAccountId     String?
+  stripeAccountId     String?   @unique
   stripeAccountStatus String    @default("not_connected")
   stripeOnboardedAt   DateTime?
   createdAt           DateTime  @default(now())

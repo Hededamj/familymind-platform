@@ -1,6 +1,6 @@
 'use client'
 
-import { useTransition } from 'react'
+import { useEffect, useTransition } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 import { Button } from '@/components/ui/button'
@@ -25,13 +25,10 @@ function StripeConnectCardInner({ status, accountId }: Props) {
   const connectError = searchParams.get('connect_error')
   const connectSuccess = searchParams.get('connect_success')
 
-  // Vis toast baseret på URL-params (fra OAuth callback redirect)
-  if (connectError) {
-    toast.error(connectError)
-  }
-  if (connectSuccess) {
-    toast.success('Stripe-konto forbundet!')
-  }
+  useEffect(() => {
+    if (connectError) toast.error(connectError)
+    if (connectSuccess) toast.success('Stripe-konto forbundet!')
+  }, [connectError, connectSuccess])
 
   function handleConnect() {
     startTransition(async () => {
@@ -61,7 +58,7 @@ function StripeConnectCardInner({ status, accountId }: Props) {
           <StatusBadge status={status} />
         </CardTitle>
         <CardDescription>
-          <StatusDescription status={status} accountId={accountId} />
+          <StatusDescription status={status} />
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -161,7 +158,7 @@ function StatusBadge({ status }: { status: string }) {
   }
 }
 
-function StatusDescription({ status, accountId }: { status: string; accountId: string | null }) {
+function StatusDescription({ status }: { status: string }) {
   switch (status) {
     case 'active':
       return 'Stripe er forbundet og klar til at modtage betalinger.'

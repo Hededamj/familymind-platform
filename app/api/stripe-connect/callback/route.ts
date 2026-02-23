@@ -10,7 +10,12 @@ export async function GET(req: NextRequest) {
   const error = searchParams.get('error')
   const errorDescription = searchParams.get('error_description')
 
-  const redirectUrl = new URL('/admin/settings/integrations', process.env.NEXT_PUBLIC_APP_URL!)
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL
+  if (!appUrl) {
+    return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 })
+  }
+
+  const redirectUrl = new URL('/admin/settings/integrations', appUrl)
 
   // Stripe sendte en fejl (bruger afviste eller teknisk fejl)
   if (error) {
