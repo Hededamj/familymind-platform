@@ -1,3 +1,5 @@
+import type Stripe from 'stripe'
+
 import { prisma } from '@/lib/prisma'
 import { getStripe } from '@/lib/stripe'
 
@@ -79,11 +81,16 @@ export async function disconnectStripeAccount(organizationId: string) {
     throw new Error('STRIPE_CONNECT_CLIENT_ID is not set')
   }
 
-  // Deauthorize hos Stripe
-  await stripe.oauth.deauthorize({
-    client_id: clientId,
-    stripe_user_id: org.stripeAccountId,
-  })
+  // Deauthorize hos Stripe — only reset DB on success
+  try {
+    await stripe.oauth.deauthorize({
+      client_id: clientId,
+      stripe_user_id: org.stripeAccountId,
+    })
+  } catch (err) {
+    console.error('Stripe deauthorize fejl:', err)
+    throw new Error('Kunne ikke frakoble hos Stripe — prøv igen')
+  }
 
   // Nulstil Organization-felter
   await prisma.organization.update({
@@ -135,9 +142,7 @@ export async function getActiveStripeAccount(
 /**
  * Resolve Stripe account status fra account-objekt.
  */
-function resolveAccountStatus(
-  account: { charges_enabled?: boolean; payouts_enabled?: boolean }
-): string {
+function resolveAccountStatus(account: Stripe.Account): string {
   if (account.charges_enabled && account.payouts_enabled) return 'active'
   if (account.charges_enabled && !account.payouts_enabled) return 'restricted'
   return 'pending'
