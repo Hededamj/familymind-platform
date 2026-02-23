@@ -5,6 +5,10 @@ import { Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { Topbar } from "@/components/layout/topbar";
 import { Footer } from "@/components/layout/footer";
+import { ConsentProvider } from '@/components/consent/consent-provider'
+import { AnalyticsScripts } from '@/components/consent/analytics-scripts'
+import { CookieBanner } from '@/components/consent/cookie-banner'
+import { CookieModal } from '@/components/consent/cookie-modal'
 import "./globals.css";
 
 const inter = Inter({
@@ -38,12 +42,17 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${dmSerif.variable} ${geistMono.variable} font-sans antialiased`}
       >
-        <Topbar />
-        <main className="min-h-screen">
-          {children}
-        </main>
-        <Footer />
-        <Toaster />
+        <ConsentProvider>
+          <AnalyticsScripts />
+          <Topbar />
+          <main className="min-h-screen">
+            {children}
+          </main>
+          <Footer />
+          <Toaster />
+          <CookieBanner />
+          <CookieModal />
+        </ConsentProvider>
       </body>
     </html>
   );
