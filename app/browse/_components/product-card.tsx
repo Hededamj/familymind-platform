@@ -49,7 +49,9 @@ export function ProductCard({ product }: { product: Product }) {
   const href =
     product.type === 'SUBSCRIPTION'
       ? '/subscribe'
-      : `/products/${product.slug}`
+      : product.type === 'COURSE'
+        ? `/courses/${product.slug}`
+        : `/products/${product.slug}`
 
   const Icon = typeIcons[product.type] ?? BookOpen
 
