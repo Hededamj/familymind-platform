@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { getActiveStripeAccount } from '@/lib/services/stripe-connect.service'
 import { getStripe } from '@/lib/stripe'
 import { createCheckoutSchema } from '@/lib/validators/checkout'
 import type { z } from 'zod'
@@ -24,6 +25,13 @@ export async function createCheckoutSession(
     where: { id: userId },
   })
 
+  if (!user.organizationId) {
+    throw new Error('Bruger tilhører ingen organisation')
+  }
+
+  // Hent tenantens aktive Stripe-konto
+  const stripeAccountId = await getActiveStripeAccount(user.organizationId)
+
   let discountId: string | undefined
   if (validated.discountCode) {
     const discount = await validateDiscountCode(
@@ -35,15 +43,20 @@ export async function createCheckoutSession(
     }
   }
 
-  const session = await stripe.checkout.sessions.create({
-    mode: product.type === 'SUBSCRIPTION' ? 'subscription' : 'payment',
-    customer_email: user.email,
-    line_items: [{ price: product.stripePriceId, quantity: 1 }],
-    ...(discountId ? { discounts: [{ coupon: discountId }] } : {}),
-    success_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/products/${product.slug}`,
-    metadata: { userId, productId: product.id },
-  })
+  const session = await stripe.checkout.sessions.create(
+    {
+      mode: product.type === 'SUBSCRIPTION' ? 'subscription' : 'payment',
+      customer_email: user.email,
+      line_items: [{ price: product.stripePriceId, quantity: 1 }],
+      ...(discountId ? { discounts: [{ coupon: discountId }] } : {}),
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/products/${product.slug}`,
+      metadata: { userId, productId: product.id },
+    },
+    {
+      stripeAccount: stripeAccountId,
+    }
+  )
 
   return { url: session.url }
 }
