@@ -3,9 +3,11 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
+import { useConsent } from '@/components/consent/consent-provider'
 
 export function Footer() {
   const pathname = usePathname()
+  const { setOpenSettings } = useConsent()
 
   // Don't show footer on admin, dashboard, onboarding, or journey day pages
   if (
@@ -20,7 +22,7 @@ export function Footer() {
   return (
     <footer className="bg-[#1A1A1A] text-white/70">
       <div className="mx-auto max-w-6xl px-4 py-14 sm:px-8">
-        <div className="grid gap-10 sm:grid-cols-3">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}
           <div>
             <Image
@@ -71,6 +73,36 @@ export function Footer() {
                 >
                   mettehummel.dk
                 </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Juridisk */}
+          <div>
+            <h4 className="mb-3 text-sm font-semibold text-white">Juridisk</h4>
+            <ul className="space-y-2.5 text-sm">
+              <li>
+                <Link href="/privatlivspolitik" className="transition-colors hover:text-white">
+                  Privatlivspolitik
+                </Link>
+              </li>
+              <li>
+                <Link href="/cookiepolitik" className="transition-colors hover:text-white">
+                  Cookiepolitik
+                </Link>
+              </li>
+              <li>
+                <Link href="/vilkaar" className="transition-colors hover:text-white">
+                  Vilkår
+                </Link>
+              </li>
+              <li>
+                <button
+                  onClick={() => setOpenSettings(true)}
+                  className="transition-colors hover:text-white"
+                >
+                  Cookieindstillinger
+                </button>
               </li>
             </ul>
           </div>
