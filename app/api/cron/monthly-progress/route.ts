@@ -39,6 +39,18 @@ export async function GET(request: NextRequest) {
     const batch = activeUsers.slice(i, i + BATCH_SIZE)
     const batchResults = await Promise.allSettled(
       batch.map(async (user) => {
+        // Deduplicate: skip if already sent this month
+        const now = new Date()
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+        const alreadySent = await prisma.userNotificationLog.findFirst({
+          where: {
+            userId: user.id,
+            type: 'monthly_progress',
+            sentAt: { gte: startOfMonth },
+          },
+        })
+        if (alreadySent) return 'skipped' as const
+
         const progress = await getMonthlyProgress(user.id)
 
         // Skip users with no activity this month
@@ -91,6 +103,12 @@ export async function GET(request: NextRequest) {
 
         // Also check for new milestones while we are processing
         await checkAndNotifyMilestones(user.id)
+
+        // Log successful send for deduplication
+        const monthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+        await prisma.userNotificationLog.create({
+          data: { userId: user.id, type: 'monthly_progress', key: monthStr },
+        })
 
         return 'sent' as const
       })
