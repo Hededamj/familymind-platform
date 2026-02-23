@@ -258,6 +258,83 @@ export async function checkAndNotifyMilestones(
 }
 
 /**
+ * Send a warm notification when a user completes a journey day.
+ */
+export async function sendDayCompleteNotification(
+  userId: string,
+  journeyTitle: string,
+  completedDayId: string,
+  nextDayId: string | null
+) {
+  // In-app notification
+  await createInAppNotification(
+    userId,
+    'SYSTEM',
+    'Godt klaret!',
+    nextDayId
+      ? `Du har gennemført en dag i "${journeyTitle}". Næste dag venter.`
+      : `Du har gennemført "${journeyTitle}"!`,
+    '/dashboard'
+  )
+
+  // Get next day info for email teaser
+  let nextDayTeaser = ''
+  if (nextDayId) {
+    const nextDay = await prisma.journeyDay.findUnique({
+      where: { id: nextDayId },
+      select: { title: true },
+    })
+    nextDayTeaser = nextDay?.title
+      ? `I morgen: ${nextDay.title}`
+      : 'Din næste dag er klar i morgen.'
+  }
+
+  // Get completed day title
+  const completedDay = await prisma.journeyDay.findUnique({
+    where: { id: completedDayId },
+    select: { title: true },
+  })
+
+  await sendTemplatedEmail(userId, 'journey_day_complete', {
+    journeyTitle,
+    dayTitle: completedDay?.title || 'dagens indhold',
+    nextDayTeaser,
+  })
+}
+
+/**
+ * Send celebration notification when a user completes an entire journey.
+ */
+export async function sendJourneyCompleteNotification(
+  userId: string,
+  journeyTitle: string,
+  journeyId: string
+) {
+  await createInAppNotification(
+    userId,
+    'MILESTONE',
+    `Tillykke! Du har gennemført "${journeyTitle}"`,
+    'Du kan altid gå tilbage og se indholdet igen.',
+    '/dashboard'
+  )
+
+  // Get recommendation for "what's next"
+  const recommendations = await prisma.recommendationRule.findMany({
+    where: { isActive: true },
+    orderBy: { priority: 'desc' },
+    take: 1,
+  })
+  const recommendationText = recommendations.length > 0
+    ? 'Vi har fundet et nyt forløb der passer til dig.'
+    : 'Udforsk vores andre kurser og forløb.'
+
+  await sendTemplatedEmail(userId, 'journey_complete', {
+    journeyTitle,
+    recommendationText,
+  })
+}
+
+/**
  * Get monthly progress summary for a user.
  * Content consumed, actions completed, check-in history, milestones earned.
  */
@@ -587,6 +664,96 @@ function computeCheckinStreak(dates: Date[]): number {
   }
 
   return streak
+}
+
+// ---------------------------------------------------------------------------
+// Journey nudges
+// ---------------------------------------------------------------------------
+
+/**
+ * Send journey-specific nudge to users who haven't progressed in 1+ days.
+ * Called by the engagement cron.
+ * Tone: warm, content-focused ("din næste dag handler om X"), NOT pushy.
+ */
+export async function sendJourneyNudges(): Promise<{ sent: number; skipped: number }> {
+  const BATCH_SIZE = 20
+  let sent = 0
+  let skipped = 0
+
+  // Find users with active journeys who haven't had a check-in in 1-2 days
+  const cutoffDate = new Date()
+  cutoffDate.setDate(cutoffDate.getDate() - 1) // 1 day ago
+
+  const staleJourneys = await prisma.userJourney.findMany({
+    where: {
+      status: 'ACTIVE',
+      currentDayId: { not: null },
+    },
+    include: {
+      user: { select: { id: true, email: true } },
+      currentDay: { select: { id: true, title: true, position: true } },
+      journey: { select: { title: true } },
+      checkIns: {
+        orderBy: { completedAt: 'desc' },
+        take: 1,
+        select: { completedAt: true },
+      },
+    },
+    take: BATCH_SIZE * 5, // Fetch extra, filter in-memory
+  })
+
+  for (const uj of staleJourneys) {
+    const lastCheckIn = uj.checkIns[0]?.completedAt
+    const lastActivity = lastCheckIn || uj.startedAt
+
+    // Only nudge if 1-3 days inactive (re-engagement handles longer)
+    const daysSinceActivity = Math.floor(
+      (Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24)
+    )
+    if (daysSinceActivity < 1 || daysSinceActivity > 3) {
+      skipped++
+      continue
+    }
+
+    // Deduplicate: check if we already sent a journey_nudge in the last 24 hours
+    const recentNudge = await prisma.userNotificationLog.findFirst({
+      where: {
+        userId: uj.user.id,
+        type: 'journey_nudge',
+        sentAt: { gte: cutoffDate },
+      },
+    })
+    if (recentNudge) {
+      skipped++
+      continue
+    }
+
+    // Send warm nudge — focus on content, not on the user's absence
+    const nextDayTitle = uj.currentDay?.title || 'din næste dag'
+
+    await sendTemplatedEmail(uj.user.id, 'journey_nudge', {
+      journeyTitle: uj.journey.title,
+      nextDayTitle,
+      estimatedMinutes: '10-15',
+    })
+
+    await createInAppNotification(
+      uj.user.id,
+      'SYSTEM',
+      `${nextDayTitle} venter på dig`,
+      `Dit forløb "${uj.journey.title}" — næste dag er klar.`,
+      '/dashboard'
+    )
+
+    await prisma.userNotificationLog.create({
+      data: { userId: uj.user.id, type: 'journey_nudge', key: uj.journeyId },
+    })
+
+    sent++
+    if (sent >= BATCH_SIZE) break
+  }
+
+  return { sent, skipped }
 }
 
 // ---------------------------------------------------------------------------

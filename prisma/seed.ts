@@ -246,6 +246,94 @@ async function main() {
     })
   }
 
+  // -- Default modules for existing courses --
+  const courses = await prisma.product.findMany({
+    where: { type: 'COURSE' },
+    include: { courseLessons: true, modules: true },
+  })
+
+  for (const course of courses) {
+    if (course.modules.length === 0 && course.courseLessons.length > 0) {
+      const defaultModule = await prisma.courseModule.create({
+        data: {
+          productId: course.id,
+          title: 'Indhold',
+          position: 1,
+        },
+      })
+      // Assign all existing lessons to the default module
+      await prisma.courseLesson.updateMany({
+        where: { productId: course.id },
+        data: { moduleId: defaultModule.id },
+      })
+      console.log(`  Created default module for course "${course.title}"`)
+    }
+  }
+
+  // -- Link journey to course if both exist --
+  const testJourney = await prisma.journey.findUnique({ where: { slug: 'bedre-sovnrutiner' } })
+  if (testJourney && !testJourney.productId) {
+    const sleepCourse = await prisma.product.findFirst({
+      where: { type: 'COURSE', title: { contains: 'søvn', mode: 'insensitive' } },
+    })
+    if (sleepCourse) {
+      await prisma.journey.update({
+        where: { id: testJourney.id },
+        data: { productId: sleepCourse.id },
+      })
+      console.log(`  Linked journey "${testJourney.title}" to course "${sleepCourse.title}"`)
+    }
+  }
+
+  // -- Journey email templates --
+  await prisma.emailTemplate.upsert({
+    where: { templateKey: 'journey_welcome' },
+    update: {},
+    create: {
+      templateKey: 'journey_welcome',
+      subject: 'Dit forløb starter i morgen, {{userName}}',
+      bodyHtml: '<h1>Hej {{userName}}</h1><p>Du har startet forløbet "{{journeyTitle}}". Din første dag er klar i morgen.</p><p>Forløbet tager ca. {{estimatedDays}} dage. Du kan gå i dit eget tempo.</p><p><a href="{{appUrl}}/dashboard">Gå til din side</a></p>',
+      description: 'Sent when a user starts a guided journey',
+      isActive: true,
+    },
+  })
+
+  await prisma.emailTemplate.upsert({
+    where: { templateKey: 'journey_day_complete' },
+    update: {},
+    create: {
+      templateKey: 'journey_day_complete',
+      subject: 'Godt klaret, {{userName}}!',
+      bodyHtml: '<h1>Godt klaret, {{userName}}!</h1><p>Du har gennemført {{dayTitle}} i "{{journeyTitle}}".</p><p>{{nextDayTeaser}}</p><p><a href="{{appUrl}}/dashboard">Fortsæt i morgen</a></p>',
+      description: 'Sent after completing a journey day',
+      isActive: true,
+    },
+  })
+
+  await prisma.emailTemplate.upsert({
+    where: { templateKey: 'journey_nudge' },
+    update: {},
+    create: {
+      templateKey: 'journey_nudge',
+      subject: '{{nextDayTitle}} venter på dig',
+      bodyHtml: '<h1>Hej {{userName}}</h1><p>Din næste dag i "{{journeyTitle}}" handler om {{nextDayTitle}}.</p><p>Det tager kun {{estimatedMinutes}} minutter.</p><p><a href="{{appUrl}}/dashboard">Fortsæt dit forløb</a></p>',
+      description: 'Gentle nudge when user has not progressed in 1-2 days',
+      isActive: true,
+    },
+  })
+
+  await prisma.emailTemplate.upsert({
+    where: { templateKey: 'journey_complete' },
+    update: {},
+    create: {
+      templateKey: 'journey_complete',
+      subject: 'Tillykke med dit gennemførte forløb, {{userName}}!',
+      bodyHtml: '<h1>Tillykke, {{userName}}!</h1><p>Du har gennemført "{{journeyTitle}}".</p><p>Du kan altid gå tilbage og se indholdet igen.</p><p>{{recommendationText}}</p><p><a href="{{appUrl}}/dashboard">Tilbage til din side</a></p>',
+      description: 'Sent when a user completes a journey',
+      isActive: true,
+    },
+  })
+
   console.log('Seed data created successfully')
 }
 

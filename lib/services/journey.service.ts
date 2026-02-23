@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { assignUserToCohort } from './community.service'
+import { checkAndNotifyMilestones, sendDayCompleteNotification, sendJourneyCompleteNotification } from './engagement.service'
 
 // --- Admin CRUD ---
 
@@ -10,6 +11,8 @@ export async function createJourney(data: {
   targetAgeMin?: number
   targetAgeMax?: number
   estimatedDays?: number
+  productId?: string
+  coverImageUrl?: string
 }) {
   return prisma.journey.create({ data })
 }
@@ -22,6 +25,8 @@ export async function updateJourney(id: string, data: Partial<{
   targetAgeMax: number | null
   estimatedDays: number | null
   isActive: boolean
+  productId: string | null
+  coverImageUrl: string | null
 }>) {
   return prisma.journey.update({ where: { id }, data })
 }
@@ -38,6 +43,7 @@ export async function listJourneys(filters?: { isActive?: boolean }) {
         include: { days: true },
         orderBy: { position: 'asc' },
       },
+      product: { select: { id: true, title: true, slug: true, type: true } },
     },
     orderBy: { createdAt: 'desc' },
   })
@@ -59,6 +65,9 @@ export async function getJourney(slug: string) {
         },
         orderBy: { position: 'asc' },
       },
+      product: {
+        select: { id: true, title: true, slug: true, type: true, thumbnailUrl: true },
+      },
     },
   })
 }
@@ -79,6 +88,9 @@ export async function getJourneyById(id: string) {
           },
         },
         orderBy: { position: 'asc' },
+      },
+      product: {
+        select: { id: true, title: true, slug: true, type: true, thumbnailUrl: true },
       },
     },
   })
@@ -220,7 +232,7 @@ export async function getUserActiveJourney(userId: string) {
 }
 
 export async function completeDay(userJourneyId: string, dayId: string, checkInOptionId: string, reflection?: string) {
-  return prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx) => {
     // Re-verify current day inside transaction (prevents race conditions)
     const uj = await tx.userJourney.findUniqueOrThrow({
       where: { id: userJourneyId },
@@ -266,6 +278,26 @@ export async function completeDay(userJourneyId: string, dayId: string, checkInO
       })
     }
   })
+
+  // Fire engagement events AFTER transaction succeeds (non-blocking)
+  const uj = await prisma.userJourney.findUnique({
+    where: { id: userJourneyId },
+    select: { userId: true, journeyId: true, status: true, journey: { select: { title: true } } },
+  })
+
+  if (uj) {
+    // Check milestones (non-blocking)
+    checkAndNotifyMilestones(uj.userId).catch(console.error)
+
+    // Send day completion notification
+    if (result.status !== 'COMPLETED') {
+      sendDayCompleteNotification(uj.userId, uj.journey.title, dayId, result.currentDayId).catch(console.error)
+    } else {
+      sendJourneyCompleteNotification(uj.userId, uj.journey.title, uj.journeyId).catch(console.error)
+    }
+  }
+
+  return result
 }
 
 export async function getJourneyProgress(userJourneyId: string) {

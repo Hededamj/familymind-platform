@@ -4,6 +4,7 @@ import { verifyCronSecret } from '@/lib/cron-auth'
 import {
   sendTemplatedEmail,
   createInAppNotification,
+  sendJourneyNudges,
 } from '@/lib/services/engagement.service'
 import { getDanishTime } from '@/lib/utils/timezone'
 import type { NotificationType } from '@prisma/client'
@@ -205,15 +206,6 @@ export async function GET(request: NextRequest) {
     return scheduleHour === nowHour
   })
 
-  if (schedulesToRun.length === 0) {
-    return NextResponse.json({
-      message: 'No schedules match this hour',
-      currentDayOfWeek,
-      currentTime: currentTimeStr,
-      schedulesChecked: matchingSchedules.length,
-    })
-  }
-
   const results: Array<{
     type: NotificationType
     targetUsers: number
@@ -305,6 +297,21 @@ export async function GET(request: NextRequest) {
     console.log(
       `[cron/engagement] ${schedule.notificationType}: ${sent} sent, ${skipped} skipped, ${failed} failed out of ${userIds.length} users`
     )
+  }
+
+  // Journey-specific nudges (run on every invocation)
+  try {
+    const nudgeResults = await sendJourneyNudges()
+    console.log(`[cron/engagement] Journey nudges: ${nudgeResults.sent} sent, ${nudgeResults.skipped} skipped`)
+    results.push({
+      type: 'JOURNEY_NUDGE' as NotificationType,
+      targetUsers: nudgeResults.sent + nudgeResults.skipped,
+      sent: nudgeResults.sent,
+      skipped: nudgeResults.skipped,
+      failed: 0,
+    })
+  } catch (error) {
+    console.error('[cron/engagement] Journey nudges failed:', error)
   }
 
   return NextResponse.json({

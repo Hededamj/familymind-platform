@@ -1,6 +1,6 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { BookOpen, Package, Video, CreditCard } from 'lucide-react'
 
 type Product = {
@@ -11,8 +11,11 @@ type Product = {
   type: string
   priceAmountCents: number
   priceCurrency: string
+  thumbnailUrl?: string | null
+  coverImageUrl?: string | null
   courseLessons?: { id: string }[]
   bundleItems?: { id: string }[]
+  modules?: { id: string }[]
 }
 
 const typeLabels: Record<string, string> = {
@@ -38,7 +41,7 @@ export function ProductCard({ product }: { product: Product }) {
 
   const subtitle =
     product.type === 'COURSE'
-      ? `${product.courseLessons?.length || 0} lektioner`
+      ? `${product.modules?.length || 0} moduler · ${product.courseLessons?.length || 0} lektioner`
       : product.type === 'BUNDLE'
         ? `${product.bundleItems?.length || 0} produkter`
         : null
@@ -56,9 +59,21 @@ export function ProductCard({ product }: { product: Product }) {
       className="card-hover group flex flex-col rounded-2xl border border-border bg-white"
     >
       {/* Thumbnail area */}
-      <div className="flex aspect-[16/9] items-center justify-center rounded-t-2xl bg-sand">
-        <Icon className="size-10 text-primary/30" />
-      </div>
+      {product.thumbnailUrl || product.coverImageUrl ? (
+        <div className="relative aspect-[16/9] overflow-hidden rounded-t-2xl">
+          <Image
+            src={(product.thumbnailUrl || product.coverImageUrl)!}
+            alt={product.title}
+            fill
+            className="object-cover"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          />
+        </div>
+      ) : (
+        <div className="flex aspect-[16/9] items-center justify-center rounded-t-2xl bg-sand">
+          <Icon className="size-10 text-primary/30" />
+        </div>
+      )}
 
       {/* Content */}
       <div className="flex flex-1 flex-col p-5">

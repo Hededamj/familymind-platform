@@ -2,13 +2,15 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { getContentUnit } from '@/lib/services/content.service'
+import { getProduct } from '@/lib/services/product.service'
 import { getCurrentUser } from '@/lib/auth'
 import { canAccessContent } from '@/lib/services/entitlement.service'
 import { getContentProgress } from '@/lib/services/progress.service'
 import { getSignedPlaybackUrl, getThumbnailUrl } from '@/lib/bunny'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Clock, Lock } from 'lucide-react'
+import { Progress } from '@/components/ui/progress'
+import { ArrowLeft, ArrowRight, Clock, Lock } from 'lucide-react'
 import { VideoPlayer } from './_components/video-player'
 import { MarkCompleteButton } from './_components/mark-complete-button'
 import { TrackStarted } from './_components/track-started'
@@ -43,10 +45,13 @@ function mediaTypeLabel(mediaType: string): string {
 
 export default async function ContentPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>
+  searchParams: Promise<{ course?: string }>
 }) {
   const { slug } = await params
+  const { course: courseSlug } = await searchParams
   const content = await getContentUnit(slug)
 
   if (!content || !content.publishedAt) {
@@ -76,20 +81,71 @@ export default async function ContentPage({
       : null
     const isCompleted = !!progress?.completedAt
 
+    // Load course context if ?course= param is present
+    let courseContext: {
+      product: { title: string; slug: string }
+      prevLesson: { slug: string; title: string } | null
+      nextLesson: { slug: string; title: string } | null
+      currentPosition: number
+      totalLessons: number
+    } | null = null
+
+    if (courseSlug) {
+      const course = await getProduct(courseSlug)
+      if (course && course.type === 'COURSE') {
+        const lessons = course.courseLessons.sort((a, b) => a.position - b.position)
+        const currentIndex = lessons.findIndex(l => l.contentUnit.slug === slug)
+        if (currentIndex >= 0) {
+          courseContext = {
+            product: { title: course.title, slug: course.slug },
+            prevLesson: currentIndex > 0
+              ? { slug: lessons[currentIndex - 1].contentUnit.slug, title: lessons[currentIndex - 1].contentUnit.title }
+              : null,
+            nextLesson: currentIndex < lessons.length - 1
+              ? { slug: lessons[currentIndex + 1].contentUnit.slug, title: lessons[currentIndex + 1].contentUnit.title }
+              : null,
+            currentPosition: currentIndex + 1,
+            totalLessons: lessons.length,
+          }
+        }
+      }
+    }
+
     return (
       <div className="px-4 py-6 sm:px-8 sm:py-8">
         <div className="mx-auto w-full max-w-3xl">
           {/* Track content as started for authenticated users */}
           {user && <TrackStarted contentUnitId={content.id} />}
 
-          {/* Back link */}
-          <Link
-            href="/dashboard"
-            className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="size-4" />
-            Tilbage til min side
-          </Link>
+          {/* Course context bar or back link */}
+          {courseContext ? (
+            <div className="mb-6 rounded-xl border border-border bg-white p-4">
+              <div className="mb-2 flex items-center justify-between">
+                <Link
+                  href={`/products/${courseContext.product.slug}`}
+                  className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+                >
+                  <ArrowLeft className="size-4" />
+                  {courseContext.product.title}
+                </Link>
+                <span className="text-xs text-muted-foreground">
+                  Lektion {courseContext.currentPosition} af {courseContext.totalLessons}
+                </span>
+              </div>
+              <Progress
+                value={(courseContext.currentPosition / courseContext.totalLessons) * 100}
+                className="h-1.5"
+              />
+            </div>
+          ) : (
+            <Link
+              href={user ? '/dashboard' : '/browse'}
+              className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="size-4" />
+              {user ? 'Tilbage til min side' : 'Tilbage'}
+            </Link>
+          )}
 
           {/* Video player */}
           {content.mediaType === 'VIDEO' && playbackUrl && (
@@ -181,6 +237,39 @@ export default async function ContentPage({
                 contentUnitId={content.id}
                 isCompleted={isCompleted}
               />
+            </div>
+          )}
+
+          {/* Next/previous navigation */}
+          {courseContext && (
+            <div className="mt-6 flex items-center justify-between border-t border-border pt-6">
+              {courseContext.prevLesson ? (
+                <Link
+                  href={`/content/${courseContext.prevLesson.slug}?course=${courseContext.product.slug}`}
+                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+                >
+                  <ArrowLeft className="size-4" />
+                  <span className="line-clamp-1 max-w-[150px]">{courseContext.prevLesson.title}</span>
+                </Link>
+              ) : <div />}
+
+              {courseContext.nextLesson ? (
+                <Link
+                  href={`/content/${courseContext.nextLesson.slug}?course=${courseContext.product.slug}`}
+                  className="flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+                >
+                  <span className="line-clamp-1 max-w-[150px]">{courseContext.nextLesson.title}</span>
+                  <ArrowRight className="size-4" />
+                </Link>
+              ) : (
+                <Link
+                  href={`/products/${courseContext.product.slug}`}
+                  className="flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+                >
+                  Tilbage til kurset
+                  <ArrowRight className="size-4" />
+                </Link>
+              )}
             </div>
           )}
         </div>

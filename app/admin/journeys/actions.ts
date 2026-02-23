@@ -31,6 +31,8 @@ export async function updateJourneyAction(
     targetAgeMax: number | null
     estimatedDays: number | null
     isActive: boolean
+    productId: string | null
+    coverImageUrl: string | null
   }>
 ) {
   await requireAdmin()

@@ -56,3 +56,19 @@ export async function getSiteSetting(key: string) {
   const setting = await prisma.siteSetting.findUnique({ where: { key } })
   return setting?.value ?? null
 }
+
+export async function upsertSiteSetting(key: string, value: string, description?: string) {
+  return prisma.siteSetting.upsert({
+    where: { key },
+    update: { value },
+    create: { key, value, description },
+  })
+}
+
+export async function getSiteSettings<K extends string>(keys: K[]): Promise<Record<K, string>> {
+  const settings = await prisma.siteSetting.findMany({
+    where: { key: { in: keys } },
+  })
+  const map = new Map(settings.map(s => [s.key, s.value]))
+  return Object.fromEntries(keys.map(k => [k, map.get(k) ?? ''])) as Record<K, string>
+}

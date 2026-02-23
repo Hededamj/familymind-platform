@@ -9,6 +9,13 @@ import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { toast } from 'sonner'
 import { createJourneyAction, updateJourneyAction } from '../actions'
 
@@ -30,6 +37,7 @@ type JourneyFormData = {
   targetAgeMax: string
   estimatedDays: string
   isActive: boolean
+  productId: string | null
 }
 
 type JourneyFormProps = {
@@ -43,10 +51,12 @@ type JourneyFormProps = {
     targetAgeMax: number | null
     estimatedDays: number | null
     isActive: boolean
+    productId: string | null
   }
+  availableCourses?: Array<{ id: string; title: string; slug: string }>
 }
 
-export function JourneyForm({ mode, initialData }: JourneyFormProps) {
+export function JourneyForm({ mode, initialData, availableCourses = [] }: JourneyFormProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const slugManuallyEdited = useRef(false)
@@ -59,6 +69,7 @@ export function JourneyForm({ mode, initialData }: JourneyFormProps) {
     targetAgeMax: initialData?.targetAgeMax?.toString() ?? '',
     estimatedDays: initialData?.estimatedDays?.toString() ?? '',
     isActive: initialData?.isActive ?? true,
+    productId: initialData?.productId ?? null,
   })
 
   useEffect(() => {
@@ -117,6 +128,7 @@ export function JourneyForm({ mode, initialData }: JourneyFormProps) {
               ? parseInt(formData.estimatedDays, 10)
               : null,
             isActive: formData.isActive,
+            productId: formData.productId,
           })
           toast.success('Rejse opdateret')
           router.refresh()
@@ -237,6 +249,29 @@ export function JourneyForm({ mode, initialData }: JourneyFormProps) {
               />
             </div>
           </div>
+
+          {availableCourses.length > 0 && (
+            <div className="space-y-2">
+              <Label>Tilknyttet kursus (valgfrit)</Label>
+              <Select
+                value={formData.productId || 'none'}
+                onValueChange={(v) => setFormData(prev => ({ ...prev, productId: v === 'none' ? null : v }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Intet kursus" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Intet kursus (selvstændigt forløb)</SelectItem>
+                  {availableCourses.map(c => (
+                    <SelectItem key={c.id} value={c.id}>{c.title}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Når et kursus er tilknyttet, vises forløbet som &quot;Guidet forløb&quot; på kursussiden
+              </p>
+            </div>
+          )}
 
           {mode === 'edit' && (
             <div className="flex items-center gap-3 pt-2">

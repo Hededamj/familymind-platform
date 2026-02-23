@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { getProduct } from '@/lib/services/product.service'
 import { getCurrentUser } from '@/lib/auth'
 import { getUserEntitlements } from '@/lib/services/entitlement.service'
@@ -8,7 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { BuyButton } from './_components/buy-button'
-import { ArrowLeft, Check, Circle, CircleDot, Package } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Check, Circle, CircleDot, Package } from 'lucide-react'
 
 function formatPrice(amountCents: number, currency: string): string {
   return new Intl.NumberFormat('da-DK', {
@@ -88,6 +89,19 @@ export default async function ProductDetailPage({
           )}
         </div>
 
+        {/* Cover image */}
+        {product.coverImageUrl && (
+          <div className="mb-6 aspect-video overflow-hidden rounded-2xl">
+            <Image
+              src={product.coverImageUrl}
+              alt={product.title}
+              width={800}
+              height={450}
+              className="h-full w-full object-cover"
+            />
+          </div>
+        )}
+
         {/* Price */}
         <div className="mb-6">
           <p className="font-serif text-3xl">
@@ -103,20 +117,17 @@ export default async function ProductDetailPage({
 
         <div className="mb-6 border-t border-border" />
 
-        {/* Course lessons with progress */}
+        {/* Course content with modules */}
         {product.type === 'COURSE' && product.courseLessons.length > 0 && (
-          <div className="mb-6">
+          <div className="mb-6 space-y-6">
             <div className="mb-4">
               <h2 className="font-serif text-lg">Indhold i kurset</h2>
-              <p className="text-sm text-muted-foreground">
-                {courseProgress
-                  ? `${courseProgress.completedLessons} af ${courseProgress.totalLessons} lektioner fuldført`
-                  : `${product.courseLessons.length} ${product.courseLessons.length === 1 ? 'lektion' : 'lektioner'}`}
-              </p>
               {courseProgress && (
                 <div className="mt-3">
                   <div className="mb-1 flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Fremskridt</span>
+                    <span className="text-muted-foreground">
+                      {courseProgress.completedLessons} af {courseProgress.totalLessons} lektioner
+                    </span>
                     <span className="font-medium">{courseProgress.percentComplete}%</span>
                   </div>
                   <Progress value={courseProgress.percentComplete} className="h-2" />
@@ -124,47 +135,121 @@ export default async function ProductDetailPage({
               )}
             </div>
 
-            <div className="rounded-2xl border border-border bg-white">
-              <ul className="divide-y divide-border">
-                {courseProgress
-                  ? courseProgress.lessons.map((lesson, index) => (
-                      <li key={lesson.id} className="flex items-center gap-3 px-5 py-4">
-                        {lesson.completed ? (
-                          <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-success text-white">
-                            <Check className="size-3.5" />
-                          </div>
-                        ) : lesson.started ? (
-                          <CircleDot className="size-6 shrink-0 text-primary" />
-                        ) : (
-                          <Circle className="size-6 shrink-0 text-muted-foreground/40" />
-                        )}
-                        <Link
-                          href={`/content/${lesson.slug}`}
-                          className="flex-1 text-sm font-medium hover:text-primary"
-                        >
-                          {index + 1}. {lesson.title}
-                        </Link>
-                      </li>
-                    ))
-                  : product.courseLessons.map((lesson, index) => (
-                      <li key={lesson.id} className="flex items-center gap-3 px-5 py-4">
-                        <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-sand text-xs font-medium">
-                          {index + 1}
-                        </span>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium">
-                            {lesson.contentUnit.title}
-                          </p>
-                          {lesson.contentUnit.durationMinutes && (
-                            <p className="text-xs text-muted-foreground">
-                              {lesson.contentUnit.durationMinutes} min.
-                            </p>
+            {product.modules && product.modules.length > 0 ? (
+              /* Module-grouped view */
+              product.modules.map((module, mi) => {
+                const moduleLessons = product.courseLessons
+                  .filter((l: any) => l.moduleId === module.id)
+                  .sort((a: any, b: any) => a.position - b.position)
+
+                if (moduleLessons.length === 0) return null
+
+                return (
+                  <div key={module.id}>
+                    <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold">
+                      <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                        {mi + 1}
+                      </span>
+                      {module.title}
+                    </h3>
+                    {module.description && (
+                      <p className="mb-3 text-xs text-muted-foreground">{module.description}</p>
+                    )}
+                    <div className="rounded-2xl border border-border bg-white">
+                      <ul className="divide-y divide-border">
+                        {courseProgress
+                          ? moduleLessons.map((lesson: any, li: number) => {
+                              const progressLesson = courseProgress.lessons.find(
+                                (pl: any) => pl.contentUnitId === lesson.contentUnitId || pl.slug === lesson.contentUnit?.slug
+                              )
+                              return (
+                                <li key={lesson.id} className="flex items-center gap-3 px-5 py-4">
+                                  {progressLesson?.completed ? (
+                                    <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-success text-white">
+                                      <Check className="size-3.5" />
+                                    </div>
+                                  ) : progressLesson?.started ? (
+                                    <CircleDot className="size-6 shrink-0 text-primary" />
+                                  ) : (
+                                    <Circle className="size-6 shrink-0 text-muted-foreground/40" />
+                                  )}
+                                  <Link
+                                    href={`/content/${lesson.contentUnit?.slug || progressLesson?.slug}?course=${product.slug}`}
+                                    className="flex-1 text-sm font-medium hover:text-primary"
+                                  >
+                                    {lesson.contentUnit?.title || progressLesson?.title}
+                                  </Link>
+                                </li>
+                              )
+                            })
+                          : moduleLessons.map((lesson: any, li: number) => (
+                              <li key={lesson.id} className="flex items-center gap-3 px-5 py-4">
+                                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-sand text-xs font-medium">
+                                  {li + 1}
+                                </span>
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium">{lesson.contentUnit.title}</p>
+                                </div>
+                              </li>
+                            ))}
+                      </ul>
+                    </div>
+                  </div>
+                )
+              })
+            ) : (
+              /* Flat list fallback */
+              <div className="rounded-2xl border border-border bg-white">
+                <ul className="divide-y divide-border">
+                  {courseProgress
+                    ? courseProgress.lessons.map((lesson: any, index: number) => (
+                        <li key={lesson.id} className="flex items-center gap-3 px-5 py-4">
+                          {lesson.completed ? (
+                            <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-success text-white">
+                              <Check className="size-3.5" />
+                            </div>
+                          ) : lesson.started ? (
+                            <CircleDot className="size-6 shrink-0 text-primary" />
+                          ) : (
+                            <Circle className="size-6 shrink-0 text-muted-foreground/40" />
                           )}
-                        </div>
-                      </li>
-                    ))}
-              </ul>
-            </div>
+                          <Link
+                            href={`/content/${lesson.slug}?course=${product.slug}`}
+                            className="flex-1 text-sm font-medium hover:text-primary"
+                          >
+                            {index + 1}. {lesson.title}
+                          </Link>
+                        </li>
+                      ))
+                    : product.courseLessons.map((lesson: any, index: number) => (
+                        <li key={lesson.id} className="flex items-center gap-3 px-5 py-4">
+                          <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-sand text-xs font-medium">
+                            {index + 1}
+                          </span>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">{lesson.contentUnit.title}</p>
+                          </div>
+                        </li>
+                      ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Guided journey link */}
+        {product.type === 'COURSE' && product.journeys && product.journeys.length > 0 && (
+          <div className="mb-6 rounded-2xl border border-primary/20 bg-primary/5 p-6">
+            <h3 className="mb-1 font-serif text-lg">Guidet forløb</h3>
+            <p className="mb-4 text-sm text-muted-foreground">
+              Følg et dagligt forløb der guider dig gennem indholdet med øvelser og refleksion.
+            </p>
+            <Button asChild variant="outline" className="rounded-xl">
+              <Link href={`/journeys/${product.journeys[0].slug}`}>
+                Se guidet forløb
+                <ArrowRight className="ml-2 size-4" />
+              </Link>
+            </Button>
           </div>
         )}
 

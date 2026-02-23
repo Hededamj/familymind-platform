@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { requireAdmin } from '@/lib/auth'
 import { getJourneyById } from '@/lib/services/journey.service'
 import { listContentUnits } from '@/lib/services/content.service'
+import { listProducts } from '@/lib/services/product.service'
 import { JourneyEditor } from './_components/journey-editor'
 
 export default async function EditJourneyPage({
@@ -12,9 +13,10 @@ export default async function EditJourneyPage({
   await requireAdmin()
   const { id } = await params
 
-  const [journey, contentUnits] = await Promise.all([
+  const [journey, contentUnits, courses] = await Promise.all([
     getJourneyById(id),
     listContentUnits({ published: true }),
+    listProducts({ type: 'COURSE', isActive: true }),
   ])
 
   if (!journey) {
@@ -29,6 +31,12 @@ export default async function EditJourneyPage({
     mediaType: unit.mediaType,
   }))
 
+  const availableCourses = courses.map((c) => ({
+    id: c.id,
+    title: c.title,
+    slug: c.slug,
+  }))
+
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <div>
@@ -37,7 +45,7 @@ export default async function EditJourneyPage({
           Rediger "{journey.title}"
         </p>
       </div>
-      <JourneyEditor journey={journey} allContentUnits={allContentUnits} />
+      <JourneyEditor journey={journey} allContentUnits={allContentUnits} availableCourses={availableCourses} />
     </div>
   )
 }

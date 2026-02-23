@@ -7,6 +7,8 @@ import {
   CardDescription,
 } from '@/components/ui/card'
 import {
+  Building2,
+  Plug,
   ClipboardList,
   Target,
   SmilePlus,
@@ -18,6 +20,18 @@ import {
 } from 'lucide-react'
 
 const settingsSections = [
+  {
+    href: '/admin/settings/general',
+    title: 'Generelt',
+    description: 'Firmaoplysninger til juridiske dokumenter og e-mails',
+    icon: Building2,
+  },
+  {
+    href: '/admin/settings/integrations',
+    title: 'Integrationer',
+    description: 'Google Analytics, Meta Pixel og Stripe-forbindelse',
+    icon: Plug,
+  },
   {
     href: '/admin/settings/onboarding',
     title: 'Onboarding Quiz',
