@@ -3,6 +3,7 @@ import type { Prisma } from '@prisma/client'
 import {
   createProductSchema,
   updateProductSchema,
+  landingPageSchema,
 } from '@/lib/validators/product'
 import { getStripe } from '@/lib/stripe'
 import type { z } from 'zod'
@@ -185,6 +186,7 @@ export async function assignLessonToModule(lessonId: string, moduleId: string | 
 
 // Landing page and images
 export async function updateProductLandingPage(id: string, landingPage: Prisma.InputJsonValue) {
+  landingPageSchema.parse(landingPage)
   return prisma.product.update({
     where: { id },
     data: { landingPage },

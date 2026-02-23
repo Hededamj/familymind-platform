@@ -27,7 +27,8 @@ export default async function CourseLandingPage({
   }
 
   const lp = (product.landingPage as LandingPageConfig) || {}
-  const ctaUrl = lp.ctaUrl || `/products/${product.slug}`
+  const rawCtaUrl = lp.ctaUrl || ''
+  const ctaUrl = rawCtaUrl.startsWith('/') ? rawCtaUrl : `/products/${product.slug}`
   const ctaText = lp.ctaText || 'Kom i gang'
   const moduleCount = product.modules?.length || 0
   const lessonCount = product.courseLessons?.length || 0

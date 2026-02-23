@@ -15,3 +15,12 @@ export const reorderLessonsSchema = z.object({
   productId: z.string().uuid(),
   lessonIds: z.array(z.string().uuid()),
 })
+
+export const landingPageSchema = z.object({
+  subtitle: z.string().optional(),
+  benefits: z.array(z.string()).optional(),
+  testimonials: z.array(z.object({ name: z.string(), text: z.string() })).optional(),
+  faq: z.array(z.object({ question: z.string(), answer: z.string() })).optional(),
+  ctaText: z.string().optional(),
+  ctaUrl: z.string().startsWith('/').optional(),
+}).passthrough()
