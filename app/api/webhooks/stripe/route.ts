@@ -55,6 +55,11 @@ export async function POST(req: Request) {
 
       if (!userId || !productId) break
 
+      // Log connected account for debugging
+      if (event.account) {
+        console.log(`Checkout from connected account: ${event.account}`)
+      }
+
       const product = await prisma.product.findUnique({
         where: { id: productId },
         include: { bundleItems: true },
@@ -143,6 +148,17 @@ export async function POST(req: Request) {
         `Payment failed for invoice ${invoice.id}, subscription: ${subscriptionRef}`
       )
       // Don't immediately revoke — Stripe will retry. Log for monitoring.
+      break
+    }
+
+    case 'account.updated': {
+      const account = event.data.object as Stripe.Account
+      if (account.id) {
+        const { syncAccountStatus } = await import(
+          '@/lib/services/stripe-connect.service'
+        )
+        await syncAccountStatus(account.id)
+      }
       break
     }
 
