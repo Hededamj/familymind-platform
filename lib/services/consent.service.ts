@@ -2,7 +2,8 @@ import { prisma } from '@/lib/prisma'
 import { createHash } from 'crypto'
 
 function hashIp(ip: string): string {
-  return createHash('sha256').update(ip).digest('hex').slice(0, 16)
+  const salt = process.env.IP_HASH_SALT || 'familymind-consent-default-salt'
+  return createHash('sha256').update(salt + ip).digest('hex').slice(0, 16)
 }
 
 export async function logConsent(data: {

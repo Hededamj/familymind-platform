@@ -10,7 +10,14 @@ import { AnalyticsScripts } from '@/components/consent/analytics-scripts'
 import { CookieBanner } from '@/components/consent/cookie-banner'
 import { CookieModal } from '@/components/consent/cookie-modal'
 import { getSiteSettings } from '@/lib/services/settings.service'
+import { unstable_cache } from 'next/cache'
 import "./globals.css";
+
+const getCachedAnalyticsSettings = unstable_cache(
+  () => getSiteSettings(['ga4_measurement_id', 'meta_pixel_id']),
+  ['analytics-settings'],
+  { revalidate: 300 }
+)
 
 const inter = Inter({
   variable: "--font-sans",
@@ -38,7 +45,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const analytics = await getSiteSettings(['ga4_measurement_id', 'meta_pixel_id'])
+  const analytics = await getCachedAnalyticsSettings()
 
   return (
     <html lang="da">

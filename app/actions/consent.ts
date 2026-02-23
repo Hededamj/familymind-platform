@@ -8,6 +8,10 @@ export async function logConsentAction(data: {
   statistics: boolean
   marketing: boolean
 }) {
+  if (typeof data.statistics !== 'boolean' || typeof data.marketing !== 'boolean') {
+    throw new Error('Invalid consent data')
+  }
+
   const headersList = await headers()
   const ip = headersList.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
 
