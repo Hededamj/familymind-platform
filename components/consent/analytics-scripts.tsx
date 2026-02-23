@@ -3,11 +3,13 @@
 import Script from 'next/script'
 import { useConsent } from './consent-provider'
 
-export function AnalyticsScripts() {
-  const { consent } = useConsent()
+type Props = {
+  ga4Id?: string
+  metaPixelId?: string
+}
 
-  const ga4Id = process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID
-  const metaPixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID
+export function AnalyticsScripts({ ga4Id, metaPixelId }: Props) {
+  const { consent } = useConsent()
 
   return (
     <>

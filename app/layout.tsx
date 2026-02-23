@@ -9,6 +9,7 @@ import { ConsentProvider } from '@/components/consent/consent-provider'
 import { AnalyticsScripts } from '@/components/consent/analytics-scripts'
 import { CookieBanner } from '@/components/consent/cookie-banner'
 import { CookieModal } from '@/components/consent/cookie-modal'
+import { getSiteSettings } from '@/lib/services/settings.service'
 import "./globals.css";
 
 const inter = Inter({
@@ -32,18 +33,20 @@ export const metadata: Metadata = {
   description: "Din strukturerede forældreguide — evidensbaseret viden og praktiske værktøjer til hele familien.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const analytics = await getSiteSettings(['ga4_measurement_id', 'meta_pixel_id'])
+
   return (
     <html lang="da">
       <body
         className={`${inter.variable} ${dmSerif.variable} ${geistMono.variable} font-sans antialiased`}
       >
         <ConsentProvider>
-          <AnalyticsScripts />
+          <AnalyticsScripts ga4Id={analytics.ga4_measurement_id} metaPixelId={analytics.meta_pixel_id} />
           <Topbar />
           <main className="min-h-screen">
             {children}
