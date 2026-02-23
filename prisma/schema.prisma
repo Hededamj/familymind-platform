@@ -136,6 +136,7 @@ model User {
   postReactions      PostReaction[]
   cohortBans         CohortBan[]
   contentReports     ContentReport[]
+  cookieConsents     CookieConsent[]
 }
 
 model Organization {
@@ -550,6 +551,19 @@ model UserNotificationLog {
 
   @@index([userId, type, key])
   @@index([userId, type, sentAt])
+}
+
+model CookieConsent {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String?  @db.Uuid
+  ipHash      String
+  statistics  Boolean  @default(false)
+  marketing   Boolean  @default(false)
+  consentedAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
 }
 
 // ──────────────────────────────────────────────
