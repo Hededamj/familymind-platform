@@ -258,6 +258,83 @@ export async function checkAndNotifyMilestones(
 }
 
 /**
+ * Send a warm notification when a user completes a journey day.
+ */
+export async function sendDayCompleteNotification(
+  userId: string,
+  journeyTitle: string,
+  completedDayId: string,
+  nextDayId: string | null
+) {
+  // In-app notification
+  await createInAppNotification(
+    userId,
+    'SYSTEM',
+    'Godt klaret!',
+    nextDayId
+      ? `Du har gennemført en dag i "${journeyTitle}". Næste dag venter.`
+      : `Du har gennemført "${journeyTitle}"!`,
+    '/dashboard'
+  )
+
+  // Get next day info for email teaser
+  let nextDayTeaser = ''
+  if (nextDayId) {
+    const nextDay = await prisma.journeyDay.findUnique({
+      where: { id: nextDayId },
+      select: { title: true },
+    })
+    nextDayTeaser = nextDay?.title
+      ? `I morgen: ${nextDay.title}`
+      : 'Din næste dag er klar i morgen.'
+  }
+
+  // Get completed day title
+  const completedDay = await prisma.journeyDay.findUnique({
+    where: { id: completedDayId },
+    select: { title: true },
+  })
+
+  await sendTemplatedEmail(userId, 'journey_day_complete', {
+    journeyTitle,
+    dayTitle: completedDay?.title || 'dagens indhold',
+    nextDayTeaser,
+  })
+}
+
+/**
+ * Send celebration notification when a user completes an entire journey.
+ */
+export async function sendJourneyCompleteNotification(
+  userId: string,
+  journeyTitle: string,
+  journeyId: string
+) {
+  await createInAppNotification(
+    userId,
+    'MILESTONE',
+    `Tillykke! Du har gennemført "${journeyTitle}"`,
+    'Du kan altid gå tilbage og se indholdet igen.',
+    '/dashboard'
+  )
+
+  // Get recommendation for "what's next"
+  const recommendations = await prisma.recommendationRule.findMany({
+    where: { isActive: true },
+    orderBy: { priority: 'desc' },
+    take: 1,
+  })
+  const recommendationText = recommendations.length > 0
+    ? 'Vi har fundet et nyt forløb der passer til dig.'
+    : 'Udforsk vores andre kurser og forløb.'
+
+  await sendTemplatedEmail(userId, 'journey_complete', {
+    journeyTitle,
+    recommendationText,
+  })
+}
+
+/**
  * Get monthly progress summary for a user.
  * Content consumed, actions completed, check-in history, milestones earned.
  */

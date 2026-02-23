@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { checkAndNotifyMilestones } from './engagement.service'
 
 export async function markContentStarted(userId: string, contentUnitId: string) {
   return prisma.userContentProgress.upsert({
@@ -9,11 +10,16 @@ export async function markContentStarted(userId: string, contentUnitId: string) 
 }
 
 export async function markContentCompleted(userId: string, contentUnitId: string) {
-  return prisma.userContentProgress.upsert({
+  const result = await prisma.userContentProgress.upsert({
     where: { userId_contentUnitId: { userId, contentUnitId } },
     update: { completedAt: new Date() },
     create: { userId, contentUnitId, completedAt: new Date() },
   })
+
+  // Check milestones after content completion (non-blocking)
+  checkAndNotifyMilestones(userId).catch(console.error)
+
+  return result
 }
 
 export async function getContentProgress(userId: string, contentUnitId: string) {
