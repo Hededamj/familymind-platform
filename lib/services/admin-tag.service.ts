@@ -2,8 +2,8 @@ import { prisma } from '@/lib/prisma'
 import { createTagSchema, updateTagSchema } from '@/lib/validators/admin-tag'
 import type { z } from 'zod'
 
-type CreateTagInput = z.infer<typeof createTagSchema>
-type UpdateTagInput = z.infer<typeof updateTagSchema>
+type CreateTagInput = z.input<typeof createTagSchema>
+type UpdateTagInput = z.input<typeof updateTagSchema>
 
 export async function listTags() {
   return prisma.adminTag.findMany({
