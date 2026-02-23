@@ -1,22 +1,25 @@
 import type { Metadata } from 'next'
+import { getSiteSettings } from '@/lib/services/settings.service'
 
 export const metadata: Metadata = {
   title: 'Privatlivspolitik — FamilyMind',
 }
 
-export default function PrivatlivspolitikPage() {
+export default async function PrivatlivspolitikPage() {
+  const company = await getSiteSettings(['company_name', 'company_cvr', 'company_address', 'company_email'])
+
   return (
     <div className="px-4 py-16 sm:px-8">
       <div className="prose prose-sm mx-auto max-w-3xl">
         <h1 className="font-serif">Privatlivspolitik</h1>
-        <p className="text-sm text-muted-foreground">Sidst opdateret: [INDSÆT DATO]</p>
+        <p className="text-sm text-muted-foreground">Sidst opdateret: Februar 2026</p>
 
         <h2>1. Dataansvarlig</h2>
         <p>
-          [INDSÆT FIRMANAVN]<br />
-          CVR: [INDSÆT CVR]<br />
-          [INDSÆT ADRESSE]<br />
-          E-mail: <a href="mailto:[INDSÆT EMAIL]">[INDSÆT EMAIL]</a>
+          {company.company_name || '[INDSÆT FIRMANAVN]'}<br />
+          CVR: {company.company_cvr || '[INDSÆT CVR]'}<br />
+          {company.company_address || '[INDSÆT ADRESSE]'}<br />
+          E-mail: <a href={`mailto:${company.company_email || ''}`}>{company.company_email || '[INDSÆT EMAIL]'}</a>
         </p>
 
         <h2>2. Hvilke personoplysninger indsamler vi?</h2>
@@ -75,7 +78,7 @@ export default function PrivatlivspolitikPage() {
           <li><strong>Tilbagetrækning af samtykke</strong> — via <a href="/cookiepolitik">cookieindstillinger</a></li>
           <li><strong>Klage</strong> — til Datatilsynet (datatilsynet.dk)</li>
         </ul>
-        <p>Kontakt os på <a href="mailto:[INDSÆT EMAIL]">[INDSÆT EMAIL]</a> for at udøve dine rettigheder.</p>
+        <p>Kontakt os på <a href={`mailto:${company.company_email || ''}`}>{company.company_email || '[INDSÆT EMAIL]'}</a> for at udøve dine rettigheder.</p>
 
         <h2>7. Sikkerhed</h2>
         <p>

@@ -1,21 +1,24 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { getSiteSettings } from '@/lib/services/settings.service'
 
 export const metadata: Metadata = {
   title: 'Vilkår — FamilyMind',
 }
 
-export default function VilkaarPage() {
+export default async function VilkaarPage() {
+  const company = await getSiteSettings(['company_name', 'company_cvr', 'company_email'])
+
   return (
     <div className="px-4 py-16 sm:px-8">
       <div className="prose prose-sm mx-auto max-w-3xl">
         <h1 className="font-serif">Vilkår og betingelser</h1>
-        <p className="text-sm text-muted-foreground">Sidst opdateret: [INDSÆT DATO]</p>
+        <p className="text-sm text-muted-foreground">Sidst opdateret: Februar 2026</p>
 
         <h2>1. Generelt</h2>
         <p>
           Disse vilkår gælder for din brug af FamilyMind-platformen (&quot;Tjenesten&quot;),
-          der drives af [INDSÆT FIRMANAVN], CVR [INDSÆT CVR].
+          der drives af {company.company_name || '[INDSÆT FIRMANAVN]'}, CVR {company.company_cvr || '[INDSÆT CVR]'}.
         </p>
         <p>
           Ved at oprette en konto eller bruge Tjenesten accepterer du disse vilkår.
@@ -79,7 +82,7 @@ export default function VilkaarPage() {
 
         <h2>10. Kontakt og klager</h2>
         <p>
-          Kontakt: <a href="mailto:[INDSÆT EMAIL]">[INDSÆT EMAIL]</a><br />
+          Kontakt: <a href={`mailto:${company.company_email || ''}`}>{company.company_email || '[INDSÆT EMAIL]'}</a><br />
           Se også vores <Link href="/privatlivspolitik">privatlivspolitik</Link>.
         </p>
 
