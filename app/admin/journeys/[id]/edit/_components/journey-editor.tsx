@@ -62,17 +62,27 @@ type Journey = {
   targetAgeMax: number | null
   estimatedDays: number | null
   isActive: boolean
+  productId: string | null
   phases: Phase[]
+  product: { id: string; title: string; slug: string; type: string; thumbnailUrl: string | null } | null
+}
+
+type AvailableCourse = {
+  id: string
+  title: string
+  slug: string
 }
 
 type JourneyEditorProps = {
   journey: Journey
   allContentUnits: ContentUnit[]
+  availableCourses: AvailableCourse[]
 }
 
 export function JourneyEditor({
   journey,
   allContentUnits,
+  availableCourses,
 }: JourneyEditorProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -102,7 +112,7 @@ export function JourneyEditor({
   return (
     <div className="space-y-8">
       {/* Basic info */}
-      <JourneyForm mode="edit" initialData={journey} />
+      <JourneyForm mode="edit" initialData={journey} availableCourses={availableCourses} />
 
       {/* Phases section */}
       <Card>
