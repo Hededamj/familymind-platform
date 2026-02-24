@@ -68,6 +68,16 @@ export async function revokeEntitlementAction(
   return result
 }
 
+export async function getProductsAction() {
+  await requireAdmin()
+  const { prisma } = await import('@/lib/prisma')
+  return prisma.product.findMany({
+    where: { isActive: true },
+    select: { id: true, title: true, type: true },
+    orderBy: { title: 'asc' },
+  })
+}
+
 export async function bulkEmailAction(
   data: z.input<typeof bulkEmailSchema>
 ) {

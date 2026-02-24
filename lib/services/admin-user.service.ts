@@ -206,12 +206,25 @@ export async function getUserDetail(userId: string) {
       },
       userJourneys: {
         include: {
-          journey: true,
-          currentDay: true,
+          journey: {
+            include: {
+              phases: {
+                include: {
+                  _count: { select: { days: true } },
+                },
+              },
+            },
+          },
+          currentDay: {
+            include: {
+              phase: { select: { position: true } },
+            },
+          },
           checkIns: {
             orderBy: { completedAt: 'desc' },
             take: 10,
           },
+          _count: { select: { checkIns: true } },
         },
         orderBy: { startedAt: 'desc' },
       },
