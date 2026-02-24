@@ -783,7 +783,7 @@ function escapeHtml(str: string): string {
 }
 
 /** Variables that contain trusted HTML and should NOT be escaped. */
-const TRUSTED_VARS = new Set(['appUrl', 'unsubscribeUrl', 'communityUrl', 'progressUrl', 'brandName'])
+const TRUSTED_VARS = new Set(['appUrl', 'unsubscribeUrl', 'communityUrl', 'progressUrl'])
 
 /**
  * Replace `{{key}}` patterns in a string with corresponding values.

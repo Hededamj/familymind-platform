@@ -1,5 +1,4 @@
 import { prisma } from '@/lib/prisma'
-import { getActiveStripeAccount } from '@/lib/services/stripe-connect.service'
 import { getStripe } from '@/lib/stripe'
 import { createCheckoutSchema } from '@/lib/validators/checkout'
 import type { z } from 'zod'
@@ -25,12 +24,18 @@ export async function createCheckoutSession(
     where: { id: userId },
   })
 
-  if (!user.organizationId) {
-    throw new Error('Bruger tilhører ingen organisation')
+  // Resolve tenant's Stripe Connect account (if any)
+  let stripeAccountId: string | undefined
+  if (user.organizationId) {
+    const org = await prisma.organization.findUnique({
+      where: { id: user.organizationId },
+      select: { stripeAccountId: true, stripeAccountStatus: true },
+    })
+    if (org?.stripeAccountId && org.stripeAccountStatus === 'active') {
+      stripeAccountId = org.stripeAccountId
+    }
+    // If no active Connect account, fall back to platform Stripe key (no stripeAccount header)
   }
-
-  // Hent tenantens aktive Stripe-konto
-  const stripeAccountId = await getActiveStripeAccount(user.organizationId)
 
   let discountId: string | undefined
   if (validated.discountCode) {
@@ -53,9 +58,7 @@ export async function createCheckoutSession(
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/products/${product.slug}`,
       metadata: { userId, productId: product.id },
     },
-    {
-      stripeAccount: stripeAccountId,
-    }
+    stripeAccountId ? { stripeAccount: stripeAccountId } : undefined
   )
 
   return { url: session.url }

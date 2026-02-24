@@ -6,13 +6,18 @@ import { Prisma } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
+const safeUrl = z.string().refine(
+  val => val === '' || val.startsWith('/') || val.startsWith('https://'),
+  'URL skal være en relativ sti eller HTTPS-URL'
+).optional().default('')
+
 const brandingSchema = z.object({
   brandName: z.string().min(1, 'Brandnavn er påkrævet'),
   tagline: z.string().optional().default(''),
   description: z.string().optional().default(''),
-  logoUrl: z.string().url().optional().or(z.literal('')).default(''),
-  faviconUrl: z.string().url().optional().or(z.literal('')).default(''),
-  websiteUrl: z.string().url().optional().or(z.literal('')).default(''),
+  logoUrl: safeUrl,
+  faviconUrl: safeUrl,
+  websiteUrl: safeUrl,
 
   colorPrimary: z.string().regex(/^#[0-9a-fA-F]{6}$/),
   colorPrimaryForeground: z.string().regex(/^#[0-9a-fA-F]{6}$/),
@@ -25,7 +30,7 @@ const brandingSchema = z.object({
 
   contactEmail: z.string().email().optional().or(z.literal('')).default(''),
   contactPhone: z.string().optional().default(''),
-  contactUrl: z.string().url().optional().or(z.literal('')).default(''),
+  contactUrl: safeUrl,
 
   emailFromName: z.string().optional().default(''),
   emailFromEmail: z.string().email().optional().or(z.literal('')).default(''),
@@ -33,13 +38,13 @@ const brandingSchema = z.object({
   heroHeading: z.string().optional().default(''),
   heroSubheading: z.string().optional().default(''),
   heroCtaText: z.string().optional().default(''),
-  heroCtaUrl: z.string().refine(val => val === '' || val.startsWith('/') || val.startsWith('https://'), 'URL skal være en relativ sti eller HTTPS-URL').optional().default(''),
+  heroCtaUrl: safeUrl,
 
   aboutHeading: z.string().optional().default(''),
   aboutName: z.string().optional().default(''),
   aboutBio: z.string().optional().default(''),
-  aboutUrl: z.string().url().optional().or(z.literal('')).default(''),
-  aboutImageUrl: z.string().url().optional().or(z.literal('')).default(''),
+  aboutUrl: safeUrl,
+  aboutImageUrl: safeUrl,
 
   subscriptionPriceDisplay: z.string().optional().default(''),
   subscriptionPeriodDisplay: z.string().optional().default(''),

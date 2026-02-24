@@ -120,13 +120,19 @@ export async function syncAccountStatus(stripeAccountId: string) {
   const account = await stripe.accounts.retrieve(stripeAccountId)
   const status = resolveAccountStatus(account)
 
+  // Always update status
   await prisma.organization.updateMany({
     where: { stripeAccountId },
-    data: {
-      stripeAccountStatus: status,
-      ...(status === 'active' ? { stripeOnboardedAt: new Date() } : {}),
-    },
+    data: { stripeAccountStatus: status },
   })
+
+  // Set stripeOnboardedAt only on first activation (when it's null)
+  if (status === 'active') {
+    await prisma.organization.updateMany({
+      where: { stripeAccountId, stripeOnboardedAt: null },
+      data: { stripeOnboardedAt: new Date() },
+    })
+  }
 }
 
 /**

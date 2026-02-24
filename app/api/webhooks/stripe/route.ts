@@ -154,10 +154,17 @@ export async function POST(req: Request) {
     case 'account.updated': {
       const account = event.data.object as Stripe.Account
       if (account.id) {
-        const { syncAccountStatus } = await import(
-          '@/lib/services/stripe-connect.service'
-        )
-        await syncAccountStatus(account.id)
+        // Only sync accounts we know about — avoid API calls for unknown accounts
+        const knownOrg = await prisma.organization.findFirst({
+          where: { stripeAccountId: account.id },
+          select: { id: true },
+        })
+        if (knownOrg) {
+          const { syncAccountStatus } = await import(
+            '@/lib/services/stripe-connect.service'
+          )
+          await syncAccountStatus(account.id)
+        }
       }
       break
     }
