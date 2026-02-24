@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
 import type { z } from 'zod'
-import type { userListFiltersSchema } from '@/lib/validators/admin-user'
+import { userListFiltersSchema } from '@/lib/validators/admin-user'
 
 type UserListFilters = z.infer<typeof userListFiltersSchema>
 
@@ -18,8 +18,9 @@ function activeEntitlementWhere() {
 // 1. listUsers — paginated user list with computed status
 // ---------------------------------------------------------------------------
 
-export async function listUsers(filters: UserListFilters) {
-  const { search, role, status, tagId, journeyId, page, pageSize } = filters
+export async function listUsers(rawFilters: UserListFilters) {
+  const validated = userListFiltersSchema.parse(rawFilters)
+  const { search, role, status, tagId, journeyId, page, pageSize } = validated
 
   const where: Prisma.UserWhereInput = {}
 
@@ -41,9 +42,9 @@ export async function listUsers(filters: UserListFilters) {
     where.tags = { some: { tagId } }
   }
 
-  // Journey filter
+  // Journey filter — only match users with an ACTIVE journey enrollment
   if (journeyId) {
-    where.userJourneys = { some: { journeyId } }
+    where.userJourneys = { some: { journeyId, status: 'ACTIVE' } }
   }
 
   // Status filter
@@ -124,6 +125,7 @@ export async function listUsers(filters: UserListFilters) {
           select: { id: true, status: true, source: true },
           take: 1,
         },
+        _count: { select: { entitlements: true } },
       },
       orderBy: { createdAt: 'desc' },
       skip,
@@ -367,4 +369,25 @@ export async function updateLastActive(userId: string) {
     where: { id: userId },
     data: { lastActiveAt: new Date() },
   })
+}
+
+// ---------------------------------------------------------------------------
+// 7. getUserNotifications — notifications + email logs for a user
+// ---------------------------------------------------------------------------
+
+export async function getUserNotifications(userId: string) {
+  const [notifications, notificationLogs] = await prisma.$transaction([
+    prisma.notification.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+    }),
+    prisma.userNotificationLog.findMany({
+      where: { userId },
+      orderBy: { sentAt: 'desc' },
+      take: 50,
+    }),
+  ])
+
+  return { notifications, notificationLogs }
 }

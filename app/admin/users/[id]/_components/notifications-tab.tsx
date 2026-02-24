@@ -1,4 +1,3 @@
-import { prisma } from '@/lib/prisma'
 import { Badge } from '@/components/ui/badge'
 import {
   Card,
@@ -15,6 +14,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import type { getUserNotifications } from '@/lib/services/admin-user.service'
+
+type NotificationsData = Awaited<ReturnType<typeof getUserNotifications>>
 
 function formatDateTime(date: Date | string): string {
   return new Intl.DateTimeFormat('da-DK', {
@@ -36,19 +38,10 @@ const notificationTypeLabels: Record<string, string> = {
   SYSTEM: 'System',
 }
 
-export async function NotificationsTab({ userId }: { userId: string }) {
-  const [notifications, notificationLogs] = await Promise.all([
-    prisma.notification.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'desc' },
-      take: 50,
-    }),
-    prisma.userNotificationLog.findMany({
-      where: { userId },
-      orderBy: { sentAt: 'desc' },
-      take: 50,
-    }),
-  ])
+export function NotificationsTab({
+  notifications,
+  notificationLogs,
+}: NotificationsData) {
 
   return (
     <div className="space-y-6 pt-4">

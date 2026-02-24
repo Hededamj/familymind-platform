@@ -1,7 +1,12 @@
+import { z } from 'zod'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { requireAdmin } from '@/lib/auth'
-import { getUserDetail, getUserActivity } from '@/lib/services/admin-user.service'
+import {
+  getUserDetail,
+  getUserActivity,
+  getUserNotifications,
+} from '@/lib/services/admin-user.service'
 import { listTags } from '@/lib/services/admin-tag.service'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -22,12 +27,14 @@ export default async function UserDetailPage({
 }) {
   await requireAdmin()
   const { id } = await params
+  const userId = z.string().uuid().parse(id)
   const { tab } = await searchParams
 
-  const [user, activity, allTags] = await Promise.all([
-    getUserDetail(id),
-    getUserActivity(id),
+  const [user, activity, allTags, notificationsData] = await Promise.all([
+    getUserDetail(userId),
+    getUserActivity(userId),
     listTags(),
+    getUserNotifications(userId),
   ])
 
   if (!user) notFound()
@@ -65,7 +72,10 @@ export default async function UserDetailPage({
           <CommunityTab user={user} />
         </TabsContent>
         <TabsContent value="notifications">
-          <NotificationsTab userId={user.id} />
+          <NotificationsTab
+            notifications={notificationsData.notifications}
+            notificationLogs={notificationsData.notificationLogs}
+          />
         </TabsContent>
       </Tabs>
     </div>

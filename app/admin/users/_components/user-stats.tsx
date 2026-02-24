@@ -12,7 +12,7 @@ type Stats = {
 const statCards = [
   { key: 'total' as const, label: 'Brugere', href: '/admin/users' },
   { key: 'active' as const, label: 'Aktive', href: '/admin/users?status=ACTIVE' },
-  { key: 'trial' as const, label: 'Trial', href: '/admin/users?status=TRIAL' },
+  { key: 'trial' as const, label: 'Prøve', href: '/admin/users?status=TRIAL' },
   { key: 'newUsers' as const, label: 'Nye (7d)', href: null },
   { key: 'churned' as const, label: 'Frafaldne', href: '/admin/users?status=CHURNED' },
 ]

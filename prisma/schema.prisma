@@ -140,6 +140,8 @@ model User {
   contentReports     ContentReport[]
   cookieConsents     CookieConsent[]
   tags               UserTag[]
+
+  @@index([lastActiveAt])
 }
 
 model Organization {

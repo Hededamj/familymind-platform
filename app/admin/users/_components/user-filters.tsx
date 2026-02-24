@@ -95,10 +95,10 @@ export function UserFilters({
           onChange={(e) => updateParam('status', e.target.value)}
         >
           <option value="">Status</option>
-          <option value="TRIAL">Trial</option>
+          <option value="TRIAL">Prøve</option>
           <option value="ACTIVE">Aktiv</option>
           <option value="INACTIVE">Inaktiv</option>
-          <option value="CHURNED">Churned</option>
+          <option value="CHURNED">Frafaldne</option>
         </select>
 
         <select

@@ -17,36 +17,15 @@ import {
   addTagToUsersAction,
   removeTagFromUsersAction,
 } from '../../actions'
+import { computeUserStatus } from '@/lib/compute-user-status'
 import type { getUserDetail } from '@/lib/services/admin-user.service'
 import type { listTags } from '@/lib/services/admin-tag.service'
 
 type User = NonNullable<Awaited<ReturnType<typeof getUserDetail>>>
 type Tag = Awaited<ReturnType<typeof listTags>>[number]
 
-function computeUserStatus(
-  user: User
-): 'trial' | 'active' | 'inactive' | 'churned' {
-  const hasActiveEntitlement = user.entitlements.some(
-    (e) =>
-      e.status === 'ACTIVE' &&
-      (!e.expiresAt || new Date(e.expiresAt) > new Date())
-  )
-  if (!hasActiveEntitlement) {
-    const hasAnyEntitlement = user.entitlements.length > 0
-    return hasAnyEntitlement ? 'churned' : 'trial'
-  }
-  const fourteenDaysAgo = new Date(Date.now() - 14 * 86400000)
-  const lastActive = user.lastActiveAt
-    ? new Date(user.lastActiveAt)
-    : null
-  if (lastActive && lastActive >= fourteenDaysAgo) {
-    return 'active'
-  }
-  return 'inactive'
-}
-
 const statusConfig = {
-  trial: { label: 'Trial', className: 'bg-blue-100 text-blue-800' },
+  trial: { label: 'Prøve', className: 'bg-blue-100 text-blue-800' },
   active: { label: 'Aktiv', className: 'bg-green-100 text-green-800' },
   inactive: { label: 'Inaktiv', className: 'bg-yellow-100 text-yellow-800' },
   churned: { label: 'Frafaldne', className: 'bg-red-100 text-red-800' },

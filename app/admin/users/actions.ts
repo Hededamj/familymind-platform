@@ -1,5 +1,6 @@
 'use server'
 
+import { z } from 'zod'
 import { requireAdmin } from '@/lib/auth'
 import * as adminUserService from '@/lib/services/admin-user.service'
 import * as tagService from '@/lib/services/admin-tag.service'
@@ -9,23 +10,33 @@ import {
   bulkEmailSchema,
 } from '@/lib/validators/admin-user'
 import { revalidatePath } from 'next/cache'
-import type { z } from 'zod'
+
+const uuidSchema = z.string().uuid()
 
 export async function updateUserRoleAction(
   userId: string,
   data: z.input<typeof updateUserRoleSchema>
 ) {
-  await requireAdmin()
+  const admin = await requireAdmin()
+  const validUserId = uuidSchema.parse(userId)
   const validated = updateUserRoleSchema.parse(data)
-  const result = await adminUserService.updateUserRole(userId, validated.role)
+
+  // Prevent admin from removing their own admin role
+  if (validUserId === admin.id && validated.role !== 'ADMIN') {
+    throw new Error('Du kan ikke fjerne din egen admin-rolle')
+  }
+
+  const result = await adminUserService.updateUserRole(validUserId, validated.role)
   revalidatePath('/admin/users')
-  revalidatePath(`/admin/users/${userId}`)
+  revalidatePath(`/admin/users/${validUserId}`)
   return result
 }
 
 export async function addTagToUsersAction(tagId: string, userIds: string[]) {
   await requireAdmin()
-  await tagService.addTagToUsers(tagId, userIds)
+  const validTagId = uuidSchema.parse(tagId)
+  const validUserIds = z.array(uuidSchema).parse(userIds)
+  await tagService.addTagToUsers(validTagId, validUserIds)
   revalidatePath('/admin/users')
 }
 
@@ -34,7 +45,9 @@ export async function removeTagFromUsersAction(
   userIds: string[]
 ) {
   await requireAdmin()
-  await tagService.removeTagFromUsers(tagId, userIds)
+  const validTagId = uuidSchema.parse(tagId)
+  const validUserIds = z.array(uuidSchema).parse(userIds)
+  await tagService.removeTagFromUsers(validTagId, validUserIds)
   revalidatePath('/admin/users')
 }
 
@@ -60,11 +73,13 @@ export async function revokeEntitlementAction(
   userId: string
 ) {
   await requireAdmin()
+  const validEntitlementId = uuidSchema.parse(entitlementId)
+  const validUserId = uuidSchema.parse(userId)
   const { revokeEntitlement } = await import(
     '@/lib/services/entitlement.service'
   )
-  const result = await revokeEntitlement(entitlementId)
-  revalidatePath(`/admin/users/${userId}`)
+  const result = await revokeEntitlement(validEntitlementId)
+  revalidatePath(`/admin/users/${validUserId}`)
   return result
 }
 

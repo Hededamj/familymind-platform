@@ -15,6 +15,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { BulkActions } from './bulk-actions'
+import { computeUserStatus } from '@/lib/compute-user-status'
 
 type Tag = { id: string; name: string; color: string }
 
@@ -26,28 +27,11 @@ type UserRow = {
   createdAt: Date | string
   tags: Array<{ tag: Tag }>
   entitlements: Array<{ id: string; status: string; source: string }>
-}
-
-function computeUserStatus(
-  user: UserRow
-): 'trial' | 'active' | 'inactive' | 'churned' {
-  const hasActiveEntitlement = user.entitlements.length > 0
-  if (!hasActiveEntitlement) {
-    // No active entitlements — the server-side filter handles trial vs churned distinction
-    return 'trial'
-  }
-  const fourteenDaysAgo = new Date(Date.now() - 14 * 86400000)
-  const lastActive = user.lastActiveAt
-    ? new Date(user.lastActiveAt)
-    : null
-  if (lastActive && lastActive >= fourteenDaysAgo) {
-    return 'active'
-  }
-  return 'inactive'
+  _count: { entitlements: number }
 }
 
 const statusConfig = {
-  trial: { label: 'Trial', className: 'bg-blue-100 text-blue-800' },
+  trial: { label: 'Prøve', className: 'bg-blue-100 text-blue-800' },
   active: { label: 'Aktiv', className: 'bg-green-100 text-green-800' },
   inactive: { label: 'Inaktiv', className: 'bg-yellow-100 text-yellow-800' },
   churned: { label: 'Frafaldne', className: 'bg-red-100 text-red-800' },
