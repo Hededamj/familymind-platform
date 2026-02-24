@@ -16,33 +16,36 @@ export default async function AdminLayout({
 
   return (
     <div className="flex min-h-screen">
-      {/* Warm editorial sidebar */}
-      <aside className="w-[272px] shrink-0 border-r border-border/60 bg-sand">
-        <div className="flex h-full flex-col">
-          {/* Brand — serif for warmth */}
-          <div className="px-7 pb-2 pt-6">
+      {/* Rich warm sidebar — dark walnut, not cold black */}
+      <aside className="relative w-[280px] shrink-0 bg-[#1E1B18]">
+        {/* Subtle warm gradient overlay for depth */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#262220] to-[#1E1B18]" />
+
+        <div className="relative flex h-full flex-col">
+          {/* Brand — generous spacing, warm serif */}
+          <div className="px-8 pb-4 pt-8">
             <Link href="/admin" className="group block">
-              <span className="font-serif text-[17px] text-foreground transition-colors duration-200 group-hover:text-foreground/70">
+              <span className="font-serif text-xl tracking-wide text-[#F5F0EB] transition-colors duration-200 group-hover:text-[#F5F0EB]/80">
                 {tenant.brandName}
               </span>
-              <span className="ml-2 rounded-md bg-sand-dark px-1.5 py-0.5 text-[10px] font-medium text-warm-gray">
-                admin
-              </span>
             </Link>
+            <p className="mt-1 text-[11px] font-medium tracking-widest text-[#F5F0EB]/20">
+              ADMIN
+            </p>
           </div>
 
-          {/* Subtle divider */}
-          <div className="mx-6 mb-2 border-b border-border/40" />
+          {/* Warm divider */}
+          <div className="mx-7 border-b border-[#F5F0EB]/[0.06]" />
 
           <AdminNav />
 
-          {/* Bottom — back to dashboard */}
-          <div className="border-t border-border/40 px-4 py-3">
+          {/* Bottom */}
+          <div className="border-t border-[#F5F0EB]/[0.06] px-5 py-4">
             <Link
               href="/dashboard"
-              className="group flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-[13px] font-medium text-foreground/30 transition-all duration-200 hover:bg-white/60 hover:text-foreground/60"
+              className="group flex items-center gap-3 rounded-xl px-3 py-3 text-[13px] font-medium text-[#F5F0EB]/25 transition-all duration-200 hover:text-[#F5F0EB]/50"
             >
-              <ArrowLeft className="size-[15px] transition-all duration-200 group-hover:-translate-x-0.5" />
+              <ArrowLeft className="size-4 transition-transform duration-200 group-hover:-translate-x-1" />
               Tilbage til dashboard
             </Link>
           </div>

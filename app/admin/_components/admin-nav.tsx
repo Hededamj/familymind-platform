@@ -54,15 +54,15 @@ export function AdminNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="flex-1 overflow-y-auto px-4 py-2">
+    <nav className="flex-1 overflow-y-auto px-5 py-3">
       {navSections.map((section, i) => (
-        <div key={section.label} className={i > 0 ? 'mt-8' : 'mt-2'}>
-          {/* Editorial section header — serif font, warm tone */}
-          <div className="mb-3 px-3 font-serif text-[11px] tracking-wide text-warm-gray">
+        <div key={section.label} className={i > 0 ? 'mt-9' : 'mt-1'}>
+          {/* Section label — confident serif, warm cream */}
+          <div className="mb-3 px-3 font-serif text-xs tracking-wide text-[#F5F0EB]/40">
             {section.label}
           </div>
 
-          <div className="space-y-0.5">
+          <div className="space-y-1">
             {section.items.map((item) => {
               const active = isActive(pathname, item.href)
               return (
@@ -70,26 +70,26 @@ export function AdminNav() {
                   key={item.href}
                   href={item.href}
                   className={`
-                    group relative flex items-center gap-3 rounded-xl px-3 py-2.5
-                    text-[13px] font-medium
+                    group flex items-center gap-3.5 rounded-xl px-3 py-3
+                    text-[14px] font-medium tracking-wide
                     transition-all duration-200 ease-out
                     ${active
-                      ? 'bg-white text-foreground shadow-[0_1px_3px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.04)]'
-                      : 'text-foreground/45 hover:bg-white/70 hover:text-foreground/80 hover:shadow-[0_1px_2px_rgba(0,0,0,0.03)]'
+                      ? 'bg-[#F5F0EB]/10 text-[#F5F0EB]'
+                      : 'text-[#F5F0EB]/40 hover:bg-[#F5F0EB]/[0.06] hover:text-[#F5F0EB]/75'
                     }
                   `}
                 >
-                  {/* Warm accent bar on active */}
+                  {/* Accent indicator */}
                   {active && (
-                    <span className="absolute left-0 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-full bg-coral" />
+                    <span className="absolute left-5 h-5 w-[3px] rounded-full bg-coral" />
                   )}
                   <item.icon
-                    className={`size-[17px] transition-all duration-200 ${
+                    className={`size-[18px] transition-all duration-200 ${
                       active
                         ? 'text-coral'
-                        : 'text-foreground/25 group-hover:text-foreground/50'
+                        : 'text-[#F5F0EB]/25 group-hover:text-[#F5F0EB]/50'
                     }`}
-                    strokeWidth={1.75}
+                    strokeWidth={1.5}
                   />
                   {item.label}
                 </Link>
