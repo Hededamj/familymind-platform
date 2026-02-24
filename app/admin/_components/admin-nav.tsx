@@ -46,7 +46,6 @@ const navSections: NavSection[] = [
 ]
 
 function isActive(pathname: string, href: string): boolean {
-  // Exact match for /admin/settings to avoid matching /admin/settings/tags
   if (href === '/admin/settings') return pathname === '/admin/settings'
   return pathname.startsWith(href)
 }
@@ -55,30 +54,40 @@ export function AdminNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="flex-1 px-3 py-4">
-      {navSections.map((section) => (
-        <div key={section.label} className="mb-6">
-          <div className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest text-foreground/30">
+    <nav className="flex-1 overflow-y-auto px-4 py-2">
+      {navSections.map((section, i) => (
+        <div key={section.label} className={i > 0 ? 'mt-8' : 'mt-2'}>
+          {/* Editorial section header — serif font, warm tone */}
+          <div className="mb-3 px-3 font-serif text-[11px] tracking-wide text-warm-gray">
             {section.label}
           </div>
-          <div className="space-y-1">
+
+          <div className="space-y-0.5">
             {section.items.map((item) => {
               const active = isActive(pathname, item.href)
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
-                    active
-                      ? 'bg-sand-dark text-foreground shadow-sm'
-                      : 'text-foreground/50 hover:bg-sand hover:text-foreground'
-                  }`}
+                  className={`
+                    group relative flex items-center gap-3 rounded-xl px-3 py-2.5
+                    text-[13px] font-medium
+                    transition-all duration-200 ease-out
+                    ${active
+                      ? 'bg-white text-foreground shadow-[0_1px_3px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.04)]'
+                      : 'text-foreground/45 hover:bg-white/70 hover:text-foreground/80 hover:shadow-[0_1px_2px_rgba(0,0,0,0.03)]'
+                    }
+                  `}
                 >
+                  {/* Warm accent bar on active */}
+                  {active && (
+                    <span className="absolute left-0 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-full bg-coral" />
+                  )}
                   <item.icon
-                    className={`size-[18px] transition-colors duration-150 ${
+                    className={`size-[17px] transition-all duration-200 ${
                       active
-                        ? 'text-foreground/80'
-                        : 'text-foreground/30 group-hover:text-foreground/60'
+                        ? 'text-coral'
+                        : 'text-foreground/25 group-hover:text-foreground/50'
                     }`}
                     strokeWidth={1.75}
                   />

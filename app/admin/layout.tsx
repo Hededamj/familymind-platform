@@ -16,26 +16,33 @@ export default async function AdminLayout({
 
   return (
     <div className="flex min-h-screen">
-      {/* Warm light sidebar */}
-      <aside className="w-[280px] shrink-0 border-r border-border bg-sand">
+      {/* Warm editorial sidebar */}
+      <aside className="w-[272px] shrink-0 border-r border-border/60 bg-sand">
         <div className="flex h-full flex-col">
-          {/* Logo */}
-          <div className="px-6 py-5">
-            <Link href="/admin" className="block">
-              <span className="font-serif text-lg text-foreground">{tenant.brandName}</span>
-              <span className="ml-1.5 text-xs font-medium text-foreground/30">Admin</span>
+          {/* Brand — serif for warmth */}
+          <div className="px-7 pb-2 pt-6">
+            <Link href="/admin" className="group block">
+              <span className="font-serif text-[17px] text-foreground transition-colors duration-200 group-hover:text-foreground/70">
+                {tenant.brandName}
+              </span>
+              <span className="ml-2 rounded-md bg-sand-dark px-1.5 py-0.5 text-[10px] font-medium text-warm-gray">
+                admin
+              </span>
             </Link>
           </div>
 
+          {/* Subtle divider */}
+          <div className="mx-6 mb-2 border-b border-border/40" />
+
           <AdminNav />
 
-          {/* Bottom */}
-          <div className="border-t border-border px-3 py-3">
+          {/* Bottom — back to dashboard */}
+          <div className="border-t border-border/40 px-4 py-3">
             <Link
               href="/dashboard"
-              className="group flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-foreground/40 transition-all duration-150 hover:bg-sand-dark hover:text-foreground"
+              className="group flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-[13px] font-medium text-foreground/30 transition-all duration-200 hover:bg-white/60 hover:text-foreground/60"
             >
-              <ArrowLeft className="size-4 transition-colors duration-150 group-hover:text-foreground/60" />
+              <ArrowLeft className="size-[15px] transition-all duration-200 group-hover:-translate-x-0.5" />
               Tilbage til dashboard
             </Link>
           </div>
