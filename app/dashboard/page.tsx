@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Settings, ArrowRight, Compass, TrendingUp } from 'lucide-react'
 import { redirect } from 'next/navigation'
 import { requireAuth } from '@/lib/auth'
+import { trackActivity } from '@/lib/track-activity'
 import { getDashboardState } from '@/lib/services/dashboard.service'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -22,6 +23,7 @@ function getGreeting(): string {
 
 export default async function DashboardPage() {
   const user = await requireAuth()
+  trackActivity() // fire-and-forget, no await
 
   // Redirect non-admin users who haven't completed onboarding
   if (!user.onboardingCompleted && user.role !== 'ADMIN') {

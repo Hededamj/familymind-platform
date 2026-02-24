@@ -9,10 +9,12 @@ import {
   ArrowLeft,
   Tag,
   Users,
+  UserSearch,
   Shield,
 } from 'lucide-react'
 
 const navItems = [
+  { href: '/admin/users', label: 'Brugere', icon: UserSearch },
   { href: '/admin/content', label: 'Indhold', icon: FileText },
   { href: '/admin/tags', label: 'Tags', icon: Tag },
   { href: '/admin/products', label: 'Produkter', icon: Package },

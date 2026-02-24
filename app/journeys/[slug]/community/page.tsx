@@ -2,6 +2,7 @@ import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Users } from 'lucide-react'
 import { requireAuth } from '@/lib/auth'
+import { trackActivity } from '@/lib/track-activity'
 import { getJourney, getUserActiveJourney } from '@/lib/services/journey.service'
 import { getUserCohort, getCohortFeed } from '@/lib/services/community.service'
 import { Badge } from '@/components/ui/badge'
@@ -15,6 +16,7 @@ export default async function CommunityFeedPage({
 }) {
   const { slug } = await params
   const user = await requireAuth()
+  trackActivity() // fire-and-forget, no await
   const journey = await getJourney(slug)
 
   if (!journey || !journey.isActive) {

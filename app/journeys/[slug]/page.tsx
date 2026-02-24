@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowRight, Check, CircleDot, Circle, ArrowLeft, Users, Lock } from 'lucide-react'
 import { requireAuth } from '@/lib/auth'
+import { trackActivity } from '@/lib/track-activity'
 import { getJourney, getUserActiveJourney, getJourneyProgress } from '@/lib/services/journey.service'
 import { getUserCohort } from '@/lib/services/community.service'
 import { Button } from '@/components/ui/button'
@@ -16,6 +17,7 @@ export default async function JourneyOverviewPage({
 }) {
   const { slug } = await params
   const user = await requireAuth()
+  trackActivity() // fire-and-forget, no await
   const journey = await getJourney(slug)
 
   if (!journey || !journey.isActive) {

@@ -123,6 +123,8 @@ model User {
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
+  lastActiveAt    DateTime?
+
   organization    Organization?         @relation(fields: [organizationId], references: [id])
   entitlements    Entitlement[]
   contentProgress UserContentProgress[]
@@ -137,6 +139,9 @@ model User {
   cohortBans         CohortBan[]
   contentReports     ContentReport[]
   cookieConsents     CookieConsent[]
+  tags               UserTag[]
+
+  @@index([lastActiveAt])
 }
 
 model Organization {
@@ -703,4 +708,30 @@ model ContentReport {
   @@index([status, createdAt])
   @@index([postId])
   @@index([replyId])
+}
+
+// ──────────────────────────────────────────────
+// Admin Tagging Models
+// ──────────────────────────────────────────────
+
+model AdminTag {
+  id        String    @id @default(uuid()) @db.Uuid
+  name      String    @unique
+  color     String    @default("#6B7280")
+  createdAt DateTime  @default(now())
+  users     UserTag[]
+}
+
+model UserTag {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  tagId     String   @db.Uuid
+  createdAt DateTime @default(now())
+
+  user User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tag  AdminTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tagId])
+  @@index([userId])
+  @@index([tagId])
 }
