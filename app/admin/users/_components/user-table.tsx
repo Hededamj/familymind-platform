@@ -50,7 +50,7 @@ const statusConfig = {
   trial: { label: 'Trial', className: 'bg-blue-100 text-blue-800' },
   active: { label: 'Aktiv', className: 'bg-green-100 text-green-800' },
   inactive: { label: 'Inaktiv', className: 'bg-yellow-100 text-yellow-800' },
-  churned: { label: 'Churned', className: 'bg-red-100 text-red-800' },
+  churned: { label: 'Frafaldne', className: 'bg-red-100 text-red-800' },
 } as const
 
 function formatRelativeTime(date: Date | string | null): string {

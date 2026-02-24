@@ -129,7 +129,7 @@ export function BulkActions({
                 setEmailOpen(true)
               }}
             >
-              Send email
+              Send e-mail
             </Button>
           </div>
         </div>
@@ -226,7 +226,7 @@ export function BulkActions({
       <Dialog open={emailOpen} onOpenChange={setEmailOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Send email</DialogTitle>
+            <DialogTitle>Send e-mail</DialogTitle>
             <DialogDescription>
               Send til {selectedUserIds.length} brugere
             </DialogDescription>
