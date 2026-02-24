@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { requireAdmin } from '@/lib/auth'
+import { getTenantConfig } from '@/lib/services/tenant.service'
 import {
   FileText,
   Package,
@@ -28,7 +29,10 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
-  await requireAdmin()
+  const [, tenant] = await Promise.all([
+    requireAdmin(),
+    getTenantConfig(),
+  ])
 
   return (
     <div className="flex min-h-screen">
@@ -38,7 +42,7 @@ export default async function AdminLayout({
           {/* Logo */}
           <div className="px-6 py-5">
             <Link href="/admin" className="block">
-              <span className="font-serif text-lg text-white">FamilyMind</span>
+              <span className="font-serif text-lg text-white">{tenant.brandName}</span>
               <span className="ml-1.5 text-xs font-medium text-white/40">Admin</span>
             </Link>
           </div>

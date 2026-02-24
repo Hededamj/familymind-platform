@@ -6,6 +6,7 @@ import { getProduct } from '@/lib/services/product.service'
 import { getCurrentUser } from '@/lib/auth'
 import { canAccessContent } from '@/lib/services/entitlement.service'
 import { getContentProgress } from '@/lib/services/progress.service'
+import { getTenantConfig } from '@/lib/services/tenant.service'
 import { getSignedPlaybackUrl, getThumbnailUrl } from '@/lib/bunny'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -58,7 +59,10 @@ export default async function ContentPage({
     notFound()
   }
 
-  const user = await getCurrentUser()
+  const [user, tenant] = await Promise.all([
+    getCurrentUser(),
+    getTenantConfig(),
+  ])
   const hasAccess = user
     ? await canAccessContent(user.id, content.id)
     : content.isFree || content.accessLevel === 'FREE'
@@ -412,7 +416,7 @@ export default async function ContentPage({
             {user && content.accessLevel === 'SUBSCRIPTION' && (
               <Button asChild size="lg" className="w-full rounded-xl">
                 <Link href="/subscribe">
-                  Start abonnement — 149 kr/md
+                  Start abonnement — {tenant.subscriptionPriceDisplay || '149 kr'}/{tenant.subscriptionPeriodDisplay || 'md'}
                 </Link>
               </Button>
             )}

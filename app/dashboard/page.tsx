@@ -3,6 +3,7 @@ import { Settings, ArrowRight, Compass, TrendingUp } from 'lucide-react'
 import { redirect } from 'next/navigation'
 import { requireAuth } from '@/lib/auth'
 import { getDashboardState } from '@/lib/services/dashboard.service'
+import { getTenantConfig } from '@/lib/services/tenant.service'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { DashboardMessageBanner } from './_components/dashboard-message-banner'
@@ -28,6 +29,11 @@ export default async function DashboardPage() {
     redirect('/onboarding')
   }
 
+  const [dashboardState, tenant] = await Promise.all([
+    getDashboardState(user.id),
+    getTenantConfig(),
+  ])
+
   const {
     stateKey,
     message,
@@ -36,7 +42,7 @@ export default async function DashboardPage() {
     inProgressCourses,
     recommendations,
     recentlyCompleted,
-  } = await getDashboardState(user.id)
+  } = dashboardState
 
   const displayName = user.name || user.email.split('@')[0]
 
@@ -47,7 +53,7 @@ export default async function DashboardPage() {
         <div className="mb-8 flex items-center justify-between">
           <div>
             <Link href="/" className="mb-2 block font-serif text-lg text-primary">
-              FamilyMind
+              {tenant.brandName}
             </Link>
             <h1 className="font-serif text-2xl sm:text-3xl">
               {getGreeting()}, {displayName}
@@ -79,6 +85,7 @@ export default async function DashboardPage() {
             <NewUserView
               message={message}
               recommendations={recommendations}
+              brandName={tenant.brandName}
             />
           )}
 
@@ -135,6 +142,7 @@ interface DashboardMessage {
 function NewUserView({
   message,
   recommendations,
+  brandName,
 }: {
   message: DashboardMessage | null
   recommendations: Array<{
@@ -145,6 +153,7 @@ function NewUserView({
     slug: string
     priority: number
   }>
+  brandName: string
 }) {
   return (
     <>
@@ -157,7 +166,7 @@ function NewUserView({
         />
       ) : (
         <DashboardMessageBanner
-          heading="Velkommen til FamilyMind!"
+          heading={`Velkommen til ${brandName}!`}
           body="Start dit første forløb eller udforsk vores kurser for at komme i gang."
           ctaLabel="Udforsk indhold"
           ctaUrl="/browse"
