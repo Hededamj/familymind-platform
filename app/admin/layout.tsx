@@ -15,15 +15,7 @@ export default async function AdminLayout({
   ])
 
   return (
-    <div
-      className="flex min-h-screen"
-      style={{
-        // Override brand blue with warm neutral for admin context
-        '--primary': '#1A1A1A',
-        '--primary-foreground': '#FAFAF8',
-        '--ring': '#1A1A1A',
-      } as React.CSSProperties}
-    >
+    <div className="admin-theme flex min-h-screen">
       {/* Rich warm sidebar */}
       <aside className="relative w-[280px] shrink-0 bg-[#1E1B18]">
         <div className="absolute inset-0 bg-gradient-to-b from-[#262220] to-[#1E1B18]" />
@@ -49,9 +41,10 @@ export default async function AdminLayout({
           <div className="border-t border-white/5 px-5 py-4">
             <Link
               href="/dashboard"
-              className="group flex items-center gap-3 rounded-xl px-3 py-3 text-[13px] font-medium text-white/20 transition-all duration-200 hover:text-white/50"
+              className="admin-nav-item group flex items-center gap-3 rounded-xl px-3 py-3 text-[13px] font-medium"
+              style={{ color: 'rgba(255,255,255,0.2)' }}
             >
-              <ArrowLeft className="size-4 transition-transform duration-200 group-hover:-translate-x-1" />
+              <ArrowLeft className="admin-nav-icon size-4 transition-transform duration-200 group-hover:-translate-x-1" />
               Tilbage til dashboard
             </Link>
           </div>

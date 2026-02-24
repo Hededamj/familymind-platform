@@ -54,48 +54,66 @@ export function AdminNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="flex-1 overflow-y-auto px-5 py-3">
-      {navSections.map((section, i) => (
-        <div key={section.label} className={i > 0 ? 'mt-9' : 'mt-1'}>
-          <div className="mb-3 px-3 font-serif text-xs tracking-wide text-white/25">
-            {section.label}
-          </div>
+    <>
+      {/* Hover styles — Tailwind opacity shorthand may not generate on dark bg */}
+      <style>{`
+        .admin-nav-item {
+          transition: all 200ms ease-out;
+        }
+        .admin-nav-item:not(.admin-nav-active):hover {
+          background: rgba(255, 255, 255, 0.08);
+          color: rgba(255, 255, 255, 0.75);
+        }
+        .admin-nav-item:not(.admin-nav-active):hover .admin-nav-icon {
+          color: rgba(255, 255, 255, 0.5);
+        }
+      `}</style>
+      <nav className="flex-1 overflow-y-auto px-5 py-3">
+        {navSections.map((section, i) => (
+          <div key={section.label} className={i > 0 ? 'mt-9' : 'mt-1'}>
+            <div className="mb-3 px-3 font-serif text-xs tracking-wide" style={{ color: 'rgba(255,255,255,0.25)' }}>
+              {section.label}
+            </div>
 
-          <div className="space-y-1">
-            {section.items.map((item) => {
-              const active = isActive(pathname, item.href)
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`
-                    group relative flex items-center gap-3.5 rounded-xl px-3 py-3
-                    text-[14px] font-medium tracking-wide
-                    transition-all duration-200 ease-out
-                    ${active
-                      ? 'bg-white/12 text-white'
-                      : 'text-white/35 hover:bg-white/8 hover:text-white/70'
-                    }
-                  `}
-                >
-                  {active && (
-                    <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-coral" />
-                  )}
-                  <item.icon
-                    className={`size-[18px] transition-all duration-200 ${
-                      active
-                        ? 'text-coral'
-                        : 'text-white/20 group-hover:text-white/50'
-                    }`}
-                    strokeWidth={1.5}
-                  />
-                  {item.label}
-                </Link>
-              )
-            })}
+            <div className="space-y-1">
+              {section.items.map((item) => {
+                const active = isActive(pathname, item.href)
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`
+                      admin-nav-item relative flex items-center gap-3.5 rounded-xl px-3 py-3
+                      text-[14px] font-medium tracking-wide
+                      ${active ? 'admin-nav-active' : ''}
+                    `}
+                    style={{
+                      background: active ? 'rgba(255,255,255,0.12)' : undefined,
+                      color: active ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.35)',
+                    }}
+                  >
+                    {active && (
+                      <span
+                        className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full"
+                        style={{ background: '#E8715A' }}
+                      />
+                    )}
+                    <item.icon
+                      className="admin-nav-icon size-[18px]"
+                      strokeWidth={1.5}
+                      style={{
+                        color: active ? '#E8715A' : 'rgba(255,255,255,0.2)',
+                        transition: 'all 200ms ease-out',
+                      }}
+                    />
+                    {item.label}
+                  </Link>
+                )
+              })}
+            </div>
           </div>
-        </div>
-      ))}
-    </nav>
+        ))}
+      </nav>
+    </>
   )
 }
