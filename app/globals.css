@@ -58,7 +58,7 @@
 
 :root {
   --radius: 0.75rem;
-  /* Warm white background — not pure white */
+  /* Fallback values — overridden by tenant config in layout.tsx */
   --background: #FAFAF8;
   --foreground: #1A1A1A;
   /* Cards: pure white on warm background */

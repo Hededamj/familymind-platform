@@ -10,6 +10,7 @@ import { AnalyticsScripts } from '@/components/consent/analytics-scripts'
 import { CookieBanner } from '@/components/consent/cookie-banner'
 import { CookieModal } from '@/components/consent/cookie-modal'
 import { getSiteSettings } from '@/lib/services/settings.service'
+import { getTenantConfig } from '@/lib/services/tenant.service'
 import { unstable_cache } from 'next/cache'
 import "./globals.css";
 
@@ -35,10 +36,13 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "FamilyMind",
-  description: "Din strukturerede forældreguide — evidensbaseret viden og praktiske værktøjer til hele familien.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const tenant = await getTenantConfig()
+  return {
+    title: tenant.brandName,
+    description: tenant.description || tenant.tagline || '',
+  }
+}
 
 export default async function RootLayout({
   children,
@@ -46,9 +50,26 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const analytics = await getCachedAnalyticsSettings()
+  const tenant = await getTenantConfig()
+
+  const themeVars = {
+    '--primary': tenant.colorPrimary,
+    '--primary-foreground': tenant.colorPrimaryForeground,
+    '--accent': tenant.colorAccent,
+    '--background': tenant.colorBackground,
+    '--foreground': tenant.colorForeground,
+    '--border': tenant.colorBorder,
+    '--input': tenant.colorBorder,
+    '--ring': tenant.colorPrimary,
+    '--color-sand': tenant.colorSand,
+    '--color-success': tenant.colorSuccess,
+    '--chart-1': tenant.colorPrimary,
+    '--sidebar-primary': tenant.colorPrimary,
+    '--sidebar-ring': tenant.colorPrimary,
+  } as React.CSSProperties
 
   return (
-    <html lang="da">
+    <html lang="da" style={themeVars}>
       <body
         className={`${inter.variable} ${dmSerif.variable} ${geistMono.variable} font-sans antialiased`}
       >
