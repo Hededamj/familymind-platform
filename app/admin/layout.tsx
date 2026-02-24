@@ -8,24 +8,42 @@ import {
   Map,
   Settings,
   ArrowLeft,
-  Tag,
+  Tags,
   Users,
-  UserSearch,
-  Shield,
-  Palette,
+  MessageSquare,
 } from 'lucide-react'
 
-const navItems = [
-  { href: '/admin/users', label: 'Brugere', icon: UserSearch },
-  { href: '/admin/content', label: 'Indhold', icon: FileText },
-  { href: '/admin/tags', label: 'Tags', icon: Tag },
-  { href: '/admin/products', label: 'Produkter', icon: Package },
-  { href: '/admin/discounts', label: 'Rabatkoder', icon: Ticket },
-  { href: '/admin/journeys', label: 'Forløb', icon: Map },
-  { href: '/admin/cohorts', label: 'Kohorter', icon: Users },
-  { href: '/admin/moderation', label: 'Moderering', icon: Shield },
-  { href: '/admin/settings/branding', label: 'Branding', icon: Palette },
-  { href: '/admin/settings', label: 'Indstillinger', icon: Settings },
+import type { LucideIcon } from 'lucide-react'
+
+type NavSection = {
+  label: string
+  items: { href: string; label: string; icon: LucideIcon }[]
+}
+
+const navSections: NavSection[] = [
+  {
+    label: 'Indhold',
+    items: [
+      { href: '/admin/products', label: 'Produkter', icon: Package },
+      { href: '/admin/content', label: 'Lektioner', icon: FileText },
+      { href: '/admin/journeys', label: 'Forløb', icon: Map },
+      { href: '/admin/discounts', label: 'Rabatkoder', icon: Ticket },
+    ],
+  },
+  {
+    label: 'Medlemmer',
+    items: [
+      { href: '/admin/users', label: 'Brugere', icon: Users },
+      { href: '/admin/cohorts', label: 'Community', icon: MessageSquare },
+      { href: '/admin/settings/tags', label: 'Segmentering', icon: Tags },
+    ],
+  },
+  {
+    label: 'System',
+    items: [
+      { href: '/admin/settings', label: 'Indstillinger', icon: Settings },
+    ],
+  },
 ]
 
 export default async function AdminLayout({
@@ -52,16 +70,25 @@ export default async function AdminLayout({
           </div>
 
           {/* Nav */}
-          <nav className="flex-1 space-y-0.5 px-3 py-2">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/60 transition-colors hover:bg-white/10 hover:text-white"
-              >
-                <item.icon className="size-4" />
-                {item.label}
-              </Link>
+          <nav className="flex-1 px-3 py-2">
+            {navSections.map((section) => (
+              <div key={section.label} className="mb-4">
+                <div className="mb-1 px-3 pt-3 text-[10px] font-semibold uppercase tracking-widest text-white/30">
+                  {section.label}
+                </div>
+                <div className="space-y-0.5">
+                  {section.items.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+                    >
+                      <item.icon className="size-4" />
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
             ))}
           </nav>
 
