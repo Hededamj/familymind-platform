@@ -11,6 +11,7 @@ import {
   Lock,
 } from 'lucide-react'
 import { requireAuth } from '@/lib/auth'
+import { trackActivity } from '@/lib/track-activity'
 import {
   getJourney,
   getUserActiveJourney,
@@ -67,6 +68,7 @@ export default async function DayViewPage({
 }) {
   const { slug, dayId } = await params
   const user = await requireAuth()
+  trackActivity() // fire-and-forget, no await
   const journey = await getJourney(slug)
 
   if (!journey || !journey.isActive) {

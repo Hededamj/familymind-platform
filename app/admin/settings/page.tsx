@@ -18,6 +18,7 @@ import {
   Bell,
   RefreshCw,
   Trophy,
+  Tag,
 } from 'lucide-react'
 
 const settingsSections = [
@@ -93,6 +94,12 @@ const settingsSections = [
     description:
       'Konfigurer milepælene og deres fejringsmeddelelser',
     icon: Trophy,
+  },
+  {
+    href: '/admin/settings/tags',
+    title: 'Bruger-tags',
+    description: 'Opret tags til segmentering og markedsføring',
+    icon: Tag,
   },
 ]
 
