@@ -17,7 +17,12 @@ const authNav = [
   { href: '/browse', label: 'Opdag', icon: Compass },
 ]
 
-export function Topbar() {
+type Props = {
+  brandName: string
+  logoUrl: string | null
+}
+
+export function Topbar({ brandName, logoUrl }: Props) {
   const pathname = usePathname()
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -56,8 +61,8 @@ export function Topbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <Image
-              src="/images/logo.png"
-              alt="FamilyMind"
+              src={logoUrl || '/images/logo.png'}
+              alt={brandName}
               width={140}
               height={36}
               className="h-7 w-auto"

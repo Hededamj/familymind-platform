@@ -3,8 +3,8 @@ import { Inter } from "next/font/google";
 import { DM_Serif_Display } from "next/font/google";
 import { Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
-import { Topbar } from "@/components/layout/topbar";
-import { Footer } from "@/components/layout/footer";
+import { TopbarWrapper } from "@/components/layout/topbar-wrapper";
+import { FooterWrapper } from "@/components/layout/footer-wrapper";
 import { ConsentProvider } from '@/components/consent/consent-provider'
 import { AnalyticsScripts } from '@/components/consent/analytics-scripts'
 import { CookieBanner } from '@/components/consent/cookie-banner'
@@ -75,11 +75,11 @@ export default async function RootLayout({
       >
         <ConsentProvider>
           <AnalyticsScripts ga4Id={analytics.ga4_measurement_id} metaPixelId={analytics.meta_pixel_id} />
-          <Topbar />
+          <TopbarWrapper />
           <main className="min-h-screen">
             {children}
           </main>
-          <Footer />
+          <FooterWrapper />
           <Toaster />
           <CookieBanner />
           <CookieModal />
