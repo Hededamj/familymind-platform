@@ -68,14 +68,18 @@ export function AdminNav() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
+                  className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
                     active
-                      ? 'bg-sidebar-primary/15 text-white'
-                      : 'text-white/50 hover:bg-white/[0.08] hover:text-white/90'
+                      ? 'bg-sidebar-primary/20 text-white'
+                      : 'text-white/50 hover:bg-white/15 hover:text-white'
                   }`}
                 >
                   <item.icon
-                    className={`size-[18px] ${active ? 'text-sidebar-primary' : ''}`}
+                    className={`size-[18px] transition-colors duration-150 ${
+                      active
+                        ? 'text-sidebar-primary'
+                        : 'group-hover:text-sidebar-primary'
+                    }`}
                     strokeWidth={1.75}
                   />
                   {item.label}

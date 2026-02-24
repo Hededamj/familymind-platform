@@ -33,7 +33,7 @@ export default async function AdminLayout({
           <div className="border-t border-sidebar-border px-3 py-3">
             <Link
               href="/dashboard"
-              className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-white/40 transition-all duration-150 hover:bg-white/[0.08] hover:text-white/90"
+              className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-white/40 transition-all duration-150 hover:bg-white/15 hover:text-white"
             >
               <ArrowLeft className="size-4" />
               Tilbage til dashboard
