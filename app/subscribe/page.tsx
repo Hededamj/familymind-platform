@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Check } from 'lucide-react'
 import { SubscribeCTA } from './_components/subscribe-cta'
 
-const benefits = [
+const defaultBenefits = [
   'Alle strukturerede forløb',
   'Videokurser og artikler',
   'Daglige øvelser og refleksion',
@@ -54,11 +54,11 @@ export default async function SubscribePage() {
         <div className="rounded-2xl border border-border bg-white p-8 shadow-sm">
           <div className="mb-6 text-center">
             <span className="font-serif text-5xl">{tenant.subscriptionPriceDisplay || '149 kr'}</span>
-            <span className="text-muted-foreground"> /{tenant.subscriptionPeriodDisplay || 'måned'}</span>
+            <span className="text-muted-foreground"> {tenant.subscriptionPeriodDisplay || '/måned'}</span>
           </div>
 
           <ul className="mb-8 space-y-3">
-            {benefits.map((benefit) => (
+            {(tenant.landingBenefits ?? defaultBenefits).map((benefit) => (
               <li key={benefit} className="flex items-start gap-3 text-sm">
                 <Check className="mt-0.5 size-4 shrink-0 text-success" />
                 <span>{benefit}</span>

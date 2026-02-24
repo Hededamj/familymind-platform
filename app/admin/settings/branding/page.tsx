@@ -5,8 +5,12 @@ import { BrandingForm } from './_components/branding-form'
 export default async function BrandingSettingsPage() {
   const user = await requireAdmin()
 
+  if (!user.organizationId) {
+    return <p>Din brugerkonto er ikke tilknyttet en organisation.</p>
+  }
+
   const org = await prisma.organization.findUnique({
-    where: { id: user.organizationId! },
+    where: { id: user.organizationId },
     select: {
       id: true,
       brandName: true,

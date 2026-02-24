@@ -2,6 +2,7 @@
 
 import { requireAdmin } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
@@ -32,7 +33,7 @@ const brandingSchema = z.object({
   heroHeading: z.string().optional().default(''),
   heroSubheading: z.string().optional().default(''),
   heroCtaText: z.string().optional().default(''),
-  heroCtaUrl: z.string().optional().default(''),
+  heroCtaUrl: z.string().refine(val => val === '' || val.startsWith('/') || val.startsWith('https://'), 'URL skal være en relativ sti eller HTTPS-URL').optional().default(''),
 
   aboutHeading: z.string().optional().default(''),
   aboutName: z.string().optional().default(''),
@@ -48,6 +49,7 @@ const brandingSchema = z.object({
 
 export async function updateBrandingAction(data: z.infer<typeof brandingSchema>) {
   const user = await requireAdmin()
+  if (!user.organizationId) throw new Error('Ingen organisation tilknyttet')
 
   const parsed = brandingSchema.safeParse(data)
   if (!parsed.success) {
@@ -57,7 +59,7 @@ export async function updateBrandingAction(data: z.infer<typeof brandingSchema>)
   const d = parsed.data
 
   await prisma.organization.update({
-    where: { id: user.organizationId! },
+    where: { id: user.organizationId },
     data: {
       brandName: d.brandName,
       tagline: d.tagline || null,
@@ -94,7 +96,11 @@ export async function updateBrandingAction(data: z.infer<typeof brandingSchema>)
   })
 
   revalidatePath('/admin/settings/branding')
-  revalidatePath('/', 'layout')
+  revalidatePath('/')
+  revalidatePath('/subscribe')
+  revalidatePath('/browse')
+  revalidatePath('/login')
+  revalidatePath('/signup')
 }
 
 const landingJsonSchema = z.object({
@@ -108,6 +114,7 @@ const landingJsonSchema = z.object({
 
 export async function updateLandingJsonAction(data: z.infer<typeof landingJsonSchema>) {
   const user = await requireAdmin()
+  if (!user.organizationId) throw new Error('Ingen organisation tilknyttet')
 
   const parsed = landingJsonSchema.safeParse(data)
   if (!parsed.success) {
@@ -117,17 +124,21 @@ export async function updateLandingJsonAction(data: z.infer<typeof landingJsonSc
   const d = parsed.data
 
   await prisma.organization.update({
-    where: { id: user.organizationId! },
+    where: { id: user.organizationId },
     data: {
-      landingBenefits: d.landingBenefits.length > 0 ? d.landingBenefits : undefined,
-      landingSteps: d.landingSteps.length > 0 ? d.landingSteps : undefined,
-      landingFeatures: d.landingFeatures.length > 0 ? d.landingFeatures : undefined,
-      landingTestimonials: d.landingTestimonials.length > 0 ? d.landingTestimonials : undefined,
-      landingFaq: d.landingFaq.length > 0 ? d.landingFaq : undefined,
-      footerLinks: d.footerLinks.length > 0 ? d.footerLinks : undefined,
+      landingBenefits: d.landingBenefits.length > 0 ? d.landingBenefits : Prisma.JsonNull,
+      landingSteps: d.landingSteps.length > 0 ? d.landingSteps : Prisma.JsonNull,
+      landingFeatures: d.landingFeatures.length > 0 ? d.landingFeatures : Prisma.JsonNull,
+      landingTestimonials: d.landingTestimonials.length > 0 ? d.landingTestimonials : Prisma.JsonNull,
+      landingFaq: d.landingFaq.length > 0 ? d.landingFaq : Prisma.JsonNull,
+      footerLinks: d.footerLinks.length > 0 ? d.footerLinks : Prisma.JsonNull,
     },
   })
 
   revalidatePath('/admin/settings/branding')
-  revalidatePath('/', 'layout')
+  revalidatePath('/')
+  revalidatePath('/subscribe')
+  revalidatePath('/browse')
+  revalidatePath('/login')
+  revalidatePath('/signup')
 }

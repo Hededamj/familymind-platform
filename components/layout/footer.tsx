@@ -69,6 +69,27 @@ export function Footer({ brandName, logoUrl, tagline, description, contactUrl, f
             </ul>
           </div>
 
+          {/* Tenant links */}
+          {footerLinks && footerLinks.length > 0 && (
+            <div>
+              <h4 className="mb-3 text-sm font-semibold text-white">Links</h4>
+              <ul className="space-y-2.5 text-sm">
+                {footerLinks.map((link) => (
+                  <li key={link.url}>
+                    <a
+                      href={link.url}
+                      target={link.url.startsWith('/') ? undefined : '_blank'}
+                      rel={link.url.startsWith('/') ? undefined : 'noopener noreferrer'}
+                      className="transition-colors hover:text-white"
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           {/* Contact */}
           {contactUrl && (
             <div>
