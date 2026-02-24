@@ -25,6 +25,14 @@ export async function sendTemplatedEmail(
     return null
   }
 
+  // Look up tenant org for brand info (email sender, brand name)
+  const org = user.organizationId
+    ? await prisma.organization.findUnique({
+        where: { id: user.organizationId },
+        select: { brandName: true, emailFromName: true, emailFromEmail: true },
+      })
+    : null
+
   // Look up template
   const template = await prisma.emailTemplate.findUnique({
     where: { templateKey },
@@ -39,6 +47,7 @@ export async function sendTemplatedEmail(
   // Interpolate variables into subject and body
   const vars: Record<string, string> = {
     userName: user.name || user.email.split('@')[0],
+    brandName: org?.brandName || 'FamilyMind',
     appUrl: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
     unsubscribeUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/settings`,
     ...variables,
@@ -57,8 +66,9 @@ export async function sendTemplatedEmail(
   }
 
   const resend = getResend()
-  const fromAddress =
-    process.env.RESEND_FROM_EMAIL || 'FamilyMind <noreply@familymind.dk>'
+  const fromName = org?.emailFromName || org?.brandName || 'FamilyMind'
+  const fromEmail = org?.emailFromEmail || process.env.RESEND_FROM_EMAIL?.match(/<(.+)>/)?.[1] || 'noreply@familymind.dk'
+  const fromAddress = `${fromName} <${fromEmail}>`
 
   const { data, error } = await resend.emails.send({
     from: fromAddress,

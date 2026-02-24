@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/card'
 import {
   Building2,
+  Palette,
   Plug,
   ClipboardList,
   Target,
@@ -26,6 +27,12 @@ const settingsSections = [
     title: 'Generelt',
     description: 'Firmaoplysninger til juridiske dokumenter og e-mails',
     icon: Building2,
+  },
+  {
+    href: '/admin/settings/branding',
+    title: 'Branding',
+    description: 'Logo, farver, landing page-indhold og email-indstillinger',
+    icon: Palette,
   },
   {
     href: '/admin/settings/integrations',

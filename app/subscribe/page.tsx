@@ -1,12 +1,13 @@
 import Link from 'next/link'
 import { getCurrentUser } from '@/lib/auth'
 import { getUserEntitlements } from '@/lib/services/entitlement.service'
+import { getTenantConfig } from '@/lib/services/tenant.service'
 import { prisma } from '@/lib/prisma'
 import { Button } from '@/components/ui/button'
 import { Check } from 'lucide-react'
 import { SubscribeCTA } from './_components/subscribe-cta'
 
-const benefits = [
+const defaultBenefits = [
   'Alle strukturerede forløb',
   'Videokurser og artikler',
   'Daglige øvelser og refleksion',
@@ -16,7 +17,10 @@ const benefits = [
 ]
 
 export default async function SubscribePage() {
-  const user = await getCurrentUser()
+  const [user, tenant] = await Promise.all([
+    getCurrentUser(),
+    getTenantConfig(),
+  ])
 
   let hasSubscription = false
   if (user) {
@@ -36,7 +40,7 @@ export default async function SubscribePage() {
         {/* Header */}
         <div className="mb-10 text-center">
           <p className="mb-2 text-xs font-semibold uppercase tracking-[0.08em] text-primary">
-            FamilyMind Abonnement
+            {tenant.brandName} Abonnement
           </p>
           <h1 className="font-serif text-3xl sm:text-4xl">
             Alt du har brug for — samlet ét sted
@@ -49,12 +53,12 @@ export default async function SubscribePage() {
         {/* Price card */}
         <div className="rounded-2xl border border-border bg-white p-8 shadow-sm">
           <div className="mb-6 text-center">
-            <span className="font-serif text-5xl">149 kr</span>
-            <span className="text-muted-foreground"> /måned</span>
+            <span className="font-serif text-5xl">{tenant.subscriptionPriceDisplay || '149 kr'}</span>
+            <span className="text-muted-foreground"> {tenant.subscriptionPeriodDisplay || '/måned'}</span>
           </div>
 
           <ul className="mb-8 space-y-3">
-            {benefits.map((benefit) => (
+            {(tenant.landingBenefits ?? defaultBenefits).map((benefit) => (
               <li key={benefit} className="flex items-start gap-3 text-sm">
                 <Check className="mt-0.5 size-4 shrink-0 text-success" />
                 <span>{benefit}</span>

@@ -1,7 +1,15 @@
 'use server'
 
+import crypto from 'crypto'
+import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
+
 import { requireAdmin } from '@/lib/auth'
 import { upsertSiteSetting } from '@/lib/services/settings.service'
+import {
+  generateConnectOAuthUrl,
+  disconnectStripeAccount,
+} from '@/lib/services/stripe-connect.service'
 import { revalidatePath, revalidateTag } from 'next/cache'
 
 const GA4_PATTERN = /^G-[A-Z0-9]{6,12}$/
@@ -26,4 +34,37 @@ export async function updateIntegrationSettingsAction(data: {
   ])
   revalidatePath('/admin/settings/integrations')
   revalidateTag('analytics-settings', 'default')
+}
+
+export async function initiateStripeConnectAction() {
+  const user = await requireAdmin()
+
+  if (!user.organizationId) {
+    throw new Error('Bruger tilhører ingen organisation')
+  }
+
+  // Generér CSRF-token og gem i cookie
+  const state = crypto.randomBytes(32).toString('hex')
+  const cookieStore = await cookies()
+  cookieStore.set('stripe_connect_state', state, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 600, // 10 minutter
+    path: '/',
+  })
+
+  const url = generateConnectOAuthUrl(state)
+  redirect(url)
+}
+
+export async function disconnectStripeAction() {
+  const user = await requireAdmin()
+
+  if (!user.organizationId) {
+    throw new Error('Bruger tilhører ingen organisation')
+  }
+
+  await disconnectStripeAccount(user.organizationId)
+  revalidatePath('/admin/settings/integrations')
 }

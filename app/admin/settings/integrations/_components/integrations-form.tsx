@@ -7,17 +7,15 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { toast } from 'sonner'
 import { updateIntegrationSettingsAction } from '../actions'
-import { CheckCircle2, XCircle } from 'lucide-react'
 
 type Props = {
   settings: {
     ga4_measurement_id: string
     meta_pixel_id: string
   }
-  stripeConnected: boolean
 }
 
-export function IntegrationsForm({ settings, stripeConnected }: Props) {
+export function IntegrationsForm({ settings }: Props) {
   const [formData, setFormData] = useState(settings)
   const [isPending, startTransition] = useTransition()
 
@@ -34,25 +32,6 @@ export function IntegrationsForm({ settings, stripeConnected }: Props) {
 
   return (
     <div className="space-y-6">
-      {/* Stripe status */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            Stripe
-            {stripeConnected ? (
-              <CheckCircle2 className="size-5 text-green-600" />
-            ) : (
-              <XCircle className="size-5 text-red-500" />
-            )}
-          </CardTitle>
-          <CardDescription>
-            {stripeConnected
-              ? 'Stripe er forbundet. API-nøgler konfigureres via miljøvariabler.'
-              : 'Stripe er ikke forbundet. Tilføj STRIPE_SECRET_KEY i miljøvariabler.'}
-          </CardDescription>
-        </CardHeader>
-      </Card>
-
       {/* Analytics */}
       <Card>
         <CardHeader>

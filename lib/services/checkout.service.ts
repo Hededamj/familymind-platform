@@ -24,6 +24,19 @@ export async function createCheckoutSession(
     where: { id: userId },
   })
 
+  // Resolve tenant's Stripe Connect account (if any)
+  let stripeAccountId: string | undefined
+  if (user.organizationId) {
+    const org = await prisma.organization.findUnique({
+      where: { id: user.organizationId },
+      select: { stripeAccountId: true, stripeAccountStatus: true },
+    })
+    if (org?.stripeAccountId && org.stripeAccountStatus === 'active') {
+      stripeAccountId = org.stripeAccountId
+    }
+    // If no active Connect account, fall back to platform Stripe key (no stripeAccount header)
+  }
+
   let discountId: string | undefined
   if (validated.discountCode) {
     const discount = await validateDiscountCode(
@@ -35,15 +48,18 @@ export async function createCheckoutSession(
     }
   }
 
-  const session = await stripe.checkout.sessions.create({
-    mode: product.type === 'SUBSCRIPTION' ? 'subscription' : 'payment',
-    customer_email: user.email,
-    line_items: [{ price: product.stripePriceId, quantity: 1 }],
-    ...(discountId ? { discounts: [{ coupon: discountId }] } : {}),
-    success_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/products/${product.slug}`,
-    metadata: { userId, productId: product.id },
-  })
+  const session = await stripe.checkout.sessions.create(
+    {
+      mode: product.type === 'SUBSCRIPTION' ? 'subscription' : 'payment',
+      customer_email: user.email,
+      line_items: [{ price: product.stripePriceId, quantity: 1 }],
+      ...(discountId ? { discounts: [{ coupon: discountId }] } : {}),
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/products/${product.slug}`,
+      metadata: { userId, productId: product.id },
+    },
+    stripeAccountId ? { stripeAccount: stripeAccountId } : undefined
+  )
 
   return { url: session.url }
 }

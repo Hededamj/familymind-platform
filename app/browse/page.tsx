@@ -1,15 +1,19 @@
 import { Suspense } from 'react'
 import { listProducts } from '@/lib/services/product.service'
 import { listJourneys } from '@/lib/services/journey.service'
+import { getTenantConfig } from '@/lib/services/tenant.service'
 import { ProductCard } from './_components/product-card'
 import { BundleCard } from './_components/bundle-card'
 import { JourneyCard } from './_components/journey-card'
 import { BrowseFilters } from './_components/browse-filters'
 import { Compass } from 'lucide-react'
 
-export const metadata = {
-  title: 'Udforsk | FamilyMind',
-  description: 'Gennemse kurser, pakker og forløb',
+export async function generateMetadata() {
+  const tenant = await getTenantConfig()
+  return {
+    title: `Udforsk | ${tenant.brandName}`,
+    description: 'Gennemse kurser, pakker og forløb',
+  }
 }
 
 export default async function BrowsePage({

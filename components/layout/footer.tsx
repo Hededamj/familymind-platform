@@ -5,7 +5,17 @@ import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useConsent } from '@/components/consent/consent-provider'
 
-export function Footer() {
+type Props = {
+  brandName: string
+  logoUrl: string | null
+  tagline: string | null
+  description: string | null
+  contactUrl: string | null
+  footerCopyright: string | null
+  footerLinks: { label: string; url: string }[] | null
+}
+
+export function Footer({ brandName, logoUrl, tagline, description, contactUrl, footerCopyright, footerLinks }: Props) {
   const pathname = usePathname()
   const { setOpenSettings } = useConsent()
 
@@ -26,15 +36,14 @@ export function Footer() {
           {/* Brand */}
           <div>
             <Image
-              src="/images/logo.png"
-              alt="FamilyMind"
+              src={logoUrl || '/images/logo.png'}
+              alt={brandName}
               width={140}
               height={36}
               className="mb-3 h-8 w-auto"
             />
             <p className="text-sm leading-relaxed text-white/50">
-              Din strukturerede forældreguide — evidensbaseret
-              viden og praktiske værktøjer til hele familien.
+              {description || tagline || ''}
             </p>
           </div>
 
@@ -60,22 +69,45 @@ export function Footer() {
             </ul>
           </div>
 
+          {/* Tenant links */}
+          {footerLinks && footerLinks.length > 0 && (
+            <div>
+              <h4 className="mb-3 text-sm font-semibold text-white">Links</h4>
+              <ul className="space-y-2.5 text-sm">
+                {footerLinks.map((link) => (
+                  <li key={link.url}>
+                    <a
+                      href={link.url}
+                      target={link.url.startsWith('/') ? undefined : '_blank'}
+                      rel={link.url.startsWith('/') ? undefined : 'noopener noreferrer'}
+                      className="transition-colors hover:text-white"
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           {/* Contact */}
-          <div>
-            <h4 className="mb-3 text-sm font-semibold text-white">Kontakt</h4>
-            <ul className="space-y-2.5 text-sm">
-              <li>
-                <a
-                  href="https://mettehummel.dk"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="transition-colors hover:text-white"
-                >
-                  mettehummel.dk
-                </a>
-              </li>
-            </ul>
-          </div>
+          {contactUrl && (
+            <div>
+              <h4 className="mb-3 text-sm font-semibold text-white">Kontakt</h4>
+              <ul className="space-y-2.5 text-sm">
+                <li>
+                  <a
+                    href={contactUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="transition-colors hover:text-white"
+                  >
+                    {contactUrl.replace(/^https?:\/\//, '')}
+                  </a>
+                </li>
+              </ul>
+            </div>
+          )}
 
           {/* Juridisk */}
           <div>
@@ -109,7 +141,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 border-t border-white/10 pt-6 text-center text-xs text-white/40">
-          &copy; {new Date().getFullYear()} FamilyMind. Alle rettigheder forbeholdes.
+          &copy; {new Date().getFullYear()} {footerCopyright || `${brandName}. Alle rettigheder forbeholdes.`}
         </div>
       </div>
     </footer>
