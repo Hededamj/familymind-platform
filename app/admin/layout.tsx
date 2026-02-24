@@ -15,35 +15,41 @@ export default async function AdminLayout({
   ])
 
   return (
-    <div className="flex min-h-screen">
-      {/* Rich warm sidebar — dark walnut, not cold black */}
+    <div
+      className="flex min-h-screen"
+      style={{
+        // Override brand blue with warm neutral for admin context
+        '--primary': '#1A1A1A',
+        '--primary-foreground': '#FAFAF8',
+        '--ring': '#1A1A1A',
+      } as React.CSSProperties}
+    >
+      {/* Rich warm sidebar */}
       <aside className="relative w-[280px] shrink-0 bg-[#1E1B18]">
-        {/* Subtle warm gradient overlay for depth */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#262220] to-[#1E1B18]" />
 
         <div className="relative flex h-full flex-col">
-          {/* Brand — generous spacing, warm serif */}
+          {/* Brand */}
           <div className="px-8 pb-4 pt-8">
             <Link href="/admin" className="group block">
-              <span className="font-serif text-xl tracking-wide text-[#F5F0EB] transition-colors duration-200 group-hover:text-[#F5F0EB]/80">
+              <span className="font-serif text-xl tracking-wide text-white/90 transition-colors duration-200 group-hover:text-white/70">
                 {tenant.brandName}
               </span>
             </Link>
-            <p className="mt-1 text-[11px] font-medium tracking-widest text-[#F5F0EB]/20">
+            <p className="mt-1 text-[11px] font-medium tracking-widest text-white/15">
               ADMIN
             </p>
           </div>
 
-          {/* Warm divider */}
-          <div className="mx-7 border-b border-[#F5F0EB]/[0.06]" />
+          <div className="mx-7 border-b border-white/5" />
 
           <AdminNav />
 
           {/* Bottom */}
-          <div className="border-t border-[#F5F0EB]/[0.06] px-5 py-4">
+          <div className="border-t border-white/5 px-5 py-4">
             <Link
               href="/dashboard"
-              className="group flex items-center gap-3 rounded-xl px-3 py-3 text-[13px] font-medium text-[#F5F0EB]/25 transition-all duration-200 hover:text-[#F5F0EB]/50"
+              className="group flex items-center gap-3 rounded-xl px-3 py-3 text-[13px] font-medium text-white/20 transition-all duration-200 hover:text-white/50"
             >
               <ArrowLeft className="size-4 transition-transform duration-200 group-hover:-translate-x-1" />
               Tilbage til dashboard

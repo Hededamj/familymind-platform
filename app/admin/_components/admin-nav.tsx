@@ -57,8 +57,7 @@ export function AdminNav() {
     <nav className="flex-1 overflow-y-auto px-5 py-3">
       {navSections.map((section, i) => (
         <div key={section.label} className={i > 0 ? 'mt-9' : 'mt-1'}>
-          {/* Section label — confident serif, warm cream */}
-          <div className="mb-3 px-3 font-serif text-xs tracking-wide text-[#F5F0EB]/40">
+          <div className="mb-3 px-3 font-serif text-xs tracking-wide text-white/25">
             {section.label}
           </div>
 
@@ -70,24 +69,23 @@ export function AdminNav() {
                   key={item.href}
                   href={item.href}
                   className={`
-                    group flex items-center gap-3.5 rounded-xl px-3 py-3
+                    group relative flex items-center gap-3.5 rounded-xl px-3 py-3
                     text-[14px] font-medium tracking-wide
                     transition-all duration-200 ease-out
                     ${active
-                      ? 'bg-[#F5F0EB]/10 text-[#F5F0EB]'
-                      : 'text-[#F5F0EB]/40 hover:bg-[#F5F0EB]/[0.06] hover:text-[#F5F0EB]/75'
+                      ? 'bg-white/12 text-white'
+                      : 'text-white/35 hover:bg-white/8 hover:text-white/70'
                     }
                   `}
                 >
-                  {/* Accent indicator */}
                   {active && (
-                    <span className="absolute left-5 h-5 w-[3px] rounded-full bg-coral" />
+                    <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-coral" />
                   )}
                   <item.icon
                     className={`size-[18px] transition-all duration-200 ${
                       active
                         ? 'text-coral'
-                        : 'text-[#F5F0EB]/25 group-hover:text-[#F5F0EB]/50'
+                        : 'text-white/20 group-hover:text-white/50'
                     }`}
                     strokeWidth={1.5}
                   />
