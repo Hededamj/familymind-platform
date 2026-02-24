@@ -55,37 +55,34 @@ export function AdminNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="flex-1 px-3 py-2">
+    <nav className="flex-1 px-3 py-4">
       {navSections.map((section) => (
-        <div key={section.label} className="mb-5">
-          <div className="mb-1.5 px-3 pt-3 text-[10px] font-semibold uppercase tracking-widest text-sidebar-primary/50">
+        <div key={section.label} className="mb-6">
+          <div className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest text-foreground/30">
             {section.label}
           </div>
-          <div className="space-y-0.5">
+          <div className="space-y-1">
             {section.items.map((item) => {
               const active = isActive(pathname, item.href)
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
+                  className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
                     active
-                      ? 'bg-sidebar-primary/20 text-white'
-                      : 'text-white/50 hover:bg-white/15 hover:text-white'
+                      ? 'bg-sand-dark text-foreground shadow-sm'
+                      : 'text-foreground/50 hover:bg-sand hover:text-foreground'
                   }`}
                 >
                   <item.icon
                     className={`size-[18px] transition-colors duration-150 ${
                       active
-                        ? 'text-sidebar-primary'
-                        : 'group-hover:text-sidebar-primary'
+                        ? 'text-foreground/80'
+                        : 'text-foreground/30 group-hover:text-foreground/60'
                     }`}
                     strokeWidth={1.75}
                   />
                   {item.label}
-                  {active && (
-                    <span className="ml-auto size-1.5 rounded-full bg-sidebar-primary" />
-                  )}
                 </Link>
               )
             })}

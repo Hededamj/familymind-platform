@@ -16,26 +16,26 @@ export default async function AdminLayout({
 
   return (
     <div className="flex min-h-screen">
-      {/* Warm dark sidebar */}
-      <aside className="w-[280px] shrink-0 bg-sidebar">
+      {/* Warm light sidebar */}
+      <aside className="w-[280px] shrink-0 border-r border-border bg-sand">
         <div className="flex h-full flex-col">
           {/* Logo */}
           <div className="px-6 py-5">
             <Link href="/admin" className="block">
-              <span className="font-serif text-lg text-white">{tenant.brandName}</span>
-              <span className="ml-1.5 text-xs font-medium text-sidebar-primary/50">Admin</span>
+              <span className="font-serif text-lg text-foreground">{tenant.brandName}</span>
+              <span className="ml-1.5 text-xs font-medium text-foreground/30">Admin</span>
             </Link>
           </div>
 
           <AdminNav />
 
           {/* Bottom */}
-          <div className="border-t border-sidebar-border px-3 py-3">
+          <div className="border-t border-border px-3 py-3">
             <Link
               href="/dashboard"
-              className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-white/40 transition-all duration-150 hover:bg-white/15 hover:text-white"
+              className="group flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-foreground/40 transition-all duration-150 hover:bg-sand-dark hover:text-foreground"
             >
-              <ArrowLeft className="size-4" />
+              <ArrowLeft className="size-4 transition-colors duration-150 group-hover:text-foreground/60" />
               Tilbage til dashboard
             </Link>
           </div>
