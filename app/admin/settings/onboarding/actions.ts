@@ -1,9 +1,17 @@
 'use server'
 
+import { z } from 'zod'
 import { requireAdmin } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import {
+  createQuestionSchema,
+  updateQuestionSchema,
+  createOptionSchema,
+  updateOptionSchema,
+} from '@/lib/validators/settings'
 
+const uuid = z.string().uuid()
 const PATH = '/admin/settings/onboarding'
 
 // ─── Questions ───────────────────────────────────────
@@ -14,6 +22,7 @@ export async function createQuestionAction(data: {
   helperText?: string
 }) {
   await requireAdmin()
+  const valid = createQuestionSchema.parse(data)
 
   const maxPos = await prisma.onboardingQuestion.aggregate({
     _max: { position: true },
@@ -22,9 +31,9 @@ export async function createQuestionAction(data: {
 
   await prisma.onboardingQuestion.create({
     data: {
-      questionText: data.questionText,
-      questionType: data.questionType,
-      helperText: data.helperText || null,
+      questionText: valid.questionText,
+      questionType: valid.questionType,
+      helperText: valid.helperText || null,
       position,
     },
   })
@@ -42,14 +51,16 @@ export async function updateQuestionAction(
   }
 ) {
   await requireAdmin()
+  const validId = uuid.parse(id)
+  const valid = updateQuestionSchema.parse(data)
 
   await prisma.onboardingQuestion.update({
-    where: { id },
+    where: { id: validId },
     data: {
-      questionText: data.questionText,
-      questionType: data.questionType,
-      helperText: data.helperText || null,
-      isActive: data.isActive,
+      questionText: valid.questionText,
+      questionType: valid.questionType,
+      helperText: valid.helperText || null,
+      isActive: valid.isActive,
     },
   })
 
@@ -58,7 +69,8 @@ export async function updateQuestionAction(
 
 export async function deleteQuestionAction(id: string) {
   await requireAdmin()
-  await prisma.onboardingQuestion.delete({ where: { id } })
+  const validId = uuid.parse(id)
+  await prisma.onboardingQuestion.delete({ where: { id: validId } })
   revalidatePath(PATH)
 }
 
@@ -67,12 +79,13 @@ export async function moveQuestionAction(
   direction: 'up' | 'down'
 ) {
   await requireAdmin()
+  const validId = uuid.parse(id)
 
   const questions = await prisma.onboardingQuestion.findMany({
     orderBy: { position: 'asc' },
   })
 
-  const idx = questions.findIndex((q) => q.id === id)
+  const idx = questions.findIndex((q) => q.id === validId)
   if (idx === -1) return
 
   const swapIdx = direction === 'up' ? idx - 1 : idx + 1
@@ -106,19 +119,21 @@ export async function createOptionAction(
   }
 ) {
   await requireAdmin()
+  const validQuestionId = uuid.parse(questionId)
+  const valid = createOptionSchema.parse(data)
 
   const maxPos = await prisma.onboardingOption.aggregate({
-    where: { questionId },
+    where: { questionId: validQuestionId },
     _max: { position: true },
   })
   const position = (maxPos._max.position ?? -1) + 1
 
   await prisma.onboardingOption.create({
     data: {
-      questionId,
-      label: data.label,
-      value: data.value,
-      tagId: data.tagId || null,
+      questionId: validQuestionId,
+      label: valid.label,
+      value: valid.value,
+      tagId: valid.tagId || null,
       position,
     },
   })
@@ -135,13 +150,15 @@ export async function updateOptionAction(
   }
 ) {
   await requireAdmin()
+  const validId = uuid.parse(id)
+  const valid = updateOptionSchema.parse(data)
 
   await prisma.onboardingOption.update({
-    where: { id },
+    where: { id: validId },
     data: {
-      label: data.label,
-      value: data.value,
-      tagId: data.tagId || null,
+      label: valid.label,
+      value: valid.value,
+      tagId: valid.tagId || null,
     },
   })
 
@@ -150,6 +167,7 @@ export async function updateOptionAction(
 
 export async function deleteOptionAction(id: string) {
   await requireAdmin()
-  await prisma.onboardingOption.delete({ where: { id } })
+  const validId = uuid.parse(id)
+  await prisma.onboardingOption.delete({ where: { id: validId } })
   revalidatePath(PATH)
 }

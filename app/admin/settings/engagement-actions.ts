@@ -1,9 +1,17 @@
 'use server'
 
+import { z } from 'zod'
 import { requireAdmin } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import {
+  updateEmailTemplateSchema,
+  updateNotificationScheduleSchema,
+  updateReEngagementTierSchema,
+  updateMilestoneSchema,
+} from '@/lib/validators/settings'
 
+const uuid = z.string().uuid()
 const SETTINGS_PATH = '/admin/settings'
 
 // ─── Email Templates ────────────────────────────────
@@ -18,16 +26,18 @@ export async function updateEmailTemplateAction(
   }
 ) {
   await requireAdmin()
+  const validId = uuid.parse(id)
+  const valid = updateEmailTemplateSchema.parse(data)
 
   await prisma.emailTemplate.update({
-    where: { id },
+    where: { id: validId },
     data: {
-      ...(data.subject !== undefined && { subject: data.subject }),
-      ...(data.bodyHtml !== undefined && { bodyHtml: data.bodyHtml }),
-      ...(data.description !== undefined && {
-        description: data.description || null,
+      ...(valid.subject !== undefined && { subject: valid.subject }),
+      ...(valid.bodyHtml !== undefined && { bodyHtml: valid.bodyHtml }),
+      ...(valid.description !== undefined && {
+        description: valid.description || null,
       }),
-      ...(data.isActive !== undefined && { isActive: data.isActive }),
+      ...(valid.isActive !== undefined && { isActive: valid.isActive }),
     },
   })
 
@@ -45,13 +55,15 @@ export async function updateNotificationScheduleAction(
   }
 ) {
   await requireAdmin()
+  const validId = uuid.parse(id)
+  const valid = updateNotificationScheduleSchema.parse(data)
 
   await prisma.notificationSchedule.update({
-    where: { id },
+    where: { id: validId },
     data: {
-      ...(data.dayOfWeek !== undefined && { dayOfWeek: data.dayOfWeek }),
-      ...(data.timeOfDay !== undefined && { timeOfDay: data.timeOfDay }),
-      ...(data.isActive !== undefined && { isActive: data.isActive }),
+      ...(valid.dayOfWeek !== undefined && { dayOfWeek: valid.dayOfWeek }),
+      ...(valid.timeOfDay !== undefined && { timeOfDay: valid.timeOfDay }),
+      ...(valid.isActive !== undefined && { isActive: valid.isActive }),
     },
   })
 
@@ -70,20 +82,22 @@ export async function updateReEngagementTierAction(
   }
 ) {
   await requireAdmin()
+  const validId = uuid.parse(id)
+  const valid = updateReEngagementTierSchema.parse(data)
 
   await prisma.reEngagementTier.update({
-    where: { id },
+    where: { id: validId },
     data: {
-      ...(data.daysInactiveMin !== undefined && {
-        daysInactiveMin: data.daysInactiveMin,
+      ...(valid.daysInactiveMin !== undefined && {
+        daysInactiveMin: valid.daysInactiveMin,
       }),
-      ...(data.daysInactiveMax !== undefined && {
-        daysInactiveMax: data.daysInactiveMax,
+      ...(valid.daysInactiveMax !== undefined && {
+        daysInactiveMax: valid.daysInactiveMax,
       }),
-      ...(data.emailTemplateId !== undefined && {
-        emailTemplateId: data.emailTemplateId,
+      ...(valid.emailTemplateId !== undefined && {
+        emailTemplateId: valid.emailTemplateId,
       }),
-      ...(data.isActive !== undefined && { isActive: data.isActive }),
+      ...(valid.isActive !== undefined && { isActive: valid.isActive }),
     },
   })
 
@@ -104,22 +118,24 @@ export async function updateMilestoneDefinitionAction(
   }
 ) {
   await requireAdmin()
+  const validId = uuid.parse(id)
+  const valid = updateMilestoneSchema.parse(data)
 
   await prisma.milestoneDefinition.update({
-    where: { id },
+    where: { id: validId },
     data: {
-      ...(data.name !== undefined && { name: data.name }),
-      ...(data.triggerType !== undefined && { triggerType: data.triggerType }),
-      ...(data.triggerValue !== undefined && {
-        triggerValue: data.triggerValue,
+      ...(valid.name !== undefined && { name: valid.name }),
+      ...(valid.triggerType !== undefined && { triggerType: valid.triggerType }),
+      ...(valid.triggerValue !== undefined && {
+        triggerValue: valid.triggerValue,
       }),
-      ...(data.celebrationTitle !== undefined && {
-        celebrationTitle: data.celebrationTitle,
+      ...(valid.celebrationTitle !== undefined && {
+        celebrationTitle: valid.celebrationTitle,
       }),
-      ...(data.celebrationMessage !== undefined && {
-        celebrationMessage: data.celebrationMessage,
+      ...(valid.celebrationMessage !== undefined && {
+        celebrationMessage: valid.celebrationMessage,
       }),
-      ...(data.isActive !== undefined && { isActive: data.isActive }),
+      ...(valid.isActive !== undefined && { isActive: valid.isActive }),
     },
   })
 

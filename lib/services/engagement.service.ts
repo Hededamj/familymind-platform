@@ -54,7 +54,8 @@ export async function sendTemplatedEmail(
   }
 
   const subject = interpolate(template.subject, vars)
-  const bodyHtml = interpolate(template.bodyHtml, vars)
+  const rawBody = interpolate(template.bodyHtml, vars)
+  const bodyHtml = wrapEmailLayout(rawBody, vars.brandName)
 
   // Dev fallback: log instead of sending when no API key
   if (!process.env.RESEND_API_KEY) {
@@ -769,6 +770,38 @@ export async function sendJourneyNudges(): Promise<{ sent: number; skipped: numb
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+/**
+ * Wrap raw email body HTML in a branded layout with header + footer.
+ */
+function wrapEmailLayout(bodyHtml: string, brandName: string): string {
+  const year = new Date().getFullYear()
+  return `<!DOCTYPE html>
+<html lang="da">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background-color:#f6f9fc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Ubuntu,sans-serif">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f6f9fc">
+<tr><td align="center" style="padding:32px 16px">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;max-width:600px;width:100%">
+  <tr><td style="padding:24px 32px">
+    <p style="font-size:24px;font-weight:700;color:#1a1a2e;margin:0">${escapeHtml(brandName)}</p>
+  </td></tr>
+  <tr><td style="padding:0 32px">${bodyHtml}</td></tr>
+  <tr><td style="padding:32px 32px 0">
+    <hr style="border:none;border-top:1px solid #e6ebf1;margin:0 0 24px">
+    <p style="color:#8898aa;font-size:12px;line-height:16px;margin:0 0 8px">
+      Du modtager denne e-mail, fordi du har en konto hos ${escapeHtml(brandName)}.
+    </p>
+    <p style="color:#8898aa;font-size:12px;line-height:16px;margin:0 0 16px">
+      &copy; ${year} ${escapeHtml(brandName)}. Alle rettigheder forbeholdes.
+    </p>
+  </td></tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>`
+}
 
 /**
  * Escape HTML special characters to prevent XSS in email templates.

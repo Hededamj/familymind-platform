@@ -1,10 +1,16 @@
 'use server'
 
+import { z } from 'zod'
 import { requireAdmin } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import type { JsonValue } from '@prisma/client/runtime/library'
+import {
+  createRecommendationRuleSchema,
+  updateRecommendationRuleSchema,
+} from '@/lib/validators/settings'
 
+const uuid = z.string().uuid()
 const PATH = '/admin/settings/recommendations'
 
 export async function createRuleAction(data: {
@@ -15,14 +21,15 @@ export async function createRuleAction(data: {
   priority: number
 }) {
   await requireAdmin()
+  const valid = createRecommendationRuleSchema.parse(data)
 
   await prisma.recommendationRule.create({
     data: {
-      name: data.name,
+      name: valid.name,
       conditions: data.conditions ?? {},
-      targetType: data.targetType,
-      targetId: data.targetId,
-      priority: data.priority,
+      targetType: valid.targetType,
+      targetId: valid.targetId,
+      priority: valid.priority,
     },
   })
 
@@ -41,16 +48,18 @@ export async function updateRuleAction(
   }
 ) {
   await requireAdmin()
+  const validId = uuid.parse(id)
+  const valid = updateRecommendationRuleSchema.parse(data)
 
   await prisma.recommendationRule.update({
-    where: { id },
+    where: { id: validId },
     data: {
-      name: data.name,
+      name: valid.name,
       conditions: data.conditions ?? {},
-      targetType: data.targetType,
-      targetId: data.targetId,
-      priority: data.priority,
-      isActive: data.isActive,
+      targetType: valid.targetType,
+      targetId: valid.targetId,
+      priority: valid.priority,
+      isActive: valid.isActive,
     },
   })
 
@@ -59,6 +68,7 @@ export async function updateRuleAction(
 
 export async function deleteRuleAction(id: string) {
   await requireAdmin()
-  await prisma.recommendationRule.delete({ where: { id } })
+  const validId = uuid.parse(id)
+  await prisma.recommendationRule.delete({ where: { id: validId } })
   revalidatePath(PATH)
 }
