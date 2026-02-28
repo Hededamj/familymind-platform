@@ -93,32 +93,29 @@ export async function canAccessContent(
     },
     include: { product: { include: { bundleItems: true } } },
   })
-  for (const be of bundleEntitlements) {
-    const bundledProductIds = be.product.bundleItems.map(
-      (bi) => bi.includedProductId
+  if (bundleEntitlements.length > 0) {
+    const allBundledProductIds = bundleEntitlements.flatMap((be) =>
+      be.product.bundleItems.map((bi) => bi.includedProductId)
     )
-    const hasContent = await prisma.courseLesson.findFirst({
-      where: { productId: { in: bundledProductIds }, contentUnitId },
-    })
-    if (hasContent) return true
+    if (allBundledProductIds.length > 0) {
+      const hasContent = await prisma.courseLesson.findFirst({
+        where: { productId: { in: allBundledProductIds }, contentUnitId },
+      })
+      if (hasContent) return true
+    }
   }
 
   // Check org-level entitlements
   const user = await prisma.user.findUnique({ where: { id: userId } })
-  if (user?.organizationId) {
-    const orgEntitlements = await prisma.entitlement.findMany({
-      where: { organizationId: user.organizationId, ...activeEntitlementFilter },
+  if (user?.organizationId && content.accessLevel === 'SUBSCRIPTION') {
+    const orgSubEntitlement = await prisma.entitlement.findFirst({
+      where: {
+        organizationId: user.organizationId,
+        ...activeEntitlementFilter,
+        product: { type: 'SUBSCRIPTION' },
+      },
     })
-    // If org has any relevant entitlement, grant access
-    for (const oe of orgEntitlements) {
-      // Simplified: if org has subscription, grant subscription-level
-      if (content.accessLevel === 'SUBSCRIPTION') {
-        const subProduct = await prisma.product.findFirst({
-          where: { id: oe.productId, type: 'SUBSCRIPTION' },
-        })
-        if (subProduct) return true
-      }
-    }
+    if (orgSubEntitlement) return true
   }
 
   return false

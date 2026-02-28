@@ -73,15 +73,58 @@ export async function getUserInProgressCourses(userId: string) {
     include: { product: true },
   })
 
+  if (entitlements.length === 0) return []
+
+  const courseProductIds = entitlements.map((e) => e.product.id)
+
+  // Batch-fetch all lessons with user progress for all courses in one query
+  const allLessons = await prisma.courseLesson.findMany({
+    where: { productId: { in: courseProductIds } },
+    include: {
+      contentUnit: {
+        include: {
+          userProgress: { where: { userId } },
+        },
+      },
+    },
+    orderBy: { position: 'asc' },
+  })
+
+  // Group lessons by productId and compute progress in-memory
+  const lessonsByProduct = new Map<string, typeof allLessons>()
+  for (const lesson of allLessons) {
+    const existing = lessonsByProduct.get(lesson.productId) ?? []
+    existing.push(lesson)
+    lessonsByProduct.set(lesson.productId, existing)
+  }
+
   const courses: (Awaited<ReturnType<typeof getCourseProgress>> & { product: typeof entitlements[number]['product'] })[] = []
+
   for (const ent of entitlements) {
-    const progress = await getCourseProgress(userId, ent.product.id)
-    if (progress.totalLessons > 0) {
-      courses.push({
-        product: ent.product,
-        ...progress,
-      })
-    }
+    const lessons = lessonsByProduct.get(ent.product.id) ?? []
+    if (lessons.length === 0) continue
+
+    const totalLessons = lessons.length
+    const completedLessons = lessons.filter(
+      (l) => l.contentUnit.userProgress[0]?.completedAt
+    ).length
+    const percentComplete = Math.round((completedLessons / totalLessons) * 100)
+
+    courses.push({
+      product: ent.product,
+      totalLessons,
+      completedLessons,
+      percentComplete,
+      lessons: lessons.map((l) => ({
+        id: l.id,
+        contentUnitId: l.contentUnit.id,
+        title: l.contentUnit.title,
+        slug: l.contentUnit.slug,
+        position: l.position,
+        started: !!l.contentUnit.userProgress[0],
+        completed: !!l.contentUnit.userProgress[0]?.completedAt,
+      })),
+    })
   }
 
   return courses

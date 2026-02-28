@@ -114,22 +114,13 @@ export async function getRecommendations(userId: string) {
     orderBy: { priority: 'desc' },
   })
 
-  const recommendations: Array<{
-    type: string
-    id: string
-    title: string
-    description: string | null
-    slug: string
-    priority: number
-  }> = []
-
-  for (const rule of rules) {
+  // Filter matching rules in-memory first
+  const matchingRules = rules.filter((rule) => {
     const conditions = rule.conditions as Record<string, unknown>
-    let matches = true
 
     // Check tag condition
     if (conditions.tagId && profile.primaryChallengeTagId !== conditions.tagId) {
-      matches = false
+      return false
     }
 
     // Check age condition
@@ -141,39 +132,69 @@ export async function getRecommendations(userId: string) {
           if (conditions.ageMax !== undefined && age > (conditions.ageMax as number)) return false
           return true
         })
-        if (!hasMatchingAge) matches = false
+        if (!hasMatchingAge) return false
       }
     }
 
-    if (matches) {
-      if (rule.targetType === 'JOURNEY') {
-        const journey = await prisma.journey.findUnique({
-          where: { id: rule.targetId, isActive: true },
+    return true
+  })
+
+  if (matchingRules.length === 0) return []
+
+  // Batch-fetch all target journeys and products in two queries
+  const journeyIds = matchingRules
+    .filter((r) => r.targetType === 'JOURNEY')
+    .map((r) => r.targetId)
+  const productIds = matchingRules
+    .filter((r) => r.targetType === 'PRODUCT')
+    .map((r) => r.targetId)
+
+  const [journeys, products] = await Promise.all([
+    journeyIds.length > 0
+      ? prisma.journey.findMany({ where: { id: { in: journeyIds }, isActive: true } })
+      : Promise.resolve([]),
+    productIds.length > 0
+      ? prisma.product.findMany({ where: { id: { in: productIds }, isActive: true } })
+      : Promise.resolve([]),
+  ])
+
+  const journeyMap = new Map(journeys.map((j) => [j.id, j] as const))
+  const productMap = new Map(products.map((p) => [p.id, p] as const))
+
+  // Build recommendations from matched data
+  const recommendations: Array<{
+    type: string
+    id: string
+    title: string
+    description: string | null
+    slug: string
+    priority: number
+  }> = []
+
+  for (const rule of matchingRules) {
+    if (rule.targetType === 'JOURNEY') {
+      const journey = journeyMap.get(rule.targetId)
+      if (journey) {
+        recommendations.push({
+          type: 'JOURNEY',
+          id: journey.id,
+          title: journey.title,
+          description: journey.description,
+          slug: journey.slug,
+          priority: rule.priority,
         })
-        if (journey) {
-          recommendations.push({
-            type: 'JOURNEY',
-            id: journey.id,
-            title: journey.title,
-            description: journey.description,
-            slug: journey.slug,
-            priority: rule.priority,
-          })
-        }
-      } else if (rule.targetType === 'PRODUCT') {
-        const product = await prisma.product.findUnique({
-          where: { id: rule.targetId, isActive: true },
+      }
+    } else if (rule.targetType === 'PRODUCT') {
+      const product = productMap.get(rule.targetId)
+      if (product) {
+        recommendations.push({
+          type: 'PRODUCT',
+          id: product.id,
+          title: product.title,
+          description: product.description,
+          slug: product.slug,
+          priority: rule.priority,
         })
-        if (product) {
-          recommendations.push({
-            type: 'PRODUCT',
-            id: product.id,
-            title: product.title,
-            description: product.description,
-            slug: product.slug,
-            priority: rule.priority,
-          })
-        }
       }
     }
   }
