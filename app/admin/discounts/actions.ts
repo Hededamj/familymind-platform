@@ -1,10 +1,14 @@
 'use server'
 
+import { z } from 'zod'
 import { requireAdmin } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { getStripe } from '@/lib/stripe'
 import type Stripe from 'stripe'
 import { revalidatePath } from 'next/cache'
+import { createDiscountSchema, updateDiscountSchema } from '@/lib/validators/settings'
+
+const uuid = z.string().uuid()
 
 export async function createDiscountAction(data: {
   code: string
@@ -19,25 +23,26 @@ export async function createDiscountAction(data: {
   durationInMonths?: number | null
 }) {
   await requireAdmin()
+  const valid = createDiscountSchema.parse(data)
 
   const stripe = getStripe()
-  const duration = data.duration || 'once'
+  const duration = valid.duration || 'once'
 
   // Create Stripe coupon first — if this fails, we don't save to DB
   const couponParams: Stripe.CouponCreateParams = {
-    name: data.code.toUpperCase(),
+    name: valid.code.toUpperCase(),
     duration: duration as 'once' | 'repeating' | 'forever',
   }
 
-  if (data.type === 'PERCENTAGE') {
-    couponParams.percent_off = data.value
+  if (valid.type === 'PERCENTAGE') {
+    couponParams.percent_off = valid.value
   } else {
-    couponParams.amount_off = data.value // already in cents/øre
+    couponParams.amount_off = valid.value // already in cents/øre
     couponParams.currency = 'dkk'
   }
 
-  if (duration === 'repeating' && data.durationInMonths) {
-    couponParams.duration_in_months = data.durationInMonths
+  if (duration === 'repeating' && valid.durationInMonths) {
+    couponParams.duration_in_months = valid.durationInMonths
   }
 
   let stripeCoupon
@@ -50,17 +55,17 @@ export async function createDiscountAction(data: {
 
   const discount = await prisma.discountCode.create({
     data: {
-      code: data.code.toUpperCase(),
-      type: data.type,
-      value: data.value,
-      maxUses: data.maxUses || null,
-      validFrom: data.validFrom ? new Date(data.validFrom) : new Date(),
-      validUntil: data.validUntil ? new Date(data.validUntil) : null,
-      applicableProductId: data.applicableProductId || null,
-      isActive: data.isActive ?? true,
+      code: valid.code.toUpperCase(),
+      type: valid.type,
+      value: valid.value,
+      maxUses: valid.maxUses || null,
+      validFrom: valid.validFrom ? new Date(valid.validFrom) : new Date(),
+      validUntil: valid.validUntil ? new Date(valid.validUntil) : null,
+      applicableProductId: valid.applicableProductId || null,
+      isActive: valid.isActive ?? true,
       stripeCouponId: stripeCoupon.id,
       duration,
-      durationInMonths: duration === 'repeating' ? (data.durationInMonths || null) : null,
+      durationInMonths: duration === 'repeating' ? (valid.durationInMonths || null) : null,
     },
   })
   revalidatePath('/admin/discounts')
@@ -78,15 +83,18 @@ export async function updateDiscountAction(
   }>
 ) {
   await requireAdmin()
+  const validId = uuid.parse(id)
+  const valid = updateDiscountSchema.parse(data)
+
   const discount = await prisma.discountCode.update({
-    where: { id },
+    where: { id: validId },
     data: {
-      ...(data.code !== undefined && { code: data.code.toUpperCase() }),
-      ...(data.maxUses !== undefined && { maxUses: data.maxUses }),
-      ...(data.applicableProductId !== undefined && { applicableProductId: data.applicableProductId }),
-      ...(data.isActive !== undefined && { isActive: data.isActive }),
-      ...(data.validUntil !== undefined && {
-        validUntil: data.validUntil ? new Date(data.validUntil) : null,
+      ...(valid.code !== undefined && { code: valid.code.toUpperCase() }),
+      ...(valid.maxUses !== undefined && { maxUses: valid.maxUses }),
+      ...(valid.applicableProductId !== undefined && { applicableProductId: valid.applicableProductId }),
+      ...(valid.isActive !== undefined && { isActive: valid.isActive }),
+      ...(valid.validUntil !== undefined && {
+        validUntil: valid.validUntil ? new Date(valid.validUntil) : null,
       }),
     },
   })
@@ -96,8 +104,9 @@ export async function updateDiscountAction(
 
 export async function deleteDiscountAction(id: string) {
   await requireAdmin()
+  const validId = uuid.parse(id)
 
-  const discount = await prisma.discountCode.findUniqueOrThrow({ where: { id } })
+  const discount = await prisma.discountCode.findUniqueOrThrow({ where: { id: validId } })
 
   // Delete from Stripe (best-effort — don't block DB deletion)
   if (discount.stripeCouponId) {
@@ -108,12 +117,13 @@ export async function deleteDiscountAction(id: string) {
     }
   }
 
-  await prisma.discountCode.delete({ where: { id } })
+  await prisma.discountCode.delete({ where: { id: validId } })
   revalidatePath('/admin/discounts')
 }
 
 export async function toggleDiscountAction(id: string, isActive: boolean) {
   await requireAdmin()
-  await prisma.discountCode.update({ where: { id }, data: { isActive } })
+  const validId = uuid.parse(id)
+  await prisma.discountCode.update({ where: { id: validId }, data: { isActive } })
   revalidatePath('/admin/discounts')
 }

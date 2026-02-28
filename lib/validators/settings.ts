@@ -111,6 +111,29 @@ export const updateRecommendationRuleSchema = z.object({
   isActive: z.boolean().optional(),
 })
 
+// ─── Discount Codes ────────────────────────────────
+
+export const createDiscountSchema = z.object({
+  code: z.string().min(1),
+  type: z.enum(['PERCENTAGE', 'FIXED_AMOUNT']),
+  value: z.number().int().min(0),
+  maxUses: z.number().int().min(1).nullable().optional(),
+  validFrom: z.string().optional(),
+  validUntil: z.string().nullable().optional(),
+  applicableProductId: uuid.nullable().optional(),
+  isActive: z.boolean().optional(),
+  duration: z.enum(['once', 'repeating', 'forever']).optional(),
+  durationInMonths: z.number().int().min(1).max(36).nullable().optional(),
+})
+
+export const updateDiscountSchema = z.object({
+  code: z.string().min(1).optional(),
+  maxUses: z.number().int().min(1).nullable().optional(),
+  validUntil: z.string().nullable().optional(),
+  applicableProductId: uuid.nullable().optional(),
+  isActive: z.boolean().optional(),
+})
+
 // ─── General Settings ───────────────────────────────
 
 export const updateCompanySettingsSchema = z.object({

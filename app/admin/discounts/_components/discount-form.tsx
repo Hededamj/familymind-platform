@@ -130,9 +130,11 @@ export function DiscountForm({ mode, initialData, products }: DiscountFormProps)
         }
         router.push('/admin/discounts')
       } catch (error) {
-        const message = error instanceof Error ? error.message : mode === 'create'
-          ? 'Kunne ikke oprette rabatkode'
-          : 'Kunne ikke opdatere rabatkode'
+        const message = error instanceof Error
+          ? error.message
+          : (mode === 'create'
+              ? 'Kunne ikke oprette rabatkode'
+              : 'Kunne ikke opdatere rabatkode')
         toast.error(message)
         console.error(error)
       }

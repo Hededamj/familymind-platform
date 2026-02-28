@@ -1,5 +1,6 @@
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { z } from 'zod'
 import type Stripe from 'stripe'
 import { getStripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
@@ -110,10 +111,13 @@ export async function POST(req: Request) {
       // Increment discount code usage
       const discountCodeId = session.metadata?.discountCodeId
       if (discountCodeId) {
-        await prisma.discountCode.update({
-          where: { id: discountCodeId },
-          data: { currentUses: { increment: 1 } },
-        })
+        const parsed = z.string().uuid().safeParse(discountCodeId)
+        if (parsed.success) {
+          await prisma.discountCode.update({
+            where: { id: parsed.data },
+            data: { currentUses: { increment: 1 } },
+          })
+        }
       }
 
       break

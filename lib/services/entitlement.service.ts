@@ -105,7 +105,9 @@ export async function canAccessContent(
     }
   }
 
-  // Check org-level entitlements
+  // Check org-level entitlements.
+  // Only SUBSCRIPTION content can be unlocked via org — COURSE/SINGLE products
+  // require individual entitlements (purchased or bundled) checked above.
   const user = await prisma.user.findUnique({ where: { id: userId } })
   if (user?.organizationId && content.accessLevel === 'SUBSCRIPTION') {
     const orgSubEntitlement = await prisma.entitlement.findFirst({

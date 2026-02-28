@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { requireAdmin } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
-import type { JsonValue } from '@prisma/client/runtime/library'
+import type { InputJsonValue } from '@prisma/client/runtime/library'
 import {
   createRecommendationRuleSchema,
   updateRecommendationRuleSchema,
@@ -15,7 +15,7 @@ const PATH = '/admin/settings/recommendations'
 
 export async function createRuleAction(data: {
   name: string
-  conditions: JsonValue
+  conditions: Record<string, unknown>
   targetType: string
   targetId: string
   priority: number
@@ -26,7 +26,7 @@ export async function createRuleAction(data: {
   await prisma.recommendationRule.create({
     data: {
       name: valid.name,
-      conditions: data.conditions ?? {},
+      conditions: (valid.conditions ?? {}) as InputJsonValue,
       targetType: valid.targetType,
       targetId: valid.targetId,
       priority: valid.priority,
@@ -40,7 +40,7 @@ export async function updateRuleAction(
   id: string,
   data: {
     name: string
-    conditions: JsonValue
+    conditions: Record<string, unknown>
     targetType: string
     targetId: string
     priority: number
@@ -55,7 +55,7 @@ export async function updateRuleAction(
     where: { id: validId },
     data: {
       name: valid.name,
-      conditions: data.conditions ?? {},
+      conditions: (valid.conditions ?? {}) as InputJsonValue,
       targetType: valid.targetType,
       targetId: valid.targetId,
       priority: valid.priority,
