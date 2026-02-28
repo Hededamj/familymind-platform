@@ -346,16 +346,20 @@ model Entitlement {
 }
 
 model DiscountCode {
-  id                  String       @id @default(uuid()) @db.Uuid
-  code                String       @unique
-  type                DiscountType
-  value               Int // percentage or cents
-  maxUses             Int?
-  currentUses         Int          @default(0)
-  validFrom           DateTime     @default(now())
-  validUntil          DateTime?
-  applicableProductId String?      @db.Uuid
-  isActive            Boolean      @default(true)
+  id                    String       @id @default(uuid()) @db.Uuid
+  code                  String       @unique
+  type                  DiscountType
+  value                 Int // percentage or cents
+  maxUses               Int?
+  currentUses           Int          @default(0)
+  validFrom             DateTime     @default(now())
+  validUntil            DateTime?
+  applicableProductId   String?      @db.Uuid
+  isActive              Boolean      @default(true)
+  stripeCouponId        String?      // Stripe coupon ID
+  stripePromotionCodeId String?      // Reserved for future use
+  duration              String       @default("once") // "once" | "repeating" | "forever"
+  durationInMonths      Int?         // Only when duration = "repeating"
 
   applicableProduct Product? @relation(fields: [applicableProductId], references: [id])
 }

@@ -33,6 +33,8 @@ type DiscountData = {
   validUntil: Date | null
   applicableProductId: string | null
   isActive: boolean
+  duration?: string
+  durationInMonths?: number | null
 }
 
 type DiscountFormProps = {
@@ -75,6 +77,10 @@ export function DiscountForm({ mode, initialData, products }: DiscountFormProps)
     initialData?.applicableProductId ?? NO_PRODUCT
   )
   const [isActive, setIsActive] = useState(initialData?.isActive ?? true)
+  const [duration, setDuration] = useState(initialData?.duration ?? 'once')
+  const [durationInMonths, setDurationInMonths] = useState(
+    initialData?.durationInMonths?.toString() ?? ''
+  )
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -107,13 +113,13 @@ export function DiscountForm({ mode, initialData, products }: DiscountFormProps)
             applicableProductId:
               applicableProductId === NO_PRODUCT ? null : applicableProductId,
             isActive,
+            duration,
+            durationInMonths: durationInMonths ? parseInt(durationInMonths, 10) : null,
           })
           toast.success('Rabatkode oprettet')
         } else {
           await updateDiscountAction(initialData!.id, {
             code,
-            type,
-            value: numericValue,
             maxUses: maxUses ? parseInt(maxUses, 10) : null,
             validUntil: validUntil || null,
             applicableProductId:
@@ -124,11 +130,10 @@ export function DiscountForm({ mode, initialData, products }: DiscountFormProps)
         }
         router.push('/admin/discounts')
       } catch (error) {
-        toast.error(
-          mode === 'create'
-            ? 'Kunne ikke oprette rabatkode'
-            : 'Kunne ikke opdatere rabatkode'
-        )
+        const message = error instanceof Error ? error.message : mode === 'create'
+          ? 'Kunne ikke oprette rabatkode'
+          : 'Kunne ikke opdatere rabatkode'
+        toast.error(message)
         console.error(error)
       }
     })
@@ -163,6 +168,7 @@ export function DiscountForm({ mode, initialData, products }: DiscountFormProps)
                 onValueChange={(v) =>
                   setType(v as 'PERCENTAGE' | 'FIXED_AMOUNT')
                 }
+                disabled={mode === 'edit'}
               >
                 <SelectTrigger id="type" className="w-full">
                   <SelectValue />
@@ -191,6 +197,7 @@ export function DiscountForm({ mode, initialData, products }: DiscountFormProps)
                   onChange={(e) => setValue(e.target.value)}
                   placeholder={type === 'PERCENTAGE' ? 'F.eks. 20' : 'F.eks. 50'}
                   required
+                  disabled={mode === 'edit'}
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
                   {type === 'PERCENTAGE' ? '%' : 'DKK'}
@@ -255,6 +262,51 @@ export function DiscountForm({ mode, initialData, products }: DiscountFormProps)
               </p>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Varighed for abonnementer</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="duration">Rabatvarighed</Label>
+            <Select
+              value={duration}
+              onValueChange={setDuration}
+              disabled={mode === 'edit'}
+            >
+              <SelectTrigger id="duration" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="once">Kun første betaling</SelectItem>
+                <SelectItem value="repeating">Antal måneder</SelectItem>
+                <SelectItem value="forever">For evigt</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              For engangskøb gælder rabatten altid hele beløbet uanset denne indstilling
+            </p>
+          </div>
+          {duration === 'repeating' && (
+            <div className="space-y-2">
+              <Label htmlFor="durationInMonths">Antal måneder</Label>
+              <Input
+                id="durationInMonths"
+                type="number"
+                min="1"
+                max="36"
+                step="1"
+                value={durationInMonths}
+                onChange={(e) => setDurationInMonths(e.target.value)}
+                placeholder="F.eks. 3"
+                required
+                disabled={mode === 'edit'}
+              />
+            </div>
+          )}
         </CardContent>
       </Card>
 

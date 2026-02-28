@@ -107,10 +107,13 @@ export async function POST(req: Request) {
         })
       }
 
-      // Increment discount code usage if applicable
-      if (session.total_details?.breakdown?.discounts?.length) {
-        // Discount was applied — we'd need to track which code was used
-        // For now, this will be handled when we enhance the discount system
+      // Increment discount code usage
+      const discountCodeId = session.metadata?.discountCodeId
+      if (discountCodeId) {
+        await prisma.discountCode.update({
+          where: { id: discountCodeId },
+          data: { currentUses: { increment: 1 } },
+        })
       }
 
       break

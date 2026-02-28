@@ -37,15 +37,16 @@ export async function createCheckoutSession(
     // If no active Connect account, fall back to platform Stripe key (no stripeAccount header)
   }
 
-  let discountId: string | undefined
+  let discountCouponId: string | undefined
+  let discountCodeId: string | undefined
+
   if (validated.discountCode) {
     const discount = await validateDiscountCode(
       validated.discountCode,
       validated.productId
     )
-    if (discount.stripeCouponId) {
-      discountId = discount.stripeCouponId
-    }
+    discountCouponId = discount.stripeCouponId
+    discountCodeId = discount.discountId
   }
 
   const session = await stripe.checkout.sessions.create(
@@ -53,10 +54,14 @@ export async function createCheckoutSession(
       mode: product.type === 'SUBSCRIPTION' ? 'subscription' : 'payment',
       customer_email: user.email,
       line_items: [{ price: product.stripePriceId, quantity: 1 }],
-      ...(discountId ? { discounts: [{ coupon: discountId }] } : {}),
+      ...(discountCouponId ? { discounts: [{ coupon: discountCouponId }] } : {}),
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/products/${product.slug}`,
-      metadata: { userId, productId: product.id },
+      metadata: {
+        userId,
+        productId: product.id,
+        ...(discountCodeId ? { discountCodeId } : {}),
+      },
     },
     stripeAccountId ? { stripeAccount: stripeAccountId } : undefined
   )
@@ -87,6 +92,6 @@ export async function validateDiscountCode(
     discountId: discount.id,
     type: discount.type,
     value: discount.value,
-    stripeCouponId: undefined as string | undefined, // Will be set when Stripe integration is complete
+    stripeCouponId: discount.stripeCouponId ?? undefined,
   }
 }

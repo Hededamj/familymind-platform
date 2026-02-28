@@ -81,6 +81,7 @@ export default async function DiscountListPage() {
                 <TableHead>Gyldig til</TableHead>
                 <TableHead>Produkt</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Stripe</TableHead>
                 <TableHead className="w-[50px]" />
               </TableRow>
             </TableHeader>
@@ -128,6 +129,13 @@ export default async function DiscountListPage() {
                       <Badge variant="default">Aktiv</Badge>
                     ) : (
                       <Badge variant="secondary">Inaktiv</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {discount.stripeCouponId ? (
+                      <Badge variant="default" className="bg-green-600">Synket</Badge>
+                    ) : (
+                      <Badge variant="destructive">Ikke synket</Badge>
                     )}
                   </TableCell>
                   <TableCell>
