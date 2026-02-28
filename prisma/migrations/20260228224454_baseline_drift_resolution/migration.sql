@@ -31,6 +31,9 @@ ALTER TABLE "DiscountCode" ADD COLUMN IF NOT EXISTS "stripeCouponId" TEXT;
 ALTER TABLE "DiscountCode" ADD COLUMN IF NOT EXISTS "stripePromotionCodeId" TEXT;
 ALTER TABLE "DiscountCode" ADD COLUMN IF NOT EXISTS "duration" TEXT NOT NULL DEFAULT 'once';
 ALTER TABLE "DiscountCode" ADD COLUMN IF NOT EXISTS "durationInMonths" INTEGER;
+-- Note: stripePromotionCodeId and duration (String) are added here for existing DB
+-- compatibility. The next migration (discount_duration_enum) drops stripePromotionCodeId
+-- and converts duration from String to DiscountDuration enum.
 
 -- User activity tracking
 ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "lastActiveAt" TIMESTAMP(3);

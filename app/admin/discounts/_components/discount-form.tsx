@@ -77,7 +77,9 @@ export function DiscountForm({ mode, initialData, products }: DiscountFormProps)
     initialData?.applicableProductId ?? NO_PRODUCT
   )
   const [isActive, setIsActive] = useState(initialData?.isActive ?? true)
-  const [duration, setDuration] = useState(initialData?.duration ?? 'once')
+  const [duration, setDuration] = useState<'once' | 'repeating' | 'forever'>(
+    (initialData?.duration as 'once' | 'repeating' | 'forever') ?? 'once'
+  )
   const [durationInMonths, setDurationInMonths] = useState(
     initialData?.durationInMonths?.toString() ?? ''
   )
@@ -276,7 +278,7 @@ export function DiscountForm({ mode, initialData, products }: DiscountFormProps)
             <Label htmlFor="duration">Rabatvarighed</Label>
             <Select
               value={duration}
-              onValueChange={setDuration}
+              onValueChange={(v) => setDuration(v as 'once' | 'repeating' | 'forever')}
               disabled={mode === 'edit'}
             >
               <SelectTrigger id="duration" className="w-full">

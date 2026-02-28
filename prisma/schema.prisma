@@ -64,6 +64,12 @@ enum DiscountType {
   FIXED_AMOUNT
 }
 
+enum DiscountDuration {
+  once
+  repeating
+  forever
+}
+
 enum QuestionType {
   SINGLE_SELECT
   MULTI_SELECT
@@ -357,8 +363,7 @@ model DiscountCode {
   applicableProductId   String?      @db.Uuid
   isActive              Boolean      @default(true)
   stripeCouponId        String?      // Stripe coupon ID
-  stripePromotionCodeId String?      // Reserved for future use
-  duration              String       @default("once") // "once" | "repeating" | "forever"
+  duration              DiscountDuration @default(once)
   durationInMonths      Int?         // Only when duration = "repeating"
 
   applicableProduct Product? @relation(fields: [applicableProductId], references: [id])

@@ -19,7 +19,7 @@ export async function createDiscountAction(data: {
   validUntil?: string | null
   applicableProductId?: string | null
   isActive?: boolean
-  duration?: string
+  duration?: 'once' | 'repeating' | 'forever'
   durationInMonths?: number | null
 }) {
   await requireAdmin()

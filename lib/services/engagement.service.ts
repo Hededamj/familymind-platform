@@ -55,7 +55,7 @@ export async function sendTemplatedEmail(
 
   const subject = interpolate(template.subject, vars)
   const rawBody = interpolate(template.bodyHtml, vars)
-  const bodyHtml = wrapEmailLayout(rawBody, vars.brandName)
+  const bodyHtml = wrapEmailLayout(rawBody, vars.brandName, vars.appUrl)
 
   // Dev fallback: log instead of sending when no API key
   if (!process.env.RESEND_API_KEY) {
@@ -774,8 +774,9 @@ export async function sendJourneyNudges(): Promise<{ sent: number; skipped: numb
 /**
  * Wrap raw email body HTML in a branded layout with header + footer.
  */
-function wrapEmailLayout(bodyHtml: string, brandName: string): string {
+function wrapEmailLayout(bodyHtml: string, brandName: string, appUrl: string): string {
   const year = new Date().getFullYear()
+  const settingsUrl = `${appUrl}/dashboard/settings`
   return `<!DOCTYPE html>
 <html lang="da">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
@@ -791,6 +792,11 @@ function wrapEmailLayout(bodyHtml: string, brandName: string): string {
     <hr style="border:none;border-top:1px solid #e6ebf1;margin:0 0 24px">
     <p style="color:#8898aa;font-size:12px;line-height:16px;margin:0 0 8px">
       Du modtager denne e-mail, fordi du har en konto hos ${escapeHtml(brandName)}.
+    </p>
+    <p style="color:#8898aa;font-size:12px;line-height:16px;margin:0 0 8px">
+      <a href="${settingsUrl}" style="color:#8898aa;text-decoration:underline">Afmeld notifikationer</a>
+      &nbsp;|&nbsp;
+      <a href="${settingsUrl}" style="color:#8898aa;text-decoration:underline">Min konto</a>
     </p>
     <p style="color:#8898aa;font-size:12px;line-height:16px;margin:0 0 16px">
       &copy; ${year} ${escapeHtml(brandName)}. Alle rettigheder forbeholdes.

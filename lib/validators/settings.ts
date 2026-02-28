@@ -48,10 +48,10 @@ export const createQuestionSchema = z.object({
 })
 
 export const updateQuestionSchema = z.object({
-  questionText: z.string().min(1).optional(),
-  questionType: z.enum(['SINGLE_SELECT', 'MULTI_SELECT', 'DATE', 'SLIDER']).optional(),
+  questionText: z.string().min(1),
+  questionType: z.enum(['SINGLE_SELECT', 'MULTI_SELECT', 'DATE', 'SLIDER']),
   helperText: z.string().nullable().optional(),
-  isActive: z.boolean().optional(),
+  isActive: z.boolean(),
 })
 
 export const createOptionSchema = z.object({
@@ -88,7 +88,7 @@ export const updateDashboardMessageSchema = z.object({
   heading: z.string().min(1),
   body: z.string().min(1),
   ctaLabel: z.string().optional(),
-  ctaUrl: z.string().optional(),
+  ctaUrl: z.string().url().optional(),
 })
 
 // ─── Recommendations ────────────────────────────────
