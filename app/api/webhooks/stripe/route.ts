@@ -117,6 +117,8 @@ export async function POST(req: Request) {
             where: { id: parsed.data },
             data: { currentUses: { increment: 1 } },
           })
+        } else {
+          console.warn(`Invalid discountCodeId in checkout metadata: ${discountCodeId}`)
         }
       }
 

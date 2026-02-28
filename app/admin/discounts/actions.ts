@@ -124,6 +124,7 @@ export async function deleteDiscountAction(id: string) {
 export async function toggleDiscountAction(id: string, isActive: boolean) {
   await requireAdmin()
   const validId = uuid.parse(id)
-  await prisma.discountCode.update({ where: { id: validId }, data: { isActive } })
+  const validActive = z.boolean().parse(isActive)
+  await prisma.discountCode.update({ where: { id: validId }, data: { isActive: validActive } })
   revalidatePath('/admin/discounts')
 }

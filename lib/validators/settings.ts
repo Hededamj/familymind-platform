@@ -116,7 +116,7 @@ export const updateRecommendationRuleSchema = z.object({
 export const createDiscountSchema = z.object({
   code: z.string().min(1),
   type: z.enum(['PERCENTAGE', 'FIXED_AMOUNT']),
-  value: z.number().int().min(0),
+  value: z.number().int().min(1),
   maxUses: z.number().int().min(1).nullable().optional(),
   validFrom: z.string().optional(),
   validUntil: z.string().nullable().optional(),

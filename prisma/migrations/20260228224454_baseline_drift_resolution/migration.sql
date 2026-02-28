@@ -6,7 +6,7 @@
 CREATE TABLE IF NOT EXISTS "AdminTag" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "name" TEXT NOT NULL,
-    "color" TEXT,
+    "color" TEXT NOT NULL DEFAULT '#6B7280',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "AdminTag_pkey" PRIMARY KEY ("id")
 );
@@ -17,14 +17,14 @@ CREATE TABLE IF NOT EXISTS "UserTag" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "userId" UUID NOT NULL,
     "tagId" UUID NOT NULL,
-    "assignedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "UserTag_pkey" PRIMARY KEY ("id")
 );
 CREATE INDEX IF NOT EXISTS "UserTag_tagId_idx" ON "UserTag"("tagId");
 CREATE INDEX IF NOT EXISTS "UserTag_userId_idx" ON "UserTag"("userId");
 CREATE UNIQUE INDEX IF NOT EXISTS "UserTag_userId_tagId_key" ON "UserTag"("userId", "tagId");
-ALTER TABLE "UserTag" ADD CONSTRAINT "UserTag_tagId_fkey" FOREIGN KEY ("tagId") REFERENCES "AdminTag"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-ALTER TABLE "UserTag" ADD CONSTRAINT "UserTag_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "UserTag" ADD CONSTRAINT "UserTag_tagId_fkey" FOREIGN KEY ("tagId") REFERENCES "AdminTag"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "UserTag" ADD CONSTRAINT "UserTag_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- DiscountCode Stripe fields
 ALTER TABLE "DiscountCode" ADD COLUMN IF NOT EXISTS "stripeCouponId" TEXT;
