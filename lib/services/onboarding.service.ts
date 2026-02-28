@@ -149,9 +149,19 @@ export async function getRecommendations(userId: string) {
     .filter((r) => r.targetType === 'PRODUCT')
     .map((r) => r.targetId)
 
+  // Exclude journeys the user has already completed
+  const completedJourneys = journeyIds.length > 0
+    ? await prisma.userJourney.findMany({
+        where: { userId, journeyId: { in: journeyIds }, status: 'COMPLETED' },
+        select: { journeyId: true },
+      })
+    : []
+  const completedJourneyIds = new Set(completedJourneys.map((uj) => uj.journeyId))
+  const eligibleJourneyIds = journeyIds.filter((id) => !completedJourneyIds.has(id))
+
   const [journeys, products] = await Promise.all([
-    journeyIds.length > 0
-      ? prisma.journey.findMany({ where: { id: { in: journeyIds }, isActive: true } })
+    eligibleJourneyIds.length > 0
+      ? prisma.journey.findMany({ where: { id: { in: eligibleJourneyIds }, isActive: true } })
       : Promise.resolve([]),
     productIds.length > 0
       ? prisma.product.findMany({ where: { id: { in: productIds }, isActive: true } })
