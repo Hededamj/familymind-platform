@@ -19,6 +19,7 @@ import {
   RefreshCw,
   Trophy,
   Tag,
+  Users,
 } from 'lucide-react'
 
 const settingsSections = [
@@ -100,6 +101,13 @@ const settingsSections = [
     title: 'Bruger-tags',
     description: 'Opret tags til segmentering og markedsføring',
     icon: Tag,
+  },
+  {
+    href: '/admin/settings/community',
+    title: 'Fællesskab',
+    description:
+      'Notifikationer, digest, indeksering og prompt-kø for fællesskabet',
+    icon: Users,
   },
 ]
 

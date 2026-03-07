@@ -134,6 +134,19 @@ export const updateDiscountSchema = z.object({
   isActive: z.boolean().optional(),
 })
 
+// ─── Community Settings ────────────────────────────
+
+export const communitySettingsSchema = z.object({
+  community_notify_reply_inapp: z.enum(['true', 'false']),
+  community_notify_reply_email: z.enum(['true', 'false']),
+  community_digest_includes_rooms: z.enum(['true', 'false']),
+  community_digest_frequency: z.enum(['daily', 'weekly', 'monthly', 'off']),
+  community_index_min_chars: z.coerce.number().int().min(0).max(10000).transform(String),
+  community_index_min_replies: z.coerce.number().int().min(0).max(100).transform(String),
+  community_prompt_time: z.string().regex(/^\d{2}:\d{2}$/, 'Forventet format: HH:mm'),
+  community_prompt_author_id: z.string().optional().default(''),
+})
+
 // ─── General Settings ───────────────────────────────
 
 export const updateCompanySettingsSchema = z.object({
