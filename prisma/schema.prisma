@@ -17,6 +17,7 @@ datasource db {
 
 enum UserRole {
   USER
+  MODERATOR
   ADMIN
 }
 
@@ -688,19 +689,25 @@ model DiscussionPrompt {
 }
 
 model DiscussionPost {
-  id         String   @id @default(uuid()) @db.Uuid
-  cohortId   String   @db.Uuid
-  authorId   String   @db.Uuid
-  dayId      String?  @db.Uuid
-  promptId   String?  @db.Uuid
-  body       String
-  isPrompt   Boolean  @default(false)
-  isPinned   Boolean  @default(false)
-  isHidden   Boolean  @default(false)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id              String   @id @default(uuid()) @db.Uuid
+  cohortId        String?  @db.Uuid
+  roomId          String?  @db.Uuid
+  organizationId  String?  @db.Uuid
+  authorId        String   @db.Uuid
+  dayId           String?  @db.Uuid
+  promptId        String?  @db.Uuid
+  slug            String?  @unique
+  body            String
+  isPrompt        Boolean  @default(false)
+  isPinned        Boolean  @default(false)
+  isHidden        Boolean  @default(false)
+  isPublic        Boolean  @default(true)
+  isFeatured      Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  cohort    Cohort            @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  cohort    Cohort?           @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  room      CommunityRoom?    @relation(fields: [roomId], references: [id], onDelete: Cascade)
   author    User              @relation(fields: [authorId], references: [id], onDelete: Cascade)
   day       JourneyDay?       @relation(fields: [dayId], references: [id])
   prompt    DiscussionPrompt? @relation(fields: [promptId], references: [id])
@@ -709,6 +716,8 @@ model DiscussionPost {
   reports   ContentReport[]   @relation("PostReports")
 
   @@index([cohortId, createdAt])
+  @@index([roomId, createdAt])
+  @@index([slug])
   @@index([authorId])
 }
 
@@ -759,6 +768,40 @@ model CohortBan {
 
   @@unique([cohortId, userId])
   @@index([userId])
+}
+
+model CommunityRoom {
+  id              String   @id @default(uuid()) @db.Uuid
+  organizationId  String?  @db.Uuid
+  name            String
+  slug            String   @unique
+  description     String?
+  icon            String?  // lucide icon name, e.g. "MessageCircle"
+  sortOrder       Int      @default(0)
+  isPublic        Boolean  @default(true)
+  isArchived      Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  posts           DiscussionPost[]
+  promptQueue     RoomPromptQueue[]
+
+  @@index([isArchived, sortOrder])
+}
+
+model RoomPromptQueue {
+  id              String   @id @default(uuid()) @db.Uuid
+  organizationId  String?  @db.Uuid
+  roomId          String   @db.Uuid
+  promptText      String
+  priority        Int      @default(0)
+  postedAt        DateTime?
+  isPaused        Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  room            CommunityRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@index([roomId, postedAt, isPaused])
 }
 
 model ContentReport {
