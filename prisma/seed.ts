@@ -307,6 +307,42 @@ async function main() {
     prisma.siteSetting.upsert({ where: { key: 'notification_max_per_week' }, update: {}, create: { key: 'notification_max_per_week', value: '3', description: 'Maximum notifications per user per week' } }),
   ])
 
+  // -- Community Site Settings --
+  const communitySettings = [
+    { key: 'community_index_min_chars', value: '50', description: 'Minimum tegn i opslag før Google-indeksering' },
+    { key: 'community_index_min_replies', value: '1', description: 'Minimum antal svar før Google-indeksering' },
+    { key: 'community_digest_includes_rooms', value: 'true', description: 'Inkludér åbne rum i community-digest' },
+    { key: 'community_digest_frequency', value: 'weekly', description: 'Community-digest frekvens (daily/weekly/monthly/off)' },
+    { key: 'community_notify_reply_inapp', value: 'true', description: 'In-app notifikation ved svar på opslag' },
+    { key: 'community_notify_reply_email', value: 'false', description: 'Email-notifikation ved svar (bruger opt-in)' },
+    { key: 'community_prompt_time', value: '08:00', description: 'Tidspunkt for auto-posting af prompts (HH:MM)' },
+    { key: 'community_prompt_author_id', value: '', description: 'Bruger-ID for prompt-forfatter (tom = første admin)' },
+  ]
+
+  for (const setting of communitySettings) {
+    await prisma.siteSetting.upsert({
+      where: { key: setting.key },
+      update: {},
+      create: setting,
+    })
+  }
+
+  // -- Default Community Rooms --
+  const defaultRooms = [
+    { name: 'Hverdagen som forælder', slug: 'hverdagen', description: 'Del hverdagens op- og nedture', icon: 'Heart', sortOrder: 0 },
+    { name: 'Spørgsmål & svar', slug: 'spoergsmaal', description: 'Stil spørgsmål til andre forældre', icon: 'HelpCircle', sortOrder: 1 },
+    { name: 'Wins & fremskridt', slug: 'wins', description: 'Del dine sejre, store som små', icon: 'Trophy', sortOrder: 2 },
+    { name: 'Tips & ressourcer', slug: 'tips', description: 'Del artikler, bøger, værktøjer', icon: 'Lightbulb', sortOrder: 3 },
+  ]
+
+  for (const room of defaultRooms) {
+    await prisma.communityRoom.upsert({
+      where: { slug: room.slug },
+      update: {},
+      create: room,
+    })
+  }
+
   // -- Test Journey (idempotent via slug) --
   const existingJourney = await prisma.journey.findUnique({ where: { slug: 'bedre-sovnrutiner' } })
 
