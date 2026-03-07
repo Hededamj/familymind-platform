@@ -38,3 +38,12 @@ export async function requireAdmin() {
   if (user.role !== 'ADMIN') redirect('/dashboard')
   return user
 }
+
+/**
+ * Require moderator or admin role. Redirects to /dashboard if neither.
+ */
+export async function requireModeratorOrAdmin() {
+  const user = await requireAuth()
+  if (user.role !== 'ADMIN' && user.role !== 'MODERATOR') redirect('/dashboard')
+  return user
+}
