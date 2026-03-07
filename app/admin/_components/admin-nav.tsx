@@ -10,7 +10,10 @@ import {
   Settings,
   Tags,
   Users,
+  UsersRound,
   MessageSquare,
+  Sparkles,
+  Shield,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -33,8 +36,16 @@ const navSections: NavSection[] = [
     label: 'Medlemmer',
     items: [
       { href: '/admin/users', label: 'Brugere', icon: Users },
-      { href: '/admin/cohorts', label: 'Community', icon: MessageSquare },
+      { href: '/admin/cohorts', label: 'Kohorter', icon: UsersRound },
       { href: '/admin/settings/tags', label: 'Segmentering', icon: Tags },
+    ],
+  },
+  {
+    label: 'Fællesskab',
+    items: [
+      { href: '/admin/community/rooms', label: 'Rum', icon: MessageSquare },
+      { href: '/admin/community/prompts', label: 'Prompts', icon: Sparkles },
+      { href: '/admin/moderation', label: 'Moderering', icon: Shield },
     ],
   },
   {
@@ -47,6 +58,8 @@ const navSections: NavSection[] = [
 
 function isActive(pathname: string, href: string): boolean {
   if (href === '/admin/settings') return pathname === '/admin/settings'
+  if (href === '/admin/community/rooms') return pathname.startsWith('/admin/community/rooms')
+  if (href === '/admin/community/prompts') return pathname.startsWith('/admin/community/prompts')
   return pathname.startsWith(href)
 }
 
