@@ -3,7 +3,8 @@ import { notFound } from 'next/navigation'
 import { ArrowLeft, ArrowRight, MessageCircle, Users } from 'lucide-react'
 import type { Metadata } from 'next'
 import { getCurrentUser } from '@/lib/auth'
-import { getRoomBySlug, getRoomFeed } from '@/lib/services/community.service'
+import { getRoomBySlug, getRoomFeed, getUserCompletedJourneys } from '@/lib/services/community.service'
+import { AlumniBadge } from '@/app/community/_components/alumni-badge'
 import { Button } from '@/components/ui/button'
 
 type Props = {
@@ -43,6 +44,7 @@ export default async function RoomFeedPage({ params }: Props) {
 
   const user = await getCurrentUser()
   const feed = await getRoomFeed(room.id, undefined, user?.id)
+  const completedJourneys = user ? await getUserCompletedJourneys(user.id) : []
 
   const postCount = room._count.posts
 
@@ -105,10 +107,13 @@ export default async function RoomFeedPage({ params }: Props) {
                   className="group flex min-h-[44px] flex-col gap-2 rounded-xl border border-border bg-background p-4 transition-colors hover:bg-accent sm:p-5"
                 >
                   {/* Post meta */}
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                     <span className="font-medium text-foreground">
                       {firstName}
                     </span>
+                    {user && post.author.id === user.id && completedJourneys.map((uj) => (
+                      <AlumniBadge key={uj.journey.id} journeyTitle={uj.journey.title} size="sm" />
+                    ))}
                     <span aria-hidden="true">&middot;</span>
                     <time dateTime={post.createdAt.toISOString()}>
                       {formatRelativeTime(post.createdAt)}

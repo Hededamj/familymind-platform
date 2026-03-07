@@ -3,7 +3,8 @@ import { notFound } from 'next/navigation'
 import { ArrowLeft, ArrowRight, MessageCircle, Users } from 'lucide-react'
 import type { Metadata } from 'next'
 import { getCurrentUser } from '@/lib/auth'
-import { getPostBySlug } from '@/lib/services/community.service'
+import { getPostBySlug, getUserCompletedJourneys } from '@/lib/services/community.service'
+import { AlumniBadge } from '@/app/community/_components/alumni-badge'
 import { getSiteSetting } from '@/lib/services/settings.service'
 import { Button } from '@/components/ui/button'
 
@@ -52,6 +53,7 @@ export default async function SinglePostPage({ params }: Props) {
   }
 
   const user = await getCurrentUser()
+  const completedJourneys = user ? await getUserCompletedJourneys(user.id) : []
   const authorName = post.author.name?.split(' ')[0] ?? 'Anonym'
   const replyCount = post._count.replies
 
@@ -98,8 +100,11 @@ export default async function SinglePostPage({ params }: Props) {
           {/* Post body */}
           <div className="rounded-xl border border-border bg-background p-4 sm:p-6">
             {/* Author + timestamp */}
-            <div className="mb-3 flex items-center gap-2 text-xs text-muted-foreground">
+            <div className="mb-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
               <span className="font-medium text-foreground">{authorName}</span>
+              {user && post.author.id === user.id && completedJourneys.map((uj) => (
+                <AlumniBadge key={uj.journey.id} journeyTitle={uj.journey.title} size="sm" />
+              ))}
               <span aria-hidden="true">&middot;</span>
               <time dateTime={post.createdAt.toISOString()}>
                 {formatRelativeTime(post.createdAt)}
@@ -133,10 +138,13 @@ export default async function SinglePostPage({ params }: Props) {
                     key={reply.id}
                     className="rounded-xl border border-border bg-background p-4 sm:p-5"
                   >
-                    <div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground">
+                    <div className="mb-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                       <span className="font-medium text-foreground">
                         {replyAuthor}
                       </span>
+                      {user && reply.author.id === user.id && completedJourneys.map((uj) => (
+                        <AlumniBadge key={uj.journey.id} journeyTitle={uj.journey.title} size="sm" />
+                      ))}
                       <span aria-hidden="true">&middot;</span>
                       <time dateTime={reply.createdAt.toISOString()}>
                         {formatRelativeTime(reply.createdAt)}

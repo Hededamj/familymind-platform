@@ -3,7 +3,8 @@ import Link from 'next/link'
 import { ArrowLeft, Users } from 'lucide-react'
 import { requireAuth } from '@/lib/auth'
 import { trackActivity } from '@/lib/track-activity'
-import { getJourney, getUserActiveJourney } from '@/lib/services/journey.service'
+import { prisma } from '@/lib/prisma'
+import { getJourney } from '@/lib/services/journey.service'
 import { getUserCohort, getCohortFeed } from '@/lib/services/community.service'
 import { Badge } from '@/components/ui/badge'
 import { NewPostForm } from './_components/new-post-form'
@@ -23,9 +24,15 @@ export default async function CommunityFeedPage({
     notFound()
   }
 
-  // User must have this journey active
-  const activeJourney = await getUserActiveJourney(user.id)
-  if (!activeJourney || activeJourney.journeyId !== journey.id) {
+  // Allow both active AND completed journeys to access cohort community
+  const userJourney = await prisma.userJourney.findFirst({
+    where: {
+      userId: user.id,
+      journeyId: journey.id,
+      status: { in: ['ACTIVE', 'COMPLETED'] },
+    },
+  })
+  if (!userJourney) {
     redirect(`/journeys/${slug}`)
   }
 
