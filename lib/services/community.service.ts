@@ -331,20 +331,21 @@ export async function createReply(
 
   if (!post) throw new Error('Indlæg ikke fundet')
 
-  // Check ban
-  const banned = await prisma.cohortBan.findUnique({
-    where: { cohortId_userId: { cohortId: post.cohortId, userId: authorId } },
-  })
-  if (banned) {
-    throw new Error('Du er udelukket fra denne gruppe')
-  }
+  // Check ban and membership (only for cohort posts, not room posts)
+  if (post.cohortId) {
+    const banned = await prisma.cohortBan.findUnique({
+      where: { cohortId_userId: { cohortId: post.cohortId, userId: authorId } },
+    })
+    if (banned) {
+      throw new Error('Du er udelukket fra denne gruppe')
+    }
 
-  // Verify membership
-  const membership = await prisma.cohortMember.findFirst({
-    where: { cohortId: post.cohortId, userId: authorId },
-  })
-  if (!membership) {
-    throw new Error('Du er ikke medlem af denne kohorte')
+    const membership = await prisma.cohortMember.findFirst({
+      where: { cohortId: post.cohortId, userId: authorId },
+    })
+    if (!membership) {
+      throw new Error('Du er ikke medlem af denne kohorte')
+    }
   }
 
   const reply = await prisma.discussionReply.create({
@@ -381,8 +382,8 @@ export async function createReply(
       )
     }
 
-    // Email notification (default on if setting not found)
-    if (notifyEmail !== 'false') {
+    // Email notification (default off if setting not found)
+    if (notifyEmail === 'true') {
       await sendTemplatedEmail(post.authorId, 'community_reply', {
         replierName: authorName,
         replySnippet: snippet,

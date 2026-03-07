@@ -5,6 +5,9 @@ import type { Metadata } from 'next'
 import { getCurrentUser } from '@/lib/auth'
 import { getRoomBySlug, getRoomFeed, getUserCompletedJourneys } from '@/lib/services/community.service'
 import { AlumniBadge } from '@/app/community/_components/alumni-badge'
+import { RoomPostForm } from '@/app/community/_components/room-post-form'
+import { RoomJsonLd } from '@/app/community/_components/json-ld'
+import { Breadcrumbs } from '@/app/community/_components/breadcrumbs'
 import { Button } from '@/components/ui/button'
 
 type Props = {
@@ -50,7 +53,13 @@ export default async function RoomFeedPage({ params }: Props) {
 
   return (
     <div className="flex min-h-screen flex-col bg-background px-4 py-6 sm:px-8 sm:py-10">
+      <RoomJsonLd room={room} postCount={room._count.posts} />
       <div className="mx-auto w-full max-w-3xl">
+        <Breadcrumbs items={[
+          { label: 'Fællesskab', href: '/community' },
+          { label: room.name },
+        ]} />
+
         {/* Back link */}
         <Link
           href="/community"
@@ -77,15 +86,10 @@ export default async function RoomFeedPage({ params }: Props) {
           </div>
         </header>
 
-        {/* Post form placeholder for logged-in users */}
+        {/* Post form for logged-in users */}
         {user && (
           <div className="mb-6">
-            <Link
-              href={`/community/${roomSlug}/nyt`}
-              className="flex min-h-[44px] w-full items-center rounded-xl border border-border bg-background px-4 py-3 text-sm text-muted-foreground transition-colors hover:border-foreground/20 hover:bg-accent"
-            >
-              Skriv et indlæg...
-            </Link>
+            <RoomPostForm roomId={room.id} roomSlug={roomSlug} />
           </div>
         )}
 

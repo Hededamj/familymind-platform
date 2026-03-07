@@ -5,6 +5,9 @@ import type { Metadata } from 'next'
 import { getCurrentUser } from '@/lib/auth'
 import { getPostBySlug, getUserCompletedJourneys } from '@/lib/services/community.service'
 import { AlumniBadge } from '@/app/community/_components/alumni-badge'
+import { RoomReplyForm } from '@/app/community/_components/room-reply-form'
+import { PostJsonLd } from '@/app/community/_components/json-ld'
+import { Breadcrumbs } from '@/app/community/_components/breadcrumbs'
 import { getSiteSetting } from '@/lib/services/settings.service'
 import { Button } from '@/components/ui/button'
 
@@ -59,7 +62,14 @@ export default async function SinglePostPage({ params }: Props) {
 
   return (
     <div className="flex min-h-screen flex-col bg-background px-4 py-6 sm:px-8 sm:py-10">
+      <PostJsonLd post={post} roomSlug={roomSlug} />
       <div className="mx-auto w-full max-w-3xl">
+        <Breadcrumbs items={[
+          { label: 'Fællesskab', href: '/community' },
+          { label: post.room!.name, href: `/community/${post.room!.slug}` },
+          { label: post.body.slice(0, 40) + (post.body.length > 40 ? '…' : '') },
+        ]} />
+
         {/* Back link */}
         <Link
           href={`/community/${roomSlug}`}
@@ -160,12 +170,10 @@ export default async function SinglePostPage({ params }: Props) {
           </section>
         )}
 
-        {/* Reply form placeholder for logged-in users */}
-        {user && (
-          <div className="mb-8 rounded-xl border border-border bg-background p-4 sm:p-5">
-            <p className="min-h-[44px] flex items-center text-sm text-muted-foreground">
-              Skriv et svar...
-            </p>
+        {/* Reply form for logged-in users */}
+        {user && post.slug && (
+          <div className="mb-8">
+            <RoomReplyForm postId={post.id} roomSlug={roomSlug} postSlug={post.slug} />
           </div>
         )}
 

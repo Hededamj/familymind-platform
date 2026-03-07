@@ -48,6 +48,9 @@ export async function toggleRoomReactionAction(
   postId?: string,
   replyId?: string
 ) {
+  if (postId) z.string().uuid().parse(postId)
+  if (replyId) z.string().uuid().parse(replyId)
+  z.string().min(1).max(10).parse(emoji)
   const user = await requireAuth()
   const added = await communityService.toggleReaction(user.id, emoji, postId, replyId)
   revalidatePath(`/community/${roomSlug}`)
@@ -75,6 +78,8 @@ export async function reportRoomContentAction(
   postId?: string,
   replyId?: string
 ) {
+  if (postId) z.string().uuid().parse(postId)
+  if (replyId) z.string().uuid().parse(replyId)
   const user = await requireAuth()
   if (!reason.trim()) return { error: 'Angiv venligst en årsag' }
 
