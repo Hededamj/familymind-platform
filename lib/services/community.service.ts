@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { getSiteSetting } from './settings.service'
 import { createInAppNotification, sendTemplatedEmail } from './engagement.service'
+import { generatePostSlug } from '@/lib/slugify'
 import type { Prisma } from '@prisma/client'
 
 const DEFAULT_COHORT_MAX_MEMBERS = 25
@@ -809,6 +810,222 @@ export async function getActiveCohortsForDigest() {
     include: {
       journey: { select: { id: true, title: true, slug: true } },
       _count: { select: { members: true } },
+    },
+  })
+}
+
+// --- Community Rooms ---
+
+export async function listRooms(includeArchived = false) {
+  return prisma.communityRoom.findMany({
+    where: includeArchived ? {} : { isArchived: false },
+    orderBy: { sortOrder: 'asc' },
+    include: {
+      _count: { select: { posts: { where: { isHidden: false } } } },
+    },
+  })
+}
+
+export async function getRoomBySlug(slug: string) {
+  return prisma.communityRoom.findUnique({
+    where: { slug },
+    include: {
+      _count: { select: { posts: { where: { isHidden: false } } } },
+    },
+  })
+}
+
+export async function createRoom(data: {
+  name: string
+  slug: string
+  description?: string
+  icon?: string
+  isPublic?: boolean
+  sortOrder?: number
+  organizationId?: string
+}) {
+  return prisma.communityRoom.create({ data })
+}
+
+export async function updateRoom(
+  id: string,
+  data: {
+    name?: string
+    slug?: string
+    description?: string
+    icon?: string
+    isPublic?: boolean
+    sortOrder?: number
+    isArchived?: boolean
+  }
+) {
+  return prisma.communityRoom.update({ where: { id }, data })
+}
+
+export async function deleteRoom(id: string) {
+  return prisma.communityRoom.update({
+    where: { id },
+    data: { isArchived: true },
+  })
+}
+
+export async function getRoomFeed(
+  roomId: string,
+  cursor?: string,
+  userId?: string
+) {
+  const posts = await prisma.discussionPost.findMany({
+    where: { roomId, isHidden: false },
+    take: FEED_PAGE_SIZE + 1,
+    ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+    orderBy: [{ isPinned: 'desc' }, { isFeatured: 'desc' }, { createdAt: 'desc' }],
+    include: {
+      author: { select: { id: true, name: true } },
+      _count: { select: { replies: true, reactions: true } },
+      reactions: userId
+        ? { where: { userId }, select: { id: true, emoji: true } }
+        : false,
+    },
+  })
+
+  const hasMore = posts.length > FEED_PAGE_SIZE
+  const items = hasMore ? posts.slice(0, FEED_PAGE_SIZE) : posts
+  const nextCursor = hasMore ? items[items.length - 1]?.id : undefined
+
+  return { items, nextCursor, hasMore }
+}
+
+export async function createRoomPost(
+  roomId: string,
+  authorId: string,
+  body: string,
+  isPublic = true
+) {
+  const slug = generatePostSlug(body)
+
+  return prisma.discussionPost.create({
+    data: {
+      roomId,
+      authorId,
+      body,
+      slug,
+      isPublic,
+      cohortId: null,
+    },
+    include: {
+      author: { select: { id: true, name: true } },
+      _count: { select: { replies: true, reactions: true } },
+    },
+  })
+}
+
+export async function getPostBySlug(slug: string) {
+  return prisma.discussionPost.findUnique({
+    where: { slug },
+    include: {
+      author: { select: { id: true, name: true } },
+      room: { select: { id: true, name: true, slug: true } },
+      replies: {
+        where: { isHidden: false },
+        orderBy: { createdAt: 'asc' },
+        include: {
+          author: { select: { id: true, name: true } },
+          _count: { select: { reactions: true } },
+        },
+      },
+      _count: { select: { replies: true, reactions: true } },
+    },
+  })
+}
+
+export async function getRoomWeeklyStats(roomId: string) {
+  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+
+  const [newPosts, newReplies, activeMembers] = await Promise.all([
+    prisma.discussionPost.count({
+      where: {
+        roomId,
+        isHidden: false,
+        isPrompt: false,
+        createdAt: { gte: weekAgo },
+      },
+    }),
+    prisma.discussionReply.count({
+      where: {
+        isHidden: false,
+        createdAt: { gte: weekAgo },
+        post: { roomId },
+      },
+    }),
+    prisma.discussionPost.findMany({
+      where: {
+        roomId,
+        isPrompt: false,
+        createdAt: { gte: weekAgo },
+      },
+      select: { authorId: true },
+      distinct: ['authorId'],
+    }).then((posts) => posts.length),
+  ])
+
+  return { newPosts, newReplies, activeMembers }
+}
+
+// --- Room Prompt Queue ---
+
+export async function listRoomPrompts(roomId: string) {
+  return prisma.roomPromptQueue.findMany({
+    where: { roomId },
+    orderBy: [{ postedAt: 'asc' }, { priority: 'desc' }, { createdAt: 'asc' }],
+    include: { room: { select: { name: true, slug: true } } },
+  })
+}
+
+export async function createRoomPrompt(data: {
+  roomId: string
+  promptText: string
+  priority?: number
+  organizationId?: string
+}) {
+  return prisma.roomPromptQueue.create({ data })
+}
+
+export async function updateRoomPrompt(
+  id: string,
+  data: { promptText?: string; priority?: number; isPaused?: boolean }
+) {
+  return prisma.roomPromptQueue.update({ where: { id }, data })
+}
+
+export async function deleteRoomPrompt(id: string) {
+  return prisma.roomPromptQueue.delete({ where: { id } })
+}
+
+export async function getNextUnpostedPrompt(roomId: string) {
+  return prisma.roomPromptQueue.findFirst({
+    where: {
+      roomId,
+      postedAt: null,
+      isPaused: false,
+    },
+    orderBy: [{ priority: 'desc' }, { createdAt: 'asc' }],
+  })
+}
+
+export async function markPromptAsPosted(id: string) {
+  return prisma.roomPromptQueue.update({
+    where: { id },
+    data: { postedAt: new Date() },
+  })
+}
+
+// --- Alumni Badges ---
+
+export async function getUserCompletedJourneys(userId: string) {
+  return prisma.userJourney.findMany({
+    where: { userId, status: 'COMPLETED' },
+    include: {
+      journey: { select: { id: true, title: true, slug: true } },
     },
   })
 }
