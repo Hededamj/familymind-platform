@@ -4,6 +4,7 @@
     { "path": "/api/cron/reengagement", "schedule": "0 8 * * *" },
     { "path": "/api/cron/monthly-progress", "schedule": "0 9 1 * *" },
     { "path": "/api/cron/community-digest", "schedule": "0 10 * * 1" },
-    { "path": "/api/cron/discussion-prompts", "schedule": "0 7 * * *" }
+    { "path": "/api/cron/discussion-prompts", "schedule": "0 7 * * *" },
+    { "path": "/api/cron/room-prompts", "schedule": "0 7 * * *" }
   ]
 }
