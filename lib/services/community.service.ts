@@ -324,6 +324,7 @@ export async function createReply(
     where: { id: postId },
     include: {
       cohort: { select: { id: true, journeyId: true } },
+      room: { select: { slug: true } },
       author: { select: { id: true, name: true } },
     },
   })
@@ -358,21 +359,36 @@ export async function createReply(
     const authorName = reply.author.name ?? 'Nogen'
     const snippet = body.length > 100 ? body.slice(0, 100) + '…' : body
 
-    // In-app notification
-    await createInAppNotification(
-      post.authorId,
-      'COMMUNITY_REPLY',
-      `${authorName} svarede på dit indlæg`,
-      snippet,
-      `/journeys/community/${post.cohortId}/${postId}`
-    )
+    // Build room-aware URL
+    const actionUrl = post.roomId && post.room
+      ? `/community/${post.room.slug}/${post.slug}`
+      : `/journeys/community/${post.cohortId}/${postId}`
 
-    // Email notification
-    await sendTemplatedEmail(post.authorId, 'community_reply', {
-      replierName: authorName,
-      replySnippet: snippet,
-      postSnippet: post.body.length > 80 ? post.body.slice(0, 80) + '…' : post.body,
-    })
+    // Check community notification settings
+    const [notifyInapp, notifyEmail] = await Promise.all([
+      getSiteSetting('community_notify_reply_inapp'),
+      getSiteSetting('community_notify_reply_email'),
+    ])
+
+    // In-app notification (default on if setting not found)
+    if (notifyInapp !== 'false') {
+      await createInAppNotification(
+        post.authorId,
+        'COMMUNITY_REPLY',
+        `${authorName} svarede på dit indlæg`,
+        snippet,
+        actionUrl
+      )
+    }
+
+    // Email notification (default on if setting not found)
+    if (notifyEmail !== 'false') {
+      await sendTemplatedEmail(post.authorId, 'community_reply', {
+        replierName: authorName,
+        replySnippet: snippet,
+        postSnippet: post.body.length > 80 ? post.body.slice(0, 80) + '…' : post.body,
+      })
+    }
   }
 
   return reply
