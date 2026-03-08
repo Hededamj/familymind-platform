@@ -9,44 +9,58 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
-  const [, tenant] = await Promise.all([
+  const [user, tenant] = await Promise.all([
     requireAdmin(),
     getTenantConfig(),
   ])
 
-  return (
-    <div className="admin-theme flex min-h-screen">
-      {/* Rich warm sidebar */}
-      <aside className="relative w-[280px] shrink-0 bg-[#1E1B18]">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#262220] to-[#1E1B18]" />
+  const initial = (user.name ?? user.email).charAt(0).toUpperCase()
 
-        <div className="relative flex h-full flex-col">
+  return (
+    <div className="flex min-h-screen">
+      {/* Light sand sidebar */}
+      <aside className="hidden w-[280px] shrink-0 border-r border-[var(--color-border)] bg-[var(--color-sand)] md:block">
+        <div className="flex h-full flex-col">
           {/* Brand */}
-          <div className="px-8 pb-4 pt-8">
+          <div className="px-8 pb-2 pt-8">
             <Link href="/admin" className="group block">
-              <span className="font-serif text-xl tracking-wide text-white/90 transition-colors duration-200 group-hover:text-white/70">
+              <span className="font-serif text-xl tracking-wide text-[var(--foreground)] transition-colors duration-200 group-hover:text-[var(--foreground)]/70">
                 {tenant.brandName}
               </span>
             </Link>
-            <p className="mt-1 text-[11px] font-medium tracking-widest text-white/15">
+            <p className="mt-1 text-[11px] font-medium uppercase tracking-widest text-[var(--foreground)]/20">
               ADMIN
             </p>
           </div>
 
-          <div className="mx-7 border-b border-white/5" />
+          {/* Back link */}
+          <div className="px-5 pb-2 pt-3">
+            <Link
+              href="/dashboard"
+              className="group flex items-center gap-2 rounded-lg px-3 py-2 text-[13px] font-medium text-[var(--accent)] transition-all duration-200 hover:bg-white/60"
+            >
+              <ArrowLeft className="size-4 transition-transform duration-200 group-hover:-translate-x-1" />
+              Tilbage til min side
+            </Link>
+          </div>
+
+          <div className="mx-7 border-b border-[var(--foreground)]/5" />
 
           <AdminNav />
 
-          {/* Bottom */}
-          <div className="border-t border-white/5 px-5 py-4">
-            <Link
-              href="/dashboard"
-              className="admin-nav-item group flex items-center gap-3 rounded-xl px-3 py-3 text-[13px] font-medium"
-              style={{ color: 'rgba(255,255,255,0.2)' }}
-            >
-              <ArrowLeft className="admin-nav-icon size-4 transition-transform duration-200 group-hover:-translate-x-1" />
-              Tilbage til dashboard
-            </Link>
+          {/* Bottom: user avatar */}
+          <div className="border-t border-[var(--foreground)]/5 px-5 py-4">
+            <div className="flex items-center gap-3 px-3">
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-white">
+                {initial}
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-[14px] font-medium text-[var(--foreground)]">
+                  {user.name ?? user.email}
+                </p>
+                <p className="text-[12px] text-[var(--foreground)]/40">Admin</p>
+              </div>
+            </div>
           </div>
         </div>
       </aside>
