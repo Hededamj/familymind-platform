@@ -3,6 +3,7 @@ import { requireAdmin } from '@/lib/auth'
 import { getTenantConfig } from '@/lib/services/tenant.service'
 import { ArrowLeft } from 'lucide-react'
 import { AdminNav } from './_components/admin-nav'
+import { AdminMobileNav } from './_components/admin-mobile-nav'
 
 export default async function AdminLayout({
   children,
@@ -17,7 +18,9 @@ export default async function AdminLayout({
   const initial = (user.name ?? user.email).charAt(0).toUpperCase()
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen flex-col md:flex-row">
+      <AdminMobileNav brandName={tenant.brandName} />
+
       {/* Light sand sidebar */}
       <aside className="hidden w-[280px] shrink-0 border-r border-[var(--color-border)] bg-[var(--color-sand)] md:block">
         <div className="flex h-full flex-col">
