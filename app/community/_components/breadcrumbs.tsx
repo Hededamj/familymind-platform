@@ -2,6 +2,8 @@ import Link from 'next/link'
 
 type BreadcrumbItem = { label: string; href?: string }
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://familymind.dk'
+
 export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -11,7 +13,7 @@ export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
       position: i + 1,
       name: item.label,
       ...(item.href
-        ? { item: `${process.env.NEXT_PUBLIC_APP_URL}${item.href}` }
+        ? { item: `${baseUrl}${item.href}` }
         : {}),
     })),
   }

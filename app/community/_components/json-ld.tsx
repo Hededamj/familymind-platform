@@ -1,3 +1,5 @@
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://familymind.dk'
+
 export function RoomJsonLd({
   room,
   postCount,
@@ -10,7 +12,7 @@ export function RoomJsonLd({
     '@type': 'CollectionPage',
     name: room.name,
     description: room.description || `Community room: ${room.name}`,
-    url: `${process.env.NEXT_PUBLIC_APP_URL}/community/${room.slug}`,
+    url: `${baseUrl}/community/${room.slug}`,
     numberOfItems: postCount,
   }
   return (
@@ -43,7 +45,7 @@ export function PostJsonLd({
       '@type': 'Person',
       name: post.author.name?.split(' ')[0] || 'Anonym',
     },
-    url: `${process.env.NEXT_PUBLIC_APP_URL}/community/${roomSlug}/${post.slug}`,
+    url: `${baseUrl}/community/${roomSlug}/${post.slug}`,
     interactionStatistic: {
       '@type': 'InteractionCounter',
       interactionType: 'https://schema.org/CommentAction',

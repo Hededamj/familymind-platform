@@ -58,9 +58,9 @@ type Prompt = {
   roomId: string
   promptText: string
   priority: number
-  postedAt: string | null
+  postedAt: Date | null
   isPaused: boolean
-  createdAt: string
+  createdAt: Date
   room: { name: string; slug: string }
 }
 
