@@ -25,6 +25,7 @@ export function Footer({ brandName, logoUrl, tagline, description, contactUrl, f
     pathname?.startsWith('/dashboard') ||
     pathname?.startsWith('/onboarding') ||
     pathname?.startsWith('/journeys') ||
+    pathname?.startsWith('/community') ||
     (pathname?.includes('/day/'))
   ) {
     return null

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { AppLayout } from '@/components/layout/app-layout'
 
 export async function generateMetadata(): Promise<Metadata> {
   // TODO: Replace with getTenantConfig().brandName when tenant service is implemented
@@ -10,5 +11,5 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function CommunityLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>
+  return <AppLayout>{children}</AppLayout>
 }

@@ -44,6 +44,8 @@ export function Topbar({ brandName, logoUrl }: Props) {
   if (pathname?.startsWith('/dashboard')) return null
   if (pathname?.startsWith('/onboarding')) return null
   if (pathname?.startsWith('/journeys')) return null
+  // Hide on community pages for logged-in users (AppLayout provides its own shell)
+  if (pathname?.startsWith('/community') && isLoggedIn) return null
 
   const isAuthPage = pathname === '/login' || pathname === '/signup'
   const nav = isLoggedIn ? authNav : publicNav
