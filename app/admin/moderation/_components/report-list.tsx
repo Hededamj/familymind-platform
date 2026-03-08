@@ -22,7 +22,7 @@ type Report = {
     cohort: {
       id: string
       journey: { id: string; title: string; slug: string }
-    }
+    } | null
   } | null
   reply?: {
     id: string
@@ -34,7 +34,7 @@ type Report = {
       cohort: {
         id: string
         journey: { id: string; title: string; slug: string }
-      }
+      } | null
     }
   } | null
 }
@@ -93,7 +93,7 @@ export function ReportList({ reports }: ReportListProps) {
     if (!content) return
 
     const authorId = content.author.id
-    const cohortId = report.post?.cohort.id ?? report.reply?.post.cohort.id
+    const cohortId = report.post?.cohort?.id ?? report.reply?.post.cohort?.id
     if (!cohortId) return
 
     if (!confirm(`Er du sikker på, at du vil udelukke ${content.author.name ?? 'denne bruger'} fra kohorten?`)) return
@@ -114,9 +114,9 @@ export function ReportList({ reports }: ReportListProps) {
       {reports.map((report) => {
         const content = report.post ?? report.reply
         const journeyTitle =
-          report.post?.cohort.journey.title ??
-          report.reply?.post.cohort.journey.title ??
-          'Ukendt'
+          report.post?.cohort?.journey.title ??
+          report.reply?.post.cohort?.journey.title ??
+          'Åbent rum'
         const isPost = !!report.post
 
         return (

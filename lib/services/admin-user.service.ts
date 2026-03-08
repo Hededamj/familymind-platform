@@ -339,7 +339,7 @@ export async function getUserActivity(
   }
 
   for (const p of posts) {
-    const cohortName = p.cohort.name ?? 'Ukendt gruppe'
+    const cohortName = p.cohort?.name ?? 'Åbent rum'
     activities.push({
       date: p.createdAt,
       type: 'post',

@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 
 function getRoomIcon(iconName: string | null): LucideIcon {
   if (!iconName) return LucideIcons.MessageCircle
-  return (LucideIcons as Record<string, LucideIcon>)[iconName] ?? LucideIcons.MessageCircle
+  return (LucideIcons as unknown as Record<string, LucideIcon>)[iconName] ?? LucideIcons.MessageCircle
 }
 
 export default async function CommunityPage() {

@@ -19,7 +19,7 @@ async function verifyCohortMembershipByPost(userId: string, postId: string) {
     where: { id: postId },
     select: { cohortId: true },
   })
-  if (!post) throw new Error('Indlæg ikke fundet')
+  if (!post || !post.cohortId) throw new Error('Indlæg ikke fundet')
   await verifyCohortMembership(userId, post.cohortId)
 }
 
