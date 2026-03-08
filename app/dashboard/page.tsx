@@ -7,6 +7,8 @@ import { getDashboardState } from '@/lib/services/dashboard.service'
 import { getTenantConfig } from '@/lib/services/tenant.service'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { CommunityPills } from '@/components/community-pills'
+import { listRooms } from '@/lib/services/community.service'
 import { DashboardMessageBanner } from './_components/dashboard-message-banner'
 import { JourneyDayCard } from './_components/journey-day-card'
 import { CourseProgressCard } from './_components/course-progress-card'
@@ -29,9 +31,10 @@ export default async function DashboardPage() {
     redirect('/onboarding')
   }
 
-  const [dashboardState, tenant] = await Promise.all([
+  const [dashboardState, tenant, rooms] = await Promise.all([
     getDashboardState(user.id),
     getTenantConfig(),
+    listRooms(),
   ])
 
   const {
@@ -53,7 +56,9 @@ export default async function DashboardPage() {
           {getGreeting()}, {displayName}
         </h1>
 
-        <div className="space-y-6">
+        <CommunityPills rooms={rooms} />
+
+        <div className="mt-6 space-y-6">
           {stateKey === 'new_user' && (
             <NewUserView
               message={message}
