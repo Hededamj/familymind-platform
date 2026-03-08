@@ -79,19 +79,21 @@ export function AppSidebar({ brandName, userName, userEmail, userRole }: Props) 
   }
 
   return (
-    <aside className="hidden md:flex md:w-[260px] md:flex-col md:shrink-0 border-r border-[var(--color-border)] bg-[var(--color-sand)] h-screen sticky top-0">
+    <aside className="hidden md:flex md:w-16 lg:w-[260px] md:flex-col md:shrink-0 border-r border-[var(--color-border)] bg-[var(--color-sand)] h-screen sticky top-0 transition-[width] duration-200">
       {/* Logo */}
-      <div className="px-6 py-6">
+      <div className="px-6 py-6 md:flex md:items-center md:justify-center lg:justify-start">
         <Link
           href="/dashboard"
           className="font-serif text-xl text-[var(--foreground)] hover:opacity-80 transition-opacity"
+          title={brandName}
         >
-          {brandName}
+          <span className="hidden lg:inline">{brandName}</span>
+          <span className="lg:hidden font-serif text-xl">{brandName.charAt(0)}</span>
         </Link>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3">
+      <nav className="flex-1 md:px-1.5 lg:px-3">
         <ul className="space-y-1">
           {navItems.map((item) => {
             const active = isActive(item.href, item.exact)
@@ -100,7 +102,8 @@ export function AppSidebar({ brandName, userName, userEmail, userRole }: Props) 
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  className={`relative flex items-center gap-3 rounded-lg px-3 h-[44px] text-sm font-medium transition-colors ${
+                  title={item.label}
+                  className={`relative flex items-center gap-3 rounded-lg h-[44px] text-sm font-medium transition-colors md:justify-center md:px-0 lg:justify-start lg:px-3 min-w-10 ${
                     active
                       ? 'bg-white text-[var(--foreground)]'
                       : 'text-[var(--foreground)]/60 hover:bg-white/60'
@@ -116,7 +119,7 @@ export function AppSidebar({ brandName, userName, userEmail, userRole }: Props) 
                         : 'text-[var(--foreground)]/40'
                     }`}
                   />
-                  {item.label}
+                  <span className="hidden lg:inline">{item.label}</span>
                 </Link>
               </li>
             )
@@ -125,12 +128,14 @@ export function AppSidebar({ brandName, userName, userEmail, userRole }: Props) 
       </nav>
 
       {/* Bottom section */}
-      <div className="border-t border-[var(--color-border)] px-3 py-3">
+      <div className="md:px-1.5 lg:px-3 py-3">
+        <div className="hidden lg:block border-t border-[var(--color-border)] mb-3" />
         {/* Admin link */}
         {isAdmin && (
           <Link
             href="/admin"
-            className={`flex items-center gap-3 rounded-lg px-3 h-[44px] text-sm font-medium transition-colors mb-1 ${
+            title="Administration"
+            className={`flex items-center gap-3 rounded-lg h-[44px] text-sm font-medium transition-colors mb-1 md:justify-center md:px-0 lg:justify-start lg:px-3 min-w-10 ${
               pathname?.startsWith('/admin')
                 ? 'bg-white text-[var(--foreground)]'
                 : 'text-[var(--foreground)]/60 hover:bg-white/60'
@@ -143,7 +148,7 @@ export function AppSidebar({ brandName, userName, userEmail, userRole }: Props) 
                   : 'text-[var(--foreground)]/40'
               }`}
             />
-            Administration
+            <span className="hidden lg:inline">Administration</span>
           </Link>
         )}
 
@@ -151,13 +156,14 @@ export function AppSidebar({ brandName, userName, userEmail, userRole }: Props) 
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-white/60"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-white/60 md:justify-center md:px-0 lg:justify-start lg:px-3"
+            title={userName}
           >
             {/* Avatar */}
             <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] text-white text-sm font-semibold">
               {getInitials(userName)}
             </div>
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 flex-1 hidden lg:block">
               <p className="truncate text-sm font-medium text-[var(--foreground)]">
                 {userName}
               </p>
@@ -166,7 +172,7 @@ export function AppSidebar({ brandName, userName, userEmail, userRole }: Props) 
               </p>
             </div>
             <ChevronUp
-              className={`size-4 shrink-0 text-[var(--foreground)]/40 transition-transform ${
+              className={`size-4 shrink-0 text-[var(--foreground)]/40 transition-transform hidden lg:block ${
                 dropdownOpen ? '' : 'rotate-180'
               }`}
             />
@@ -174,7 +180,7 @@ export function AppSidebar({ brandName, userName, userEmail, userRole }: Props) 
 
           {/* Dropdown menu — opens upward */}
           {dropdownOpen && (
-            <div className="absolute bottom-full left-0 right-0 mb-2 rounded-xl border border-[var(--color-border)] bg-white shadow-lg overflow-hidden z-50">
+            <div className="absolute bottom-full left-0 right-0 mb-2 rounded-xl border border-[var(--color-border)] bg-white shadow-lg overflow-hidden z-50 md:left-auto md:right-auto md:w-56 lg:left-0 lg:right-0 lg:w-auto">
               <div className="py-1">
                 <Link
                   href="/dashboard/profile"
