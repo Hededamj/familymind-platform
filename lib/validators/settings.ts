@@ -144,7 +144,7 @@ export const communitySettingsSchema = z.object({
   community_index_min_chars: z.coerce.number().int().min(0).max(10000).transform(String),
   community_index_min_replies: z.coerce.number().int().min(0).max(100).transform(String),
   community_prompt_time: z.string().regex(/^\d{2}:\d{2}$/, 'Forventet format: HH:mm'),
-  community_prompt_author_id: z.string().optional().default(''),
+  community_prompt_author_id: z.union([z.literal(''), z.string().uuid()]).default(''),
 })
 
 // ─── General Settings ───────────────────────────────

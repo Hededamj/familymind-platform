@@ -108,14 +108,14 @@ export function AdminNav() {
                     {active && (
                       <span
                         className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full"
-                        style={{ background: '#E8715A' }}
+                        style={{ background: 'var(--accent)' }}
                       />
                     )}
                     <item.icon
                       className="admin-nav-icon size-[18px]"
                       strokeWidth={1.5}
                       style={{
-                        color: active ? '#E8715A' : 'rgba(255,255,255,0.2)',
+                        color: active ? 'var(--accent)' : 'rgba(255,255,255,0.2)',
                         transition: 'all 200ms ease-out',
                       }}
                     />

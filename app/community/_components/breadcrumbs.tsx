@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 type BreadcrumbItem = { label: string; href?: string }
 
 export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
@@ -29,12 +31,12 @@ export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
           <span key={i} className="flex items-center gap-2">
             {i > 0 && <span>/</span>}
             {item.href ? (
-              <a
+              <Link
                 href={item.href}
                 className="hover:text-foreground transition-colors"
               >
                 {item.label}
-              </a>
+              </Link>
             ) : (
               <span className="text-foreground">{item.label}</span>
             )}

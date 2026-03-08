@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { ArrowLeft, ArrowRight, MessageCircle, Users } from 'lucide-react'
 import type { Metadata } from 'next'
 import { getCurrentUser } from '@/lib/auth'
+import { formatRelativeTime } from '@/lib/format-time'
 import { getPostBySlug, getUserCompletedJourneys } from '@/lib/services/community.service'
 import { AlumniBadge } from '@/app/community/_components/alumni-badge'
 import { RoomReplyForm } from '@/app/community/_components/room-reply-form'
@@ -13,19 +14,6 @@ import { Button } from '@/components/ui/button'
 
 type Props = {
   params: Promise<{ roomSlug: string; postSlug: string }>
-}
-
-function formatRelativeTime(date: Date): string {
-  const now = new Date()
-  const diff = now.getTime() - date.getTime()
-  const minutes = Math.floor(diff / 60000)
-  if (minutes < 1) return 'Lige nu'
-  if (minutes < 60) return `${minutes} min siden`
-  const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours} ${hours === 1 ? 'time' : 'timer'} siden`
-  const days = Math.floor(hours / 24)
-  if (days < 7) return `${days} ${days === 1 ? 'dag' : 'dage'} siden`
-  return date.toLocaleDateString('da-DK', { day: 'numeric', month: 'short' })
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
