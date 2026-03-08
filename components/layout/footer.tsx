@@ -19,11 +19,12 @@ export function Footer({ brandName, logoUrl, tagline, description, contactUrl, f
   const pathname = usePathname()
   const { setOpenSettings } = useConsent()
 
-  // Don't show footer on admin, dashboard, onboarding, or journey day pages
+  // Don't show footer on admin, dashboard, onboarding, journeys, or journey day pages
   if (
     pathname?.startsWith('/admin') ||
     pathname?.startsWith('/dashboard') ||
     pathname?.startsWith('/onboarding') ||
+    pathname?.startsWith('/journeys') ||
     (pathname?.includes('/day/'))
   ) {
     return null

@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Settings, ArrowRight, Compass, TrendingUp } from 'lucide-react'
+import { ArrowRight, Compass } from 'lucide-react'
 import { redirect } from 'next/navigation'
 import { requireAuth } from '@/lib/auth'
 import { trackActivity } from '@/lib/track-activity'
@@ -12,8 +12,6 @@ import { JourneyDayCard } from './_components/journey-day-card'
 import { CourseProgressCard } from './_components/course-progress-card'
 import { RecommendationSection } from './_components/recommendation-section'
 import { CompletedJourneyCard } from './_components/completed-journey-card'
-import { NotificationBell } from './_components/notification-bell'
-import { LogoutButton } from './settings/_components/logout-button'
 
 function getGreeting(): string {
   const hour = new Date().getHours()
@@ -49,39 +47,12 @@ export default async function DashboardPage() {
   const displayName = user.name || user.email.split('@')[0]
 
   return (
-    <div className="flex min-h-screen flex-col px-4 py-6 sm:px-8 sm:py-8">
-      <div className="mx-auto w-full max-w-2xl">
-        {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <Link href="/" className="mb-2 block font-serif text-lg text-primary">
-              {tenant.brandName}
-            </Link>
-            <h1 className="font-serif text-2xl sm:text-3xl">
-              {getGreeting()}, {displayName}
-            </h1>
-          </div>
-          <div className="flex items-center gap-1">
-            <NotificationBell />
-            <Link
-              href="/dashboard/progress"
-              className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary"
-            >
-              <TrendingUp className="size-4" />
-              <span className="hidden sm:inline">Fremgang</span>
-            </Link>
-            <Link
-              href="/dashboard/settings"
-              className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary"
-            >
-              <Settings className="size-4" />
-              <span className="hidden sm:inline">Min konto</span>
-            </Link>
-            <LogoutButton variant="icon" />
-          </div>
-        </div>
+    <div className="px-4 py-6 sm:px-8 sm:py-8">
+      <div className="mx-auto w-full max-w-4xl">
+        <h1 className="mb-8 font-serif text-2xl sm:text-3xl">
+          {getGreeting()}, {displayName}
+        </h1>
 
-        {/* State-based content */}
         <div className="space-y-6">
           {stateKey === 'new_user' && (
             <NewUserView

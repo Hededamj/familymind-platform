@@ -39,10 +39,11 @@ export function Topbar({ brandName, logoUrl }: Props) {
     setMobileOpen(false)
   }, [pathname])
 
-  // Don't show topbar on admin (has sidebar), dashboard (has own header), or onboarding
+  // Don't show topbar on admin (has sidebar), dashboard (has own header), onboarding, or journeys
   if (pathname?.startsWith('/admin')) return null
   if (pathname?.startsWith('/dashboard')) return null
   if (pathname?.startsWith('/onboarding')) return null
+  if (pathname?.startsWith('/journeys')) return null
 
   const isAuthPage = pathname === '/login' || pathname === '/signup'
   const nav = isLoggedIn ? authNav : publicNav
