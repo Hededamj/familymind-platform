@@ -101,15 +101,6 @@
   --sidebar-ring: #86A0A6;
 }
 
-/* Admin theme — warm neutral, no brand blue */
-.admin-theme {
-  --primary: #1A1A1A;
-  --primary-foreground: #FAFAF8;
-  --ring: #1A1A1A;
-  --accent: #E8715A;
-  --accent-foreground: #FFFFFF;
-}
-
 .dark {
   --background: #0F0F0E;
   --foreground: #F5F0EB;
