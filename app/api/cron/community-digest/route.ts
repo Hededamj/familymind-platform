@@ -104,9 +104,11 @@ export async function GET(request: NextRequest) {
 
   const hasRoomActivity = roomStatsList.length > 0
 
-  // If rooms are included and have activity, send digest to ALL registered users
+  // If rooms are included and have activity, send digest to recently active users
   if (hasRoomActivity) {
+    const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)
     const allUsers = await prisma.user.findMany({
+      where: { lastActiveAt: { gte: ninetyDaysAgo } },
       select: { id: true },
     })
 
@@ -118,18 +120,23 @@ export async function GET(request: NextRequest) {
 
     for (let i = 0; i < allUsers.length; i += BATCH_SIZE) {
       const batch = allUsers.slice(i, i + BATCH_SIZE)
+      const batchUserIds = batch.map((u) => u.id)
+
+      // Batch dedup: check which users already received a room digest in this period
+      const alreadySentRecords = await prisma.userNotificationLog.findMany({
+        where: {
+          userId: { in: batchUserIds },
+          type: 'community_digest',
+          key: 'rooms',
+          sentAt: { gte: sinceDate },
+        },
+        select: { userId: true },
+      })
+      const sentUserIds = new Set(alreadySentRecords.map((n) => n.userId))
+
       const results = await Promise.allSettled(
         batch.map(async (user) => {
-          // Dedup: check if we already sent a room digest in this period
-          const alreadySent = await prisma.userNotificationLog.findFirst({
-            where: {
-              userId: user.id,
-              type: 'community_digest',
-              key: 'rooms',
-              sentAt: { gte: sinceDate },
-            },
-          })
-          if (alreadySent) return 'skipped' as const
+          if (sentUserIds.has(user.id)) return 'skipped' as const
 
           await sendTemplatedEmail(user.id, 'community_digest', {
             journeyTitle: 'Community',

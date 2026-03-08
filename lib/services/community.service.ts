@@ -1036,6 +1036,19 @@ export async function markPromptAsPosted(id: string) {
   })
 }
 
+// --- User Journey Helpers ---
+
+/**
+ * Check if a user has an active journey (for community CTA logic).
+ */
+export async function userHasActiveJourney(userId: string): Promise<boolean> {
+  const journey = await prisma.userJourney.findFirst({
+    where: { userId, status: 'ACTIVE' },
+    select: { id: true },
+  })
+  return !!journey
+}
+
 // --- Alumni Badges ---
 
 export async function getUserCompletedJourneys(userId: string) {

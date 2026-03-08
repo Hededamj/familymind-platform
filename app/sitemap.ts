@@ -40,7 +40,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })
   }
 
-  // Indexable posts
+  // Indexable posts (capped at 5000 most recent)
   const posts = await prisma.discussionPost.findMany({
     where: {
       roomId: { not: null },
@@ -48,6 +48,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       isPublic: true,
       slug: { not: null },
     },
+    take: 5000,
+    orderBy: { updatedAt: 'desc' },
     select: {
       slug: true,
       updatedAt: true,

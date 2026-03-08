@@ -3,8 +3,7 @@ import { ArrowRight, Compass, Users } from 'lucide-react'
 import * as LucideIcons from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { getCurrentUser } from '@/lib/auth'
-import { listRooms } from '@/lib/services/community.service'
-import { prisma } from '@/lib/prisma'
+import { listRooms, userHasActiveJourney } from '@/lib/services/community.service'
 import { Button } from '@/components/ui/button'
 
 function getRoomIcon(iconName: string | null): LucideIcon {
@@ -22,14 +21,7 @@ export default async function CommunityPage() {
   const publicRooms = rooms.filter((room) => room.isPublic)
 
   // Check if logged-in user has an active journey
-  let hasActiveJourney = false
-  if (user) {
-    const activeJourney = await prisma.userJourney.findFirst({
-      where: { userId: user.id, status: 'STARTED' },
-      select: { id: true },
-    })
-    hasActiveJourney = !!activeJourney
-  }
+  const hasActiveJourney = user ? await userHasActiveJourney(user.id) : false
 
   return (
     <div className="flex min-h-screen flex-col bg-background px-4 py-6 sm:px-8 sm:py-10">

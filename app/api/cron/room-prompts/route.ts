@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyCronSecret } from '@/lib/cron-auth'
 import { prisma } from '@/lib/prisma'
 import * as communityService from '@/lib/services/community.service'
+import { generatePostSlug } from '@/lib/slugify'
 
 const BATCH_SIZE = 20
 
@@ -55,14 +56,24 @@ export async function GET(request: NextRequest) {
         const nextPrompt = await communityService.getNextUnpostedPrompt(room.id)
         if (!nextPrompt) return 'skipped'
 
-        await communityService.createRoomPost(
-          room.id,
-          authorId!,
-          nextPrompt.promptText,
-          true // isPublic
-        )
+        await prisma.$transaction(async (tx) => {
+          await tx.discussionPost.create({
+            data: {
+              roomId: room.id,
+              authorId: authorId!,
+              body: nextPrompt.promptText,
+              slug: generatePostSlug(nextPrompt.promptText),
+              isPublic: true,
+              isPrompt: true,
+              cohortId: null,
+            },
+          })
+          await tx.roomPromptQueue.update({
+            where: { id: nextPrompt.id },
+            data: { postedAt: new Date() },
+          })
+        })
 
-        await communityService.markPromptAsPosted(nextPrompt.id)
         return 'posted'
       })
     )

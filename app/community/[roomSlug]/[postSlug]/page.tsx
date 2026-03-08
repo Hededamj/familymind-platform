@@ -80,25 +80,6 @@ export default async function SinglePostPage({ params }: Props) {
           <span className="sm:hidden">Tilbage</span>
         </Link>
 
-        {/* Room breadcrumb */}
-        {post.room && (
-          <p className="mb-2 text-xs text-muted-foreground">
-            <Link
-              href="/community"
-              className="transition-colors hover:text-foreground"
-            >
-              Fællesskab
-            </Link>
-            {' / '}
-            <Link
-              href={`/community/${roomSlug}`}
-              className="transition-colors hover:text-foreground"
-            >
-              {post.room.name}
-            </Link>
-          </p>
-        )}
-
         {/* Post */}
         <article className="mb-8">
           <header className="mb-4">

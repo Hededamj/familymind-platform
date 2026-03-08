@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 
 export async function generateMetadata(): Promise<Metadata> {
+  // TODO: Replace with getTenantConfig().brandName when tenant service is implemented
   const brandName = process.env.NEXT_PUBLIC_APP_NAME || 'FamilyMind'
   return {
     title: `Fællesskab — ${brandName}`,

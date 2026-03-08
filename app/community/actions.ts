@@ -5,6 +5,8 @@ import { revalidatePath } from 'next/cache'
 import * as communityService from '@/lib/services/community.service'
 import { z } from 'zod'
 
+const slugSchema = z.string().min(1).max(200).regex(/^[a-z0-9-]+$/)
+
 export async function createRoomPostAction(
   roomId: string,
   body: string,
@@ -12,6 +14,7 @@ export async function createRoomPostAction(
   isPublic: boolean = true
 ) {
   const id = z.string().uuid().parse(roomId)
+  slugSchema.parse(roomSlug)
   const user = await requireAuth()
 
   const trimmed = body.trim()
@@ -30,6 +33,8 @@ export async function createRoomReplyAction(
   postSlug: string
 ) {
   z.string().uuid().parse(postId)
+  slugSchema.parse(roomSlug)
+  slugSchema.parse(postSlug)
   const user = await requireAuth()
 
   const trimmed = body.trim()
@@ -51,6 +56,7 @@ export async function toggleRoomReactionAction(
   if (postId) z.string().uuid().parse(postId)
   if (replyId) z.string().uuid().parse(replyId)
   z.string().min(1).max(10).parse(emoji)
+  slugSchema.parse(roomSlug)
   const user = await requireAuth()
   const added = await communityService.toggleReaction(user.id, emoji, postId, replyId)
   revalidatePath(`/community/${roomSlug}`)
@@ -59,6 +65,7 @@ export async function toggleRoomReactionAction(
 
 export async function deleteRoomPostAction(postId: string, roomSlug: string) {
   z.string().uuid().parse(postId)
+  slugSchema.parse(roomSlug)
   const user = await requireAuth()
 
   const post = await communityService.getPostWithReplies(postId)
