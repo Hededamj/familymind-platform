@@ -47,7 +47,7 @@ export default async function RoomListPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Navn</TableHead>
-                <TableHead>Slug</TableHead>
+                <TableHead className="hidden sm:table-cell">Slug</TableHead>
                 <TableHead>Indlæg</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Rækkefølge</TableHead>
@@ -70,8 +70,8 @@ export default async function RoomListPage() {
                       {room.name}
                     </div>
                   </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    /{room.slug}
+                  <TableCell className="hidden text-muted-foreground sm:table-cell">
+                    {room.slug}
                   </TableCell>
                   <TableCell>{room._count.posts}</TableCell>
                   <TableCell>

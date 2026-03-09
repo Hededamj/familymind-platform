@@ -1197,7 +1197,7 @@ export function ProductForm({
                     <div className="flex-1">
                       <div className="text-sm font-medium">{unit.title}</div>
                       <div className="text-xs text-muted-foreground">
-                        {unit.mediaType} &middot; /{unit.slug}
+                        {unit.mediaType}
                       </div>
                     </div>
                     <Plus className="size-4 text-muted-foreground" />

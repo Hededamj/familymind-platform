@@ -85,12 +85,7 @@ export default async function JourneysListPage() {
               {journeys.map((journey) => (
                 <TableRow key={journey.id}>
                   <TableCell className="font-medium">
-                    <div>
-                      <div>{journey.title}</div>
-                      <div className="text-sm text-muted-foreground">
-                        /{journey.slug}
-                      </div>
-                    </div>
+                    {journey.title}
                   </TableCell>
                   <TableCell>{countTotalDays(journey.phases)}</TableCell>
                   <TableCell>

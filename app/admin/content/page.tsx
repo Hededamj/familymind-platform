@@ -99,12 +99,7 @@ export default async function ContentListPage() {
                     )}
                   </TableCell>
                   <TableCell className="font-medium">
-                    <div>
-                      <div>{unit.title}</div>
-                      <div className="text-sm text-muted-foreground">
-                        /{unit.slug}
-                      </div>
-                    </div>
+                    {unit.title}
                   </TableCell>
                   <TableCell>
                     <Badge variant="secondary">

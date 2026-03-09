@@ -83,12 +83,7 @@ function ProductTable({
           {products.map((product) => (
             <TableRow key={product.id}>
               <TableCell className="font-medium">
-                <div>
-                  <div>{product.title}</div>
-                  <div className="text-sm text-muted-foreground">
-                    /{product.slug}
-                  </div>
-                </div>
+                {product.title}
               </TableCell>
               <TableCell>
                 <Badge
