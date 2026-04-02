@@ -684,11 +684,12 @@ export function ProductForm({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="default">Standard</SelectItem>
-                  <SelectItem value="sleep">Søvn 🌙</SelectItem>
-                  <SelectItem value="emotions">Følelser 💛</SelectItem>
-                  <SelectItem value="communication">Kommunikation 💬</SelectItem>
-                  <SelectItem value="boundaries">Grænser 🛡️</SelectItem>
-                  <SelectItem value="selfcare">Selvpleje 🌿</SelectItem>
+                  <SelectItem value="family">Familie</SelectItem>
+                  <SelectItem value="sleep">Søvn</SelectItem>
+                  <SelectItem value="emotions">Følelser</SelectItem>
+                  <SelectItem value="communication">Kommunikation</SelectItem>
+                  <SelectItem value="boundaries">Grænser</SelectItem>
+                  <SelectItem value="selfcare">Selvpleje</SelectItem>
                 </SelectContent>
               </Select>
               <Button type="button" variant="outline" size="sm" onClick={handleGenerateCover} disabled={!formData.title}>
