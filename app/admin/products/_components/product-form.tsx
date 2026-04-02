@@ -50,6 +50,7 @@ import {
   Loader2,
   Package,
   Info,
+  ImageIcon,
 } from 'lucide-react'
 
 function generateSlug(title: string): string {
@@ -193,6 +194,26 @@ export function ProductForm({
     coverImageUrl: initialData?.coverImageUrl ?? '',
     thumbnailUrl: initialData?.thumbnailUrl ?? '',
   })
+
+  // Cover generator state
+  const [coverTheme, setCoverTheme] = useState('default')
+  const [coverPreviewUrl, setCoverPreviewUrl] = useState('')
+
+  function generateCoverUrl(theme: string) {
+    const params = new URLSearchParams({
+      title: formData.title || 'Kursus',
+      theme,
+    })
+    if (formData.description) params.set('subtitle', formData.description.slice(0, 80))
+    return `/api/og/course-cover?${params.toString()}`
+  }
+
+  function handleGenerateCover() {
+    const url = generateCoverUrl(coverTheme)
+    setCoverPreviewUrl(url)
+    const fullUrl = `${window.location.origin}${url}`
+    setFormData(prev => ({ ...prev, coverImageUrl: fullUrl, thumbnailUrl: fullUrl }))
+  }
 
   // Inline lesson creation state
   const [showCreateLessonForm, setShowCreateLessonForm] = useState(false)
@@ -650,6 +671,42 @@ export function ProductForm({
               <p className="text-xs text-muted-foreground">Lille billede til kort og lister</p>
             </div>
           </div>
+          {/* Cover generator */}
+          <div className="rounded-lg border border-dashed p-4 space-y-3">
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <ImageIcon className="size-4" />
+              Generer coverbillede
+            </div>
+            <div className="flex items-center gap-3">
+              <Select value={coverTheme} onValueChange={setCoverTheme}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="default">Standard</SelectItem>
+                  <SelectItem value="sleep">Søvn 🌙</SelectItem>
+                  <SelectItem value="emotions">Følelser 💛</SelectItem>
+                  <SelectItem value="communication">Kommunikation 💬</SelectItem>
+                  <SelectItem value="boundaries">Grænser 🛡️</SelectItem>
+                  <SelectItem value="selfcare">Selvpleje 🌿</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button type="button" variant="outline" size="sm" onClick={handleGenerateCover} disabled={!formData.title}>
+                <ImageIcon className="mr-2 size-4" />
+                Generer
+              </Button>
+            </div>
+            {coverPreviewUrl && (
+              <div className="mt-2">
+                <img
+                  src={coverPreviewUrl}
+                  alt="Cover preview"
+                  className="w-full max-w-md rounded-lg border"
+                />
+              </div>
+            )}
+          </div>
+
           {mode === 'edit' && (formData.coverImageUrl || formData.thumbnailUrl) && (
             <Button type="button" variant="outline" size="sm" onClick={handleSaveImages} disabled={isPending}>
               Gem billeder
