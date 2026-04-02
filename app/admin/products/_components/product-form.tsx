@@ -199,20 +199,22 @@ export function ProductForm({
   const [coverTheme, setCoverTheme] = useState('default')
   const [coverPreviewUrl, setCoverPreviewUrl] = useState('')
 
-  function generateCoverUrl(theme: string) {
+  function generateCoverUrl(theme: string, bustCache = false) {
     const params = new URLSearchParams({
       title: formData.title || 'Kursus',
       theme,
     })
     if (formData.description) params.set('subtitle', formData.description.slice(0, 80))
+    if (bustCache) params.set('v', Date.now().toString())
     return `/api/og/course-cover?${params.toString()}`
   }
 
   function handleGenerateCover() {
-    const url = generateCoverUrl(coverTheme)
-    setCoverPreviewUrl(url)
-    const fullUrl = `${window.location.origin}${url}`
-    setFormData(prev => ({ ...prev, coverImageUrl: fullUrl, thumbnailUrl: fullUrl }))
+    const previewUrl = generateCoverUrl(coverTheme, true)
+    setCoverPreviewUrl(previewUrl)
+    // Save clean URL without cache-buster
+    const cleanUrl = `${window.location.origin}${generateCoverUrl(coverTheme)}`
+    setFormData(prev => ({ ...prev, coverImageUrl: cleanUrl, thumbnailUrl: cleanUrl }))
   }
 
   // Inline lesson creation state

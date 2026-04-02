@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
 
   const t = THEMES[theme] || THEMES.default
 
-  return new ImageResponse(
+  const response = new ImageResponse(
     (
       <div
         style={{
@@ -234,4 +234,7 @@ export async function GET(req: NextRequest) {
       height: 630,
     }
   )
+
+  response.headers.set('Cache-Control', 'public, max-age=3600, stale-while-revalidate=86400')
+  return response
 }
