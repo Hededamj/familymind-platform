@@ -7,6 +7,8 @@ export const createProductSchema = z.object({
   type: z.enum(['SUBSCRIPTION', 'COURSE', 'SINGLE', 'BUNDLE']),
   priceAmountCents: z.number().int().min(0),
   priceCurrency: z.string().default('DKK'),
+  coverImageUrl: z.string().url().optional(),
+  thumbnailUrl: z.string().url().optional(),
 })
 
 export const updateProductSchema = createProductSchema.partial()

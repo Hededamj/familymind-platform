@@ -40,6 +40,7 @@ import {
   updateProductImagesAction,
   updateLandingPageAction,
 } from '../actions'
+import { createContentAction } from '../../content/actions'
 import {
   ArrowUp,
   ArrowDown,
@@ -193,6 +194,16 @@ export function ProductForm({
     thumbnailUrl: initialData?.thumbnailUrl ?? '',
   })
 
+  // Inline lesson creation state
+  const [showCreateLessonForm, setShowCreateLessonForm] = useState(false)
+  const [newLesson, setNewLesson] = useState({
+    title: '',
+    description: '',
+    mediaType: 'TEXT' as 'VIDEO' | 'AUDIO' | 'PDF' | 'TEXT',
+    bunnyVideoId: '',
+    durationMinutes: '',
+  })
+
   // In edit mode, consider slug as manually edited
   useEffect(() => {
     if (mode === 'edit') {
@@ -227,6 +238,8 @@ export function ProductForm({
       type: formData.type,
       priceAmountCents,
       priceCurrency: formData.priceCurrency,
+      coverImageUrl: formData.coverImageUrl || undefined,
+      thumbnailUrl: formData.thumbnailUrl || undefined,
     }
 
     startTransition(async () => {
@@ -255,8 +268,7 @@ export function ProductForm({
 
     startTransition(async () => {
       try {
-        await addLessonAction(initialData.id, contentUnitId)
-        // Update local state optimistically
+        const created = await addLessonAction(initialData.id, contentUnitId)
         const unit = availableContentUnits.find(
           (u) => u.id === contentUnitId
         )
@@ -264,7 +276,7 @@ export function ProductForm({
           setLessons((prev) => [
             ...prev,
             {
-              id: crypto.randomUUID(), // temporary ID until revalidation
+              id: created.id,
               contentUnitId: unit.id,
               moduleId: null,
               position: prev.length + 1,
@@ -274,7 +286,7 @@ export function ProductForm({
           ])
         }
         setShowLessonDialog(false)
-        toast.success('Lektion tilfojet')
+        toast.success('Lektion tilføjet')
       } catch {
         toast.error('Kunne ikke tilføje lektion')
       }
@@ -483,6 +495,57 @@ export function ProductForm({
     })
   }
 
+  function newLessonSlug(title: string): string {
+    return title
+      .toLowerCase()
+      .replace(/æ/g, 'ae')
+      .replace(/ø/g, 'oe')
+      .replace(/å/g, 'aa')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '')
+  }
+
+  async function handleCreateAndAddLesson() {
+    if (!initialData || !newLesson.title.trim()) return
+
+    startTransition(async () => {
+      try {
+        const created = await createContentAction({
+          title: newLesson.title.trim(),
+          description: newLesson.description || undefined,
+          slug: newLessonSlug(newLesson.title),
+          mediaType: newLesson.mediaType,
+          bunnyVideoId: newLesson.bunnyVideoId || undefined,
+          durationMinutes: newLesson.durationMinutes ? parseInt(newLesson.durationMinutes, 10) : undefined,
+          difficulty: 'INTRODUCTORY',
+          isStandalone: false,
+          isFree: false,
+          accessLevel: 'PURCHASE',
+        })
+
+        const added = await addLessonAction(initialData.id, created.id)
+        setLessons(prev => [
+          ...prev,
+          {
+            id: added.id,
+            contentUnitId: created.id,
+            moduleId: null,
+            position: prev.length + 1,
+            contentUnit: { id: created.id, title: created.title, slug: created.slug, mediaType: created.mediaType },
+            module: null,
+          },
+        ])
+
+        setNewLesson({ title: '', description: '', mediaType: 'TEXT', bunnyVideoId: '', durationMinutes: '' })
+        setShowCreateLessonForm(false)
+        setShowLessonDialog(false)
+        toast.success('Lektion oprettet og tilføjet')
+      } catch {
+        toast.error('Kunne ikke oprette lektion')
+      }
+    })
+  }
+
   // Content units not yet added as lessons
   const availableLessonUnits = availableContentUnits.filter(
     (unit) => !lessons.some((l) => l.contentUnitId === unit.id)
@@ -501,6 +564,13 @@ export function ProductForm({
   const availableSingleUnits = availableContentUnits.filter(
     (unit) => !lessons.some((l) => l.contentUnitId === unit.id)
   )
+
+  const mediaTypeLabels: Record<string, string> = {
+    VIDEO: 'Video',
+    AUDIO: 'Lyd',
+    PDF: 'PDF',
+    TEXT: 'Tekst',
+  }
 
   const productTypeLabels: Record<string, string> = {
     SUBSCRIPTION: 'Abonnement',
@@ -558,30 +628,28 @@ export function ProductForm({
             />
           </div>
 
-          {mode === 'edit' && (
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="coverImageUrl">Coverbillede URL</Label>
-                <Input
-                  id="coverImageUrl"
-                  value={formData.coverImageUrl}
-                  onChange={(e) => setFormData(prev => ({ ...prev, coverImageUrl: e.target.value }))}
-                  placeholder="https://..."
-                />
-                <p className="text-xs text-muted-foreground">Bruges på landing page og browse-side</p>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="thumbnailUrl">Thumbnail URL</Label>
-                <Input
-                  id="thumbnailUrl"
-                  value={formData.thumbnailUrl}
-                  onChange={(e) => setFormData(prev => ({ ...prev, thumbnailUrl: e.target.value }))}
-                  placeholder="https://..."
-                />
-                <p className="text-xs text-muted-foreground">Lille billede til kort og lister</p>
-              </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="coverImageUrl">Coverbillede URL</Label>
+              <Input
+                id="coverImageUrl"
+                value={formData.coverImageUrl}
+                onChange={(e) => setFormData(prev => ({ ...prev, coverImageUrl: e.target.value }))}
+                placeholder="https://..."
+              />
+              <p className="text-xs text-muted-foreground">Bruges på landing page og browse-side</p>
             </div>
-          )}
+            <div className="space-y-2">
+              <Label htmlFor="thumbnailUrl">Thumbnail URL</Label>
+              <Input
+                id="thumbnailUrl"
+                value={formData.thumbnailUrl}
+                onChange={(e) => setFormData(prev => ({ ...prev, thumbnailUrl: e.target.value }))}
+                placeholder="https://..."
+              />
+              <p className="text-xs text-muted-foreground">Lille billede til kort og lister</p>
+            </div>
+          </div>
           {mode === 'edit' && (formData.coverImageUrl || formData.thumbnailUrl) && (
             <Button type="button" variant="outline" size="sm" onClick={handleSaveImages} disabled={isPending}>
               Gem billeder
@@ -797,8 +865,7 @@ export function ProductForm({
                         {lesson.contentUnit.title}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        {lesson.contentUnit.mediaType} &middot; /
-                        {lesson.contentUnit.slug}
+                        {mediaTypeLabels[lesson.contentUnit.mediaType] ?? lesson.contentUnit.mediaType}
                       </div>
                     </div>
                     {modules.length > 0 && (
@@ -1164,48 +1231,135 @@ export function ProductForm({
       </div>
 
       {/* Add Lesson / Content Dialog */}
-      <Dialog open={showLessonDialog} onOpenChange={setShowLessonDialog}>
+      <Dialog open={showLessonDialog} onOpenChange={(open) => { setShowLessonDialog(open); if (!open) setShowCreateLessonForm(false) }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {formData.type === 'SINGLE'
-                ? 'Vælg indhold'
-                : 'Tilføj lektion'}
+              {showCreateLessonForm
+                ? 'Opret ny lektion'
+                : formData.type === 'SINGLE'
+                  ? 'Vælg indhold'
+                  : 'Tilføj lektion'}
             </DialogTitle>
           </DialogHeader>
-          <div className="max-h-[400px] overflow-y-auto">
-            {(formData.type === 'SINGLE'
-              ? availableSingleUnits
-              : availableLessonUnits
-            ).length === 0 ? (
-              <p className="py-4 text-center text-sm text-muted-foreground">
-                Intet tilgængeligt indhold at tilføje.
-              </p>
-            ) : (
+
+          {showCreateLessonForm ? (
+            <div className="space-y-4">
               <div className="space-y-2">
+                <Label>Titel *</Label>
+                <Input
+                  value={newLesson.title}
+                  onChange={(e) => setNewLesson(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="F.eks. Forstå dit barns søvnbehov"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Beskrivelse</Label>
+                <Textarea
+                  value={newLesson.description}
+                  onChange={(e) => setNewLesson(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Kort beskrivelse af lektionen..."
+                  rows={3}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Medietype</Label>
+                  <Select
+                    value={newLesson.mediaType}
+                    onValueChange={(value) => setNewLesson(prev => ({ ...prev, mediaType: value as typeof prev.mediaType }))}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="VIDEO">Video</SelectItem>
+                      <SelectItem value="AUDIO">Lyd</SelectItem>
+                      <SelectItem value="PDF">PDF</SelectItem>
+                      <SelectItem value="TEXT">Tekst</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Varighed (min)</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    value={newLesson.durationMinutes}
+                    onChange={(e) => setNewLesson(prev => ({ ...prev, durationMinutes: e.target.value }))}
+                    placeholder="15"
+                  />
+                </div>
+              </div>
+              {newLesson.mediaType === 'VIDEO' && (
+                <div className="space-y-2">
+                  <Label>Bunny Video ID</Label>
+                  <Input
+                    value={newLesson.bunnyVideoId}
+                    onChange={(e) => setNewLesson(prev => ({ ...prev, bunnyVideoId: e.target.value }))}
+                    placeholder="Kan tilføjes senere"
+                  />
+                </div>
+              )}
+              <div className="flex justify-end gap-2">
+                <Button type="button" variant="outline" onClick={() => setShowCreateLessonForm(false)}>Tilbage</Button>
+                <Button type="button" onClick={handleCreateAndAddLesson} disabled={!newLesson.title.trim() || isPending}>
+                  {isPending ? 'Opretter...' : 'Opret og tilføj'}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <>
+              {formData.type !== 'SINGLE' && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => setShowCreateLessonForm(true)}
+                >
+                  <Plus className="mr-2 size-4" />
+                  Opret ny lektion
+                </Button>
+              )}
+
+              <div className="max-h-[400px] overflow-y-auto">
                 {(formData.type === 'SINGLE'
                   ? availableSingleUnits
                   : availableLessonUnits
-                ).map((unit) => (
-                  <button
-                    key={unit.id}
-                    type="button"
-                    className="flex w-full items-center gap-3 rounded-md border p-3 text-left transition-colors hover:bg-accent"
-                    onClick={() => handleAddLesson(unit.id)}
-                    disabled={isPending}
-                  >
-                    <div className="flex-1">
-                      <div className="text-sm font-medium">{unit.title}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {unit.mediaType}
-                      </div>
-                    </div>
-                    <Plus className="size-4 text-muted-foreground" />
-                  </button>
-                ))}
+                ).length === 0 ? (
+                  <p className="py-4 text-center text-sm text-muted-foreground">
+                    Intet eksisterende indhold at tilføje.
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    {availableLessonUnits.length > 0 && formData.type !== 'SINGLE' && (
+                      <p className="text-xs font-medium text-muted-foreground">Eller vælg eksisterende:</p>
+                    )}
+                    {(formData.type === 'SINGLE'
+                      ? availableSingleUnits
+                      : availableLessonUnits
+                    ).map((unit) => (
+                      <button
+                        key={unit.id}
+                        type="button"
+                        className="flex w-full items-center gap-3 rounded-md border p-3 text-left transition-colors hover:bg-accent"
+                        onClick={() => handleAddLesson(unit.id)}
+                        disabled={isPending}
+                      >
+                        <div className="flex-1">
+                          <div className="text-sm font-medium">{unit.title}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {mediaTypeLabels[unit.mediaType] ?? unit.mediaType}
+                          </div>
+                        </div>
+                        <Plus className="size-4 text-muted-foreground" />
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            </>
+          )}
         </DialogContent>
       </Dialog>
 
