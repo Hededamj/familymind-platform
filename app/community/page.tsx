@@ -25,7 +25,7 @@ export default async function CommunityPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background px-4 py-6 sm:px-8 sm:py-10">
-      <div className="mx-auto w-full max-w-5xl">
+      <div className="mx-auto w-full max-w-3xl">
         {/* Header */}
         <header className="mb-10">
           <h1 className="font-serif text-3xl sm:text-4xl text-foreground">

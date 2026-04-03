@@ -46,7 +46,7 @@ export default async function BrowsePage({
 
   return (
     <div className="px-4 py-12 sm:px-8">
-      <div className="mx-auto w-full max-w-6xl">
+      <div className="mx-auto w-full max-w-4xl">
         <div className="mb-10 text-center">
           <h1 className="font-serif text-3xl sm:text-4xl">Opdag</h1>
           <p className="mt-2 text-muted-foreground">

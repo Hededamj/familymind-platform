@@ -50,7 +50,7 @@ export default async function DashboardPage() {
   const displayName = user.name || user.email.split('@')[0]
 
   return (
-    <div className="px-4 py-6 sm:px-8 sm:py-8">
+    <div className="overflow-hidden px-4 py-6 sm:px-8 sm:py-8">
       <div className="mx-auto w-full max-w-2xl">
         <h1 className="mb-8 font-serif text-2xl sm:text-3xl">
           {getGreeting()}, {displayName}
