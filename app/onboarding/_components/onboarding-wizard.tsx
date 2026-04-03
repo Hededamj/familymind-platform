@@ -332,7 +332,10 @@ export function OnboardingWizard({ questions, brandName }: Props) {
       </div>
 
       {/* Bottom navigation - fixed on mobile */}
-      <div className="fixed inset-x-0 bottom-0 border-t border-border bg-background/95 px-4 py-4 backdrop-blur-sm sm:relative sm:border-t-0 sm:bg-transparent sm:backdrop-blur-none">
+      <div
+        className="fixed inset-x-0 bottom-0 border-t border-border bg-background/95 px-4 pt-4 backdrop-blur-sm sm:relative sm:border-t-0 sm:bg-transparent sm:backdrop-blur-none"
+        style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))' }}
+      >
         <div className="mx-auto flex max-w-lg items-center gap-3">
           <Button
             variant="outline"
