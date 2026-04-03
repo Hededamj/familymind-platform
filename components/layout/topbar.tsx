@@ -39,12 +39,13 @@ export function Topbar({ brandName, logoUrl }: Props) {
     setMobileOpen(false)
   }, [pathname])
 
-  // Don't show topbar on admin (has sidebar), dashboard (has own header), onboarding, or journeys
+  // Don't show topbar on routes that use AppLayout (has its own shell)
   if (pathname?.startsWith('/admin')) return null
   if (pathname?.startsWith('/dashboard')) return null
   if (pathname?.startsWith('/onboarding')) return null
   if (pathname?.startsWith('/journeys')) return null
-  // Hide on community pages for logged-in users (AppLayout provides its own shell)
+  if (pathname?.startsWith('/browse') && isLoggedIn) return null
+  if (pathname?.startsWith('/products') && isLoggedIn) return null
   if (pathname?.startsWith('/community') && isLoggedIn) return null
 
   const isAuthPage = pathname === '/login' || pathname === '/signup'
