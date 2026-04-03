@@ -46,8 +46,8 @@ Plans:
   5. Bundle card titles are truncated cleanly rather than overflowing their container
 **Plans**: 2 plans
 Plans:
-- [ ] 02-01-PLAN.md — Fix card/banner overflow and bundle card truncation (LAYOUT-01, LAYOUT-04, LAYOUT-05)
-- [ ] 02-02-PLAN.md — Fix progress page grid collapse and verify max-width consistency (LAYOUT-02, LAYOUT-03)
+- [x] 02-01-PLAN.md — Fix card/banner overflow and bundle card truncation (LAYOUT-01, LAYOUT-04, LAYOUT-05)
+- [x] 02-02-PLAN.md — Fix progress page grid collapse and verify max-width consistency (LAYOUT-02, LAYOUT-03)
 **UI hint**: yes
 
 ### Phase 3: Typography, Spacing & Touch
