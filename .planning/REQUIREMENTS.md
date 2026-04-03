@@ -11,8 +11,8 @@ Requirements for mobile-first overhaul. Each maps to roadmap phases.
 
 - [x] **SAFE-01**: Topbar har safe-area-inset-top for iPhones med notch/Dynamic Island
 - [x] **SAFE-02**: Bottom tab bar har safe-area-inset-bottom for iPhones med home indicator
-- [ ] **SAFE-03**: Onboarding wizard fixed footer respekterer safe area
-- [ ] **SAFE-04**: Check-in form sticky button har korrekt clearance over tab bar
+- [x] **SAFE-03**: Onboarding wizard fixed footer respekterer safe area
+- [x] **SAFE-04**: Check-in form sticky button har korrekt clearance over tab bar
 
 ### Layout & Overflow
 
@@ -79,8 +79,8 @@ Deferred to future milestones.
 |-------------|-------|--------|
 | SAFE-01 | Phase 1 | Complete |
 | SAFE-02 | Phase 1 | Complete |
-| SAFE-03 | Phase 1 | Pending |
-| SAFE-04 | Phase 1 | Pending |
+| SAFE-03 | Phase 1 | Complete |
+| SAFE-04 | Phase 1 | Complete |
 | LAYOUT-01 | Phase 2 | Pending |
 | LAYOUT-02 | Phase 2 | Pending |
 | LAYOUT-03 | Phase 2 | Pending |

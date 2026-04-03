@@ -12,7 +12,7 @@ This milestone transforms FamilyMind from a functional platform into a polished 
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Safe Area & Viewport** - Apply safe-area insets to all fixed chrome so the UI is never obscured by notch or home indicator
+- [x] **Phase 1: Safe Area & Viewport** - Apply safe-area insets to all fixed chrome so the UI is never obscured by notch or home indicator (completed 2026-04-03)
 - [ ] **Phase 2: Layout & Overflow** - Fix structural layout issues so content fits correctly at all screen widths
 - [ ] **Phase 3: Typography, Spacing & Touch** - Polish font sizes, padding, text wrapping and touch targets for a refined mobile feel
 - [ ] **Phase 4: Navigation & PWA** - Ensure consistent app navigation on all user routes and add PWA manifest/meta tags
@@ -31,7 +31,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 2 plans
 Plans:
 - [x] 01-01-PLAN.md — Enable viewport-fit=cover and fix AppTopbar + BottomTabBar safe areas
-- [ ] 01-02-PLAN.md — Fix onboarding wizard footer and check-in form sticky button safe areas
+- [x] 01-02-PLAN.md — Fix onboarding wizard footer and check-in form sticky button safe areas
 **UI hint**: yes
 
 ### Phase 2: Layout & Overflow
@@ -80,7 +80,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Safe Area & Viewport | 1/2 | In Progress|  |
+| 1. Safe Area & Viewport | 2/2 | Complete   | 2026-04-03 |
 | 2. Layout & Overflow | 0/? | Not started | - |
 | 3. Typography, Spacing & Touch | 0/? | Not started | - |
 | 4. Navigation & PWA | 0/? | Not started | - |
