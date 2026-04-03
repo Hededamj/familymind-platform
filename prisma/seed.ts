@@ -228,9 +228,19 @@ async function main() {
   ])
 
   // -- Onboarding Questions --
+
+  // Migrate Q1 from SLIDER to MULTI_SELECT if it already exists
+  const existingQ1 = await prisma.onboardingQuestion.findFirst({ where: { questionText: 'Hvad er dit barns alder?' } })
+  if (existingQ1) {
+    await prisma.onboardingQuestion.update({
+      where: { id: existingQ1.id },
+      data: { questionText: 'Hvilke aldersgrupper passer til dine børn?', questionType: 'MULTI_SELECT', helperText: 'Vælg alle der passer — du kan have flere børn' },
+    })
+  }
+
   const q1 = await createIfNotExists(
-    () => prisma.onboardingQuestion.findFirst({ where: { questionText: 'Hvad er dit barns alder?' } }),
-    () => prisma.onboardingQuestion.create({ data: { questionText: 'Hvad er dit barns alder?', questionType: 'SLIDER', position: 1, isActive: true, helperText: 'Vælg den alder der bedst matcher dit barn' } })
+    () => prisma.onboardingQuestion.findFirst({ where: { questionText: 'Hvilke aldersgrupper passer til dine børn?' } }),
+    () => prisma.onboardingQuestion.create({ data: { questionText: 'Hvilke aldersgrupper passer til dine børn?', questionType: 'MULTI_SELECT', position: 1, isActive: true, helperText: 'Vælg alle der passer — du kan have flere børn' } })
   )
   const q2 = await createIfNotExists(
     () => prisma.onboardingQuestion.findFirst({ where: { questionText: 'Hvad er din største udfordring lige nu?' } }),
@@ -255,6 +265,27 @@ async function main() {
   const tagEmotions = await prisma.contentTag.upsert({ where: { slug: 'folelser' }, update: {}, create: { name: 'Følelser', slug: 'folelser' } })
   const tagCommunication = await prisma.contentTag.upsert({ where: { slug: 'kommunikation' }, update: {}, create: { name: 'Kommunikation', slug: 'kommunikation' } })
   const tagSelfCare = await prisma.contentTag.upsert({ where: { slug: 'selvpleje' }, update: {}, create: { name: 'Selvpleje', slug: 'selvpleje' } })
+
+  // Age group tags
+  const tagBaby = await prisma.contentTag.upsert({ where: { slug: 'baby' }, update: {}, create: { name: 'Baby (0-1 år)', slug: 'baby' } })
+  const tagToddler = await prisma.contentTag.upsert({ where: { slug: 'smaborn' }, update: {}, create: { name: 'Småbørn (1-3 år)', slug: 'smaborn' } })
+  const tagPreschool = await prisma.contentTag.upsert({ where: { slug: 'bornehave' }, update: {}, create: { name: 'Børnehave (3-6 år)', slug: 'bornehave' } })
+  const tagSchool = await prisma.contentTag.upsert({ where: { slug: 'skolebarn' }, update: {}, create: { name: 'Skolebørn (6-10 år)', slug: 'skolebarn' } })
+  const tagTween = await prisma.contentTag.upsert({ where: { slug: 'tweens' }, update: {}, create: { name: 'Tweens (10-13 år)', slug: 'tweens' } })
+  const tagTeen = await prisma.contentTag.upsert({ where: { slug: 'teenager' }, update: {}, create: { name: 'Teenagere (13-18 år)', slug: 'teenager' } })
+
+  // Q1 options (age groups)
+  const q1OptionCount = await prisma.onboardingOption.count({ where: { questionId: q1.id } })
+  if (q1OptionCount === 0) {
+    await Promise.all([
+      prisma.onboardingOption.create({ data: { questionId: q1.id, label: 'Baby (0-1 år)', value: 'baby', tagId: tagBaby.id, position: 1 } }),
+      prisma.onboardingOption.create({ data: { questionId: q1.id, label: 'Småbørn (1-3 år)', value: 'toddler', tagId: tagToddler.id, position: 2 } }),
+      prisma.onboardingOption.create({ data: { questionId: q1.id, label: 'Børnehave (3-6 år)', value: 'preschool', tagId: tagPreschool.id, position: 3 } }),
+      prisma.onboardingOption.create({ data: { questionId: q1.id, label: 'Skolebørn (6-10 år)', value: 'school', tagId: tagSchool.id, position: 4 } }),
+      prisma.onboardingOption.create({ data: { questionId: q1.id, label: 'Tweens (10-13 år)', value: 'tween', tagId: tagTween.id, position: 5 } }),
+      prisma.onboardingOption.create({ data: { questionId: q1.id, label: 'Teenagere (13-18 år)', value: 'teen', tagId: tagTeen.id, position: 6 } }),
+    ])
+  }
 
   // Q2 options (only create if question has no options yet)
   const q2OptionCount = await prisma.onboardingOption.count({ where: { questionId: q2.id } })
