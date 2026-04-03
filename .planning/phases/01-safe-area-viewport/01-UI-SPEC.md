@@ -59,11 +59,13 @@ Typography is unchanged in this phase. Recorded here as baseline for downstream 
 
 | Role | Size | Weight | Line Height | Font | Source |
 |------|------|--------|-------------|------|--------|
-| Body | 16px (text-base) | 400 | 1.5 | Inter (sans) | globals.css |
 | Label / small | 14px (text-sm) | 400 | 1.5 | Inter (sans) | globals.css |
-| Tab label | 10px (text-[10px]) | 400 | 1 | Inter (sans) | bottom-tab-bar.tsx |
+| Body | 16px (text-base) | 400 | 1.5 | Inter (sans) | globals.css |
 | Sub-heading | 18px (text-lg) | serif | 1.2 | DM Serif Display | app-topbar.tsx, wizard |
-| Heading | 20–24px (text-xl/2xl) | serif | 1.2 | DM Serif Display | onboarding-wizard.tsx |
+| Heading | 24px (text-2xl) | serif | 1.2 | DM Serif Display | onboarding-wizard.tsx |
+
+Component-level override (not a scale tier):
+- `text-[10px]` on BottomTabBar tab labels — one-off size for the compact icon label below each tab icon; not part of the formal typography scale.
 
 ---
 
