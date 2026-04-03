@@ -4,6 +4,10 @@ import type { z } from 'zod'
 
 type UpdateProfileInput = z.infer<typeof updateProfileSchema>
 
+// WHITE-LABEL TODO: Fase 2 — når multi-tenant aktiveres (hostname-baseret),
+// skal denne funktion modtage tenantId fra request context i stedet for at
+// bruge findFirst. Se tenant.service.ts for resolver-logik.
+// Ændring: getOrCreateUser(supabaseUser, tenantId) → organizationId: tenantId
 export async function getOrCreateUser(supabaseUser: {
   id: string
   email: string
@@ -14,7 +18,7 @@ export async function getOrCreateUser(supabaseUser: {
   })
 
   if (existing) {
-    // Tilknyt eksisterende brugere uden organisation til default org
+    // Tilknyt eksisterende brugere uden organisation til default org (Fase 1: single-tenant)
     if (!existing.organizationId) {
       const defaultOrg = await prisma.organization.findFirst({
         orderBy: { createdAt: 'asc' },
@@ -30,6 +34,7 @@ export async function getOrCreateUser(supabaseUser: {
     return existing
   }
 
+  // Fase 1: single-tenant — tilknyt til ældste org. Fase 2: brug tenantId.
   const defaultOrg = await prisma.organization.findFirst({
     orderBy: { createdAt: 'asc' },
     select: { id: true },
