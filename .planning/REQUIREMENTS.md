@@ -16,11 +16,11 @@ Requirements for mobile-first overhaul. Each maps to roadmap phases.
 
 ### Layout & Overflow
 
-- [ ] **LAYOUT-01**: Alle flex text-containers har min-w-0 så indhold ikke overflower
+- [x] **LAYOUT-01**: Alle flex text-containers har min-w-0 så indhold ikke overflower
 - [x] **LAYOUT-02**: Dashboard, browse, community og journeys har konsistent max-width
 - [x] **LAYOUT-03**: Grids kollapser til single column på skærme under 640px hvor relevant
-- [ ] **LAYOUT-04**: Cards og banners har overflow-hidden så indhold ikke bryder ud
-- [ ] **LAYOUT-05**: Bundle cards har min-w-0 og line-clamp på titler
+- [x] **LAYOUT-04**: Cards og banners har overflow-hidden så indhold ikke bryder ud
+- [x] **LAYOUT-05**: Bundle cards har min-w-0 og line-clamp på titler
 
 ### Typography & Spacing
 
@@ -81,11 +81,11 @@ Deferred to future milestones.
 | SAFE-02 | Phase 1 | Complete |
 | SAFE-03 | Phase 1 | Complete |
 | SAFE-04 | Phase 1 | Complete |
-| LAYOUT-01 | Phase 2 | Pending |
+| LAYOUT-01 | Phase 2 | Complete |
 | LAYOUT-02 | Phase 2 | Complete |
 | LAYOUT-03 | Phase 2 | Complete |
-| LAYOUT-04 | Phase 2 | Pending |
-| LAYOUT-05 | Phase 2 | Pending |
+| LAYOUT-04 | Phase 2 | Complete |
+| LAYOUT-05 | Phase 2 | Complete |
 | TYPO-01 | Phase 3 | Pending |
 | TYPO-02 | Phase 3 | Pending |
 | TYPO-03 | Phase 3 | Pending |
