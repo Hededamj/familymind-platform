@@ -144,7 +144,7 @@ export function CheckInForm({
       )}
 
       {/* Submit button - fixed at bottom on mobile */}
-      <div className="sticky bottom-4 pt-2">
+      <div className="sticky pt-2" style={{ bottom: 'calc(3.5rem + env(safe-area-inset-bottom, 0px) + 1rem)' }}>
         <Button
           size="lg"
           className="w-full"
