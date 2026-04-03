@@ -43,7 +43,7 @@ export function LoginForm({ brandName }: { brandName: string }) {
       return
     }
 
-    // If no explicit redirect was given, check if user is admin
+    // Force a hard navigation so the server picks up the new auth cookie
     const explicitRedirect = searchParams.get('redirectTo')
     if (!explicitRedirect) {
       try {
@@ -51,8 +51,7 @@ export function LoginForm({ brandName }: { brandName: string }) {
         if (res.ok) {
           const { role } = await res.json()
           if (role === 'ADMIN') {
-            router.push('/admin')
-            router.refresh()
+            window.location.href = '/admin'
             return
           }
         }
@@ -61,8 +60,7 @@ export function LoginForm({ brandName }: { brandName: string }) {
       }
     }
 
-    router.push(redirectTo)
-    router.refresh()
+    window.location.href = redirectTo
   }
 
   async function handleOAuthLogin(provider: 'google' | 'apple') {
