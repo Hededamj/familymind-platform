@@ -25,7 +25,7 @@ export function CommunityPills({ rooms }: { rooms: Room[] }) {
       <p className="text-sm font-medium text-[var(--color-muted)]">
         Fællesskab
       </p>
-      <div className="mt-2 flex gap-2 overflow-x-auto pb-2 md:flex-wrap md:overflow-visible">
+      <div className="mt-2 flex gap-2 overflow-x-auto pb-2 scrollbar-none md:flex-wrap md:overflow-visible">
         {rooms.map((room) => {
           const Icon = getRoomIcon(room.icon)
           return (

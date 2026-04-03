@@ -51,7 +51,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="px-4 py-6 sm:px-8 sm:py-8">
-      <div className="mx-auto w-full max-w-4xl">
+      <div className="mx-auto w-full max-w-2xl">
         <h1 className="mb-8 font-serif text-2xl sm:text-3xl">
           {getGreeting()}, {displayName}
         </h1>
@@ -155,12 +155,12 @@ function NewUserView({
 
       {recommendations.length === 0 && (
         <Card>
-          <CardContent className="flex flex-col items-center py-10 text-center">
+          <CardContent className="flex flex-col items-center px-4 py-10 text-center">
             <Compass className="mb-4 size-12 text-muted-foreground/50" />
             <h2 className="mb-2 text-lg font-semibold">
               Udforsk vores indhold
             </h2>
-            <p className="mb-6 max-w-sm text-sm text-muted-foreground">
+            <p className="mb-6 text-sm text-muted-foreground">
               Find forløb og kurser der passer til din familie.
             </p>
             <Button asChild>

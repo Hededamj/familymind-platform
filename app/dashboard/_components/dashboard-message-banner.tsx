@@ -16,11 +16,11 @@ export function DashboardMessageBanner({
   ctaUrl,
 }: DashboardMessageBannerProps) {
   return (
-    <div className="rounded-2xl bg-sand p-6">
-      <h2 className="font-serif text-xl sm:text-2xl">
+    <div className="rounded-2xl bg-sand p-4 sm:p-6">
+      <h2 className="font-serif text-lg sm:text-2xl">
         {heading}
       </h2>
-      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{body}</p>
+      <p className="mt-2 text-sm leading-relaxed text-muted-foreground break-words">{body}</p>
       {ctaLabel && ctaUrl && (
         <Button asChild className="mt-4 rounded-xl" size="lg">
           <Link href={ctaUrl}>
