@@ -20,7 +20,13 @@ export function AppTopbar({ brandName, hasUnread }: Props) {
   )
 
   return (
-    <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-[var(--border)] bg-[var(--background)] px-4 md:hidden">
+    <header
+      className="sticky top-0 z-40 flex items-center justify-between border-b border-[var(--border)] bg-[var(--background)] px-4 md:hidden"
+      style={{
+        paddingTop: 'env(safe-area-inset-top, 0px)',
+        height: 'calc(3.5rem + env(safe-area-inset-top, 0px))',
+      }}
+    >
       {/* Left side */}
       {isTopLevel ? (
         <span className="font-serif text-lg text-[var(--foreground)]">
