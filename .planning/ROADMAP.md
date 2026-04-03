@@ -44,7 +44,10 @@ Plans:
   3. Multi-column grids collapse to a single column on screens narrower than 640px
   4. Cards and banners never show content breaking outside their bounds
   5. Bundle card titles are truncated cleanly rather than overflowing their container
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 02-01-PLAN.md — Fix card/banner overflow and bundle card truncation (LAYOUT-01, LAYOUT-04, LAYOUT-05)
+- [ ] 02-02-PLAN.md — Fix progress page grid collapse and verify max-width consistency (LAYOUT-02, LAYOUT-03)
 **UI hint**: yes
 
 ### Phase 3: Typography, Spacing & Touch
@@ -81,6 +84,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Safe Area & Viewport | 2/2 | Complete   | 2026-04-03 |
-| 2. Layout & Overflow | 0/? | Not started | - |
+| 2. Layout & Overflow | 0/2 | Planned | - |
 | 3. Typography, Spacing & Touch | 0/? | Not started | - |
 | 4. Navigation & PWA | 0/? | Not started | - |
