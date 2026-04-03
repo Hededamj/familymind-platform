@@ -58,7 +58,7 @@ export function ProductCard({ product }: { product: Product }) {
   return (
     <Link
       href={href}
-      className="card-hover group flex flex-col rounded-2xl border border-border bg-white"
+      className="card-hover group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-white"
     >
       {/* Thumbnail area */}
       {product.thumbnailUrl || product.coverImageUrl ? (
@@ -78,7 +78,7 @@ export function ProductCard({ product }: { product: Product }) {
       )}
 
       {/* Content */}
-      <div className="flex flex-1 flex-col p-5">
+      <div className="flex min-w-0 flex-1 flex-col p-5">
         <Badge
           variant="secondary"
           className="mb-2 w-fit rounded-full text-xs"
@@ -86,7 +86,7 @@ export function ProductCard({ product }: { product: Product }) {
           {typeLabels[product.type] ?? product.type}
         </Badge>
 
-        <h3 className="font-serif text-lg group-hover:text-primary">
+        <h3 className="font-serif text-lg line-clamp-1 group-hover:text-primary">
           {product.title}
         </h3>
 
