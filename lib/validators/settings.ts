@@ -150,8 +150,8 @@ export const communitySettingsSchema = z.object({
 // ─── General Settings ───────────────────────────────
 
 export const updateCompanySettingsSchema = z.object({
-  company_name: z.string().min(1),
-  company_cvr: z.string().min(1),
-  company_address: z.string().min(1),
-  company_email: z.string().email(),
+  company_name: z.string().min(1, 'Firmanavn er påkrævet'),
+  company_cvr: z.string().min(1, 'CVR-nummer er påkrævet'),
+  company_address: z.string().min(1, 'Adresse er påkrævet'),
+  company_email: z.string().email('Ugyldig email'),
 })
