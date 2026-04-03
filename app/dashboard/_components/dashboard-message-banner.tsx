@@ -16,7 +16,7 @@ export function DashboardMessageBanner({
   ctaUrl,
 }: DashboardMessageBannerProps) {
   return (
-    <div className="rounded-2xl bg-sand p-4 sm:p-6">
+    <div className="overflow-hidden rounded-2xl bg-sand p-4 sm:p-6">
       <h2 className="font-serif text-lg sm:text-2xl">
         {heading}
       </h2>

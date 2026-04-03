@@ -53,11 +53,11 @@ export function BundleCard({ product }: { product: BundleProduct }) {
       )}
 
       {/* Content */}
-      <div className="flex flex-1 flex-col p-6">
+      <div className="flex min-w-0 flex-1 flex-col p-6">
         <Badge variant="secondary" className="mb-2 w-fit rounded-full text-xs">
           Pakke
         </Badge>
-        <h3 className="font-serif text-xl group-hover:text-primary">
+        <h3 className="font-serif text-xl line-clamp-2 group-hover:text-primary">
           {product.title}
         </h3>
         {product.description && (
