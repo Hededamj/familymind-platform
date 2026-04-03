@@ -41,7 +41,7 @@ export default async function ProgressPage() {
         </p>
 
         {/* All-time stats grid */}
-        <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <div className="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
           <StatCard
             icon={<CalendarDays className="size-5" />}
             iconBg="bg-primary/10 text-primary"
@@ -96,7 +96,7 @@ export default async function ProgressPage() {
               {milestones.map((milestone) => (
                 <div
                   key={milestone.id}
-                  className="flex items-start gap-4 rounded-2xl border border-border bg-white p-5"
+                  className="flex items-start gap-4 overflow-hidden rounded-2xl border border-border bg-white p-5"
                 >
                   <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-500">
                     <Star className="size-5" />
