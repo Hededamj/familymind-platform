@@ -255,6 +255,7 @@ model ContentTag {
 
   contentUnits      ContentUnitTag[]
   onboardingOptions OnboardingOption[]
+  communityRooms    CommunityRoomTag[]
 }
 
 model ContentUnitTag {
@@ -785,8 +786,19 @@ model CommunityRoom {
 
   posts           DiscussionPost[]
   promptQueue     RoomPromptQueue[]
+  tags            CommunityRoomTag[]
 
   @@index([isArchived, sortOrder])
+}
+
+model CommunityRoomTag {
+  roomId String @db.Uuid
+  tagId  String @db.Uuid
+
+  room CommunityRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  tag  ContentTag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([roomId, tagId])
 }
 
 model RoomPromptQueue {

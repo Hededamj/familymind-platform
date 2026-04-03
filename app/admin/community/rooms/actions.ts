@@ -23,6 +23,13 @@ const roomSchema = z.object({
   sortOrder: z.coerce.number().int().min(0).default(0),
 })
 
+function parseTagIds(formData: FormData): string[] {
+  const raw = formData.get('tagIds')
+  if (!raw || typeof raw !== 'string') return []
+  const parsed = JSON.parse(raw)
+  return z.array(z.string().uuid()).parse(parsed)
+}
+
 export async function createRoomAction(formData: FormData) {
   await requireAdmin()
 
@@ -34,8 +41,9 @@ export async function createRoomAction(formData: FormData) {
     isPublic: formData.get('isPublic') === 'true',
     sortOrder: formData.get('sortOrder') || 0,
   })
+  const tagIds = parseTagIds(formData)
 
-  await communityService.createRoom(data)
+  await communityService.createRoom(data, tagIds)
   revalidatePath('/admin/community/rooms')
 }
 
@@ -51,8 +59,9 @@ export async function updateRoomAction(id: string, formData: FormData) {
     isPublic: formData.get('isPublic') === 'true',
     sortOrder: formData.get('sortOrder') || 0,
   })
+  const tagIds = parseTagIds(formData)
 
-  await communityService.updateRoom(id, data)
+  await communityService.updateRoom(id, data, tagIds)
   revalidatePath('/admin/community/rooms')
 }
 

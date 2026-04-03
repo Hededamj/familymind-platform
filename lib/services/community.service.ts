@@ -860,8 +860,16 @@ export async function createRoom(data: {
   isPublic?: boolean
   sortOrder?: number
   organizationId?: string
-}) {
-  return prisma.communityRoom.create({ data })
+}, tagIds?: string[]) {
+  return prisma.$transaction(async (tx) => {
+    const room = await tx.communityRoom.create({ data })
+    if (tagIds && tagIds.length > 0) {
+      await tx.communityRoomTag.createMany({
+        data: tagIds.map((tagId) => ({ roomId: room.id, tagId })),
+      })
+    }
+    return room
+  })
 }
 
 export async function updateRoom(
@@ -874,9 +882,21 @@ export async function updateRoom(
     isPublic?: boolean
     sortOrder?: number
     isArchived?: boolean
-  }
+  },
+  tagIds?: string[]
 ) {
-  return prisma.communityRoom.update({ where: { id }, data })
+  return prisma.$transaction(async (tx) => {
+    const room = await tx.communityRoom.update({ where: { id }, data })
+    if (tagIds !== undefined) {
+      await tx.communityRoomTag.deleteMany({ where: { roomId: id } })
+      if (tagIds.length > 0) {
+        await tx.communityRoomTag.createMany({
+          data: tagIds.map((tagId) => ({ roomId: id, tagId })),
+        })
+      }
+    }
+    return room
+  })
 }
 
 export async function deleteRoom(id: string) {

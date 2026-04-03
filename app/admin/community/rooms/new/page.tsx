@@ -1,8 +1,11 @@
 import { requireAdmin } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
 import { RoomForm } from '../_components/room-form'
 
 export default async function NewRoomPage() {
   await requireAdmin()
+
+  const allTags = await prisma.contentTag.findMany({ orderBy: { name: 'asc' } })
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -12,7 +15,7 @@ export default async function NewRoomPage() {
           Tilføj et nyt rum til community-sektionen
         </p>
       </div>
-      <RoomForm mode="create" />
+      <RoomForm mode="create" allTags={allTags} />
     </div>
   )
 }

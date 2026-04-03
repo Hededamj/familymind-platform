@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowRight, Map, BookOpen } from 'lucide-react'
+import { ArrowRight, Map, BookOpen, MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -33,11 +33,18 @@ export function RecommendationSection({
       <h2 className="mb-4 text-lg font-semibold">Anbefalet til dig</h2>
       <div className="grid gap-4 sm:grid-cols-2">
         {recommendations.map((rec) => {
-          const isJourney = rec.type === 'JOURNEY'
-          const href = isJourney
-            ? `/journeys/${rec.slug}`
-            : `/products/${rec.slug}`
-          const Icon = isJourney ? Map : BookOpen
+          const href =
+            rec.type === 'JOURNEY'
+              ? `/journeys/${rec.slug}`
+              : rec.type === 'ROOM'
+                ? `/community/${rec.slug}`
+                : `/products/${rec.slug}`
+          const Icon =
+            rec.type === 'JOURNEY' ? Map : rec.type === 'ROOM' ? MessageCircle : BookOpen
+          const badgeLabel =
+            rec.type === 'JOURNEY' ? 'Forløb' : rec.type === 'ROOM' ? 'Fællesskab' : 'Kursus'
+          const ctaLabel =
+            rec.type === 'JOURNEY' ? 'Start forløb' : rec.type === 'ROOM' ? 'Deltag i samtalen' : 'Se kursus'
 
           return (
             <Card key={rec.id} className="flex flex-col">
@@ -45,7 +52,7 @@ export function RecommendationSection({
                 <div className="flex items-center gap-2">
                   <Icon className="size-4 text-primary" />
                   <Badge variant="secondary" className="text-xs">
-                    {isJourney ? 'Forløb' : 'Kursus'}
+                    {badgeLabel}
                   </Badge>
                 </div>
                 <CardTitle className="mt-2 text-base">{rec.title}</CardTitle>
@@ -58,7 +65,7 @@ export function RecommendationSection({
               <CardContent className="mt-auto">
                 <Button asChild variant="outline" className="w-full" size="sm">
                   <Link href={href}>
-                    {isJourney ? 'Start forløb' : 'Se kursus'}
+                    {ctaLabel}
                     <ArrowRight className="ml-2 size-4" />
                   </Link>
                 </Button>

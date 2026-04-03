@@ -15,9 +15,12 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
-import { Loader2 } from 'lucide-react'
+import { Loader2, X } from 'lucide-react'
 import { createRoomAction, updateRoomAction } from '../actions'
+
+type TagOption = { id: string; name: string; slug: string }
 
 function generateSlug(name: string): string {
   return name
@@ -53,13 +56,14 @@ type RoomData = {
   isPublic: boolean
   sortOrder: number
   isArchived: boolean
+  tagIds?: string[]
 }
 
 type RoomFormProps =
-  | { mode: 'create'; initialData?: undefined }
-  | { mode: 'edit'; initialData: RoomData }
+  | { mode: 'create'; initialData?: undefined; allTags: TagOption[] }
+  | { mode: 'edit'; initialData: RoomData; allTags: TagOption[] }
 
-export function RoomForm({ mode, initialData }: RoomFormProps) {
+export function RoomForm({ mode, initialData, allTags }: RoomFormProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const slugManuallyEdited = useRef(false)
@@ -72,6 +76,7 @@ export function RoomForm({ mode, initialData }: RoomFormProps) {
   const [icon, setIcon] = useState(initialData?.icon ?? '')
   const [isPublic, setIsPublic] = useState(initialData?.isPublic ?? true)
   const [sortOrder, setSortOrder] = useState(initialData?.sortOrder ?? 0)
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>(initialData?.tagIds ?? [])
 
   function handleNameChange(value: string) {
     setName(value)
@@ -95,6 +100,7 @@ export function RoomForm({ mode, initialData }: RoomFormProps) {
         formData.set('icon', icon)
         formData.set('isPublic', String(isPublic))
         formData.set('sortOrder', String(sortOrder))
+        formData.set('tagIds', JSON.stringify(selectedTagIds))
 
         if (mode === 'edit') {
           await updateRoomAction(initialData.id, formData)
@@ -173,6 +179,50 @@ export function RoomForm({ mode, initialData }: RoomFormProps) {
               ))}
             </SelectContent>
           </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Tags</Label>
+          <p className="text-sm text-muted-foreground">
+            Tags bruges til at anbefale rum baseret på onboarding-quiz
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {selectedTagIds.map((tagId) => {
+              const tag = allTags.find((t) => t.id === tagId)
+              if (!tag) return null
+              return (
+                <Badge key={tagId} variant="secondary" className="gap-1">
+                  {tag.name}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedTagIds((prev) => prev.filter((id) => id !== tagId))}
+                    className="ml-1 hover:text-destructive"
+                  >
+                    <X className="size-3" />
+                  </button>
+                </Badge>
+              )
+            })}
+          </div>
+          {allTags.filter((t) => !selectedTagIds.includes(t.id)).length > 0 && (
+            <Select
+              value=""
+              onValueChange={(tagId) => setSelectedTagIds((prev) => [...prev, tagId])}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Tilføj tag..." />
+              </SelectTrigger>
+              <SelectContent>
+                {allTags
+                  .filter((t) => !selectedTagIds.includes(t.id))
+                  .map((t) => (
+                    <SelectItem key={t.id} value={t.id}>
+                      {t.name}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
 
         <div className="space-y-2">

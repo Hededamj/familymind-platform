@@ -17,9 +17,13 @@ export default async function EditRoomPage({
     notFound()
   }
 
-  const room = await prisma.communityRoom.findUnique({
-    where: { id: validId.data },
-  })
+  const [room, allTags] = await Promise.all([
+    prisma.communityRoom.findUnique({
+      where: { id: validId.data },
+      include: { tags: { select: { tagId: true } } },
+    }),
+    prisma.contentTag.findMany({ orderBy: { name: 'asc' } }),
+  ])
 
   if (!room) {
     notFound()
@@ -33,7 +37,11 @@ export default async function EditRoomPage({
           Rediger &quot;{room.name}&quot;
         </p>
       </div>
-      <RoomForm mode="edit" initialData={room} />
+      <RoomForm
+        mode="edit"
+        initialData={{ ...room, tagIds: room.tags.map(t => t.tagId) }}
+        allTags={allTags}
+      />
     </div>
   )
 }

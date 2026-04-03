@@ -28,6 +28,12 @@ export default async function RecommendationsSettingsPage() {
     select: { id: true, title: true },
   })
 
+  const rooms = await prisma.communityRoom.findMany({
+    where: { isArchived: false },
+    orderBy: { name: 'asc' },
+    select: { id: true, name: true },
+  })
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
@@ -54,6 +60,7 @@ export default async function RecommendationsSettingsPage() {
         tags={tags}
         journeys={journeys}
         products={products}
+        rooms={rooms}
       />
     </div>
   )

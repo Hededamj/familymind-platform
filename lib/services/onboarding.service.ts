@@ -141,12 +141,15 @@ export async function getRecommendations(userId: string) {
 
   if (matchingRules.length === 0) return []
 
-  // Batch-fetch all target journeys and products in two queries
+  // Batch-fetch all target journeys, products, and rooms
   const journeyIds = matchingRules
     .filter((r) => r.targetType === 'JOURNEY')
     .map((r) => r.targetId)
   const productIds = matchingRules
     .filter((r) => r.targetType === 'PRODUCT')
+    .map((r) => r.targetId)
+  const roomIds = matchingRules
+    .filter((r) => r.targetType === 'ROOM')
     .map((r) => r.targetId)
 
   // Exclude journeys the user has already completed
@@ -159,17 +162,21 @@ export async function getRecommendations(userId: string) {
   const completedJourneyIds = new Set(completedJourneys.map((uj) => uj.journeyId))
   const eligibleJourneyIds = journeyIds.filter((id) => !completedJourneyIds.has(id))
 
-  const [journeys, products] = await Promise.all([
+  const [journeys, products, rooms] = await Promise.all([
     eligibleJourneyIds.length > 0
       ? prisma.journey.findMany({ where: { id: { in: eligibleJourneyIds }, isActive: true } })
       : Promise.resolve([]),
     productIds.length > 0
       ? prisma.product.findMany({ where: { id: { in: productIds }, isActive: true } })
       : Promise.resolve([]),
+    roomIds.length > 0
+      ? prisma.communityRoom.findMany({ where: { id: { in: roomIds }, isArchived: false } })
+      : Promise.resolve([]),
   ])
 
   const journeyMap = new Map(journeys.map((j) => [j.id, j] as const))
   const productMap = new Map(products.map((p) => [p.id, p] as const))
+  const roomMap = new Map(rooms.map((r) => [r.id, r] as const))
 
   // Build recommendations from matched data
   const recommendations: Array<{
@@ -203,6 +210,18 @@ export async function getRecommendations(userId: string) {
           title: product.title,
           description: product.description,
           slug: product.slug,
+          priority: rule.priority,
+        })
+      }
+    } else if (rule.targetType === 'ROOM') {
+      const room = roomMap.get(rule.targetId)
+      if (room) {
+        recommendations.push({
+          type: 'ROOM',
+          id: room.id,
+          title: room.name,
+          description: room.description,
+          slug: room.slug,
           priority: rule.priority,
         })
       }
