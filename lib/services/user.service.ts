@@ -12,7 +12,28 @@ export async function getOrCreateUser(supabaseUser: {
   const existing = await prisma.user.findUnique({
     where: { id: supabaseUser.id },
   })
-  if (existing) return existing
+
+  if (existing) {
+    // Tilknyt eksisterende brugere uden organisation til default org
+    if (!existing.organizationId) {
+      const defaultOrg = await prisma.organization.findFirst({
+        orderBy: { createdAt: 'asc' },
+        select: { id: true },
+      })
+      if (defaultOrg) {
+        return prisma.user.update({
+          where: { id: existing.id },
+          data: { organizationId: defaultOrg.id },
+        })
+      }
+    }
+    return existing
+  }
+
+  const defaultOrg = await prisma.organization.findFirst({
+    orderBy: { createdAt: 'asc' },
+    select: { id: true },
+  })
 
   return prisma.user.create({
     data: {
@@ -22,6 +43,7 @@ export async function getOrCreateUser(supabaseUser: {
         supabaseUser.user_metadata?.full_name ||
         supabaseUser.user_metadata?.name ||
         null,
+      organizationId: defaultOrg?.id ?? null,
     },
   })
 }
