@@ -30,7 +30,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. The check-in form sticky button is visible above the bottom tab bar with correct clearance
 **Plans**: 2 plans
 Plans:
-- [ ] 01-01-PLAN.md — Enable viewport-fit=cover and fix AppTopbar + BottomTabBar safe areas
+- [x] 01-01-PLAN.md — Enable viewport-fit=cover and fix AppTopbar + BottomTabBar safe areas
 - [ ] 01-02-PLAN.md — Fix onboarding wizard footer and check-in form sticky button safe areas
 **UI hint**: yes
 
@@ -80,7 +80,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Safe Area & Viewport | 0/2 | Planning complete | - |
+| 1. Safe Area & Viewport | 1/2 | In Progress|  |
 | 2. Layout & Overflow | 0/? | Not started | - |
 | 3. Typography, Spacing & Touch | 0/? | Not started | - |
 | 4. Navigation & PWA | 0/? | Not started | - |
