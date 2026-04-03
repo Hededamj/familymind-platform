@@ -22,7 +22,7 @@ export function CommunityPills({ rooms }: { rooms: Room[] }) {
 
   return (
     <section>
-      <p className="text-sm font-medium text-[var(--color-muted)]">
+      <p className="text-sm font-medium text-muted-foreground">
         Fællesskab
       </p>
       <div className="mt-2 flex gap-2 overflow-x-auto pb-2 scrollbar-none md:flex-wrap md:overflow-visible">
