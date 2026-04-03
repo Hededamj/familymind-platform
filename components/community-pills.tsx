@@ -25,17 +25,17 @@ export function CommunityPills({ rooms }: { rooms: Room[] }) {
       <p className="text-sm font-medium text-muted-foreground">
         Fællesskab
       </p>
-      <div className="mt-2 flex gap-2 overflow-x-auto pb-2 scrollbar-none md:flex-wrap md:overflow-visible">
+      <div className="mt-2 flex flex-wrap gap-2">
         {rooms.map((room) => {
           const Icon = getRoomIcon(room.icon)
           return (
             <Link
               key={room.id}
               href={`/community/${room.slug}`}
-              className="flex shrink-0 items-center gap-2 rounded-full border border-[var(--color-border)] bg-white px-4 py-2.5 hover:bg-[var(--color-sand)] hover:text-[var(--foreground)]"
+              className="flex items-center gap-1.5 rounded-full border border-[var(--color-border)] bg-white px-3 py-1.5 hover:bg-[var(--color-sand)] hover:text-[var(--foreground)]"
             >
-              <Icon className="size-4 text-[var(--color-muted)]" />
-              <span className="text-sm font-medium">{room.name}</span>
+              <Icon className="size-3.5 text-muted-foreground" />
+              <span className="text-xs font-medium sm:text-sm">{room.name}</span>
               {room._count.posts > 0 && (
                 <span className="rounded-full bg-[var(--accent)]/10 px-2 py-0.5 text-[11px] font-semibold text-[var(--accent)]">
                   {room._count.posts}
