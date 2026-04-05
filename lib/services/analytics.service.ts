@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { INACTIVE_THRESHOLD_MS } from '@/lib/compute-user-status'
 
 type Period = '7d' | '30d' | '90d' | '12m'
 
@@ -22,7 +23,7 @@ function previousPeriodDate(period: Period): { from: Date; to: Date } {
   }
 }
 
-const ACTIVE_THRESHOLD_MS = 14 * 24 * 60 * 60 * 1000
+const ACTIVE_THRESHOLD_MS = INACTIVE_THRESHOLD_MS
 
 // ─── Overview ────────────────────────────────────────
 
@@ -40,17 +41,19 @@ export async function getOverviewStats(orgId: string, period: Period) {
     prisma.user.count({ where: { ...orgFilter, lastActiveAt: { gte: new Date(prev.to.getTime() - ACTIVE_THRESHOLD_MS), lt: prev.to } } }),
   ])
 
-  // Churn: cancelled entitlements in period
-  const [churnedNow, churnedPrev, activeEntitlements] = await Promise.all([
-    prisma.entitlement.count({ where: { user: orgFilter, status: 'CANCELLED', createdAt: { gte: since } } }),
-    prisma.entitlement.count({ where: { user: orgFilter, status: 'CANCELLED', createdAt: { gte: prev.from, lt: prev.to } } }),
+  // Churn: cancelled entitlements in period (by cancelledAt, not createdAt)
+  const [churnedNow, churnedPrev, activeEntitlements, prevActiveEntitlements] = await Promise.all([
+    prisma.entitlement.count({ where: { user: orgFilter, status: 'CANCELLED', cancelledAt: { gte: since } } }),
+    prisma.entitlement.count({ where: { user: orgFilter, status: 'CANCELLED', cancelledAt: { gte: prev.from, lt: prev.to } } }),
     prisma.entitlement.count({ where: { user: orgFilter, status: 'ACTIVE' } }),
+    // Forrige periodes aktive ≈ nuværende aktive + opsagte i denne periode
+    prisma.entitlement.count({ where: { user: orgFilter, OR: [{ status: 'ACTIVE' }, { status: 'CANCELLED', cancelledAt: { gte: since } }] } }),
   ])
   const churnRate = activeEntitlements + churnedNow > 0
     ? Math.round((churnedNow / (activeEntitlements + churnedNow)) * 100)
     : 0
-  const prevChurnRate = activeEntitlements + churnedPrev > 0
-    ? Math.round((churnedPrev / (activeEntitlements + churnedPrev)) * 100)
+  const prevChurnRate = prevActiveEntitlements > 0
+    ? Math.round((churnedPrev / prevActiveEntitlements) * 100)
     : 0
 
   // MRR
@@ -149,15 +152,15 @@ export async function getHealthStats(orgId: string, period: Period) {
     }
   }
 
-  // Churn trend: per week/month
+  // Churn trend: per week/month (by cancelledAt)
   const cancelledEntitlements = await prisma.entitlement.findMany({
-    where: { user: orgFilter, status: 'CANCELLED', createdAt: { gte: since } },
-    select: { createdAt: true },
+    where: { user: orgFilter, status: 'CANCELLED', cancelledAt: { gte: since } },
+    select: { cancelledAt: true },
   })
 
   const churnByWeek = new Map<string, number>()
   for (const e of cancelledEntitlements) {
-    const d = new Date(e.createdAt)
+    const d = new Date(e.cancelledAt!)
     const weekStart = new Date(d)
     weekStart.setDate(d.getDate() - d.getDay())
     const key = weekStart.toISOString().slice(0, 10)
@@ -173,19 +176,25 @@ export async function getHealthStats(orgId: string, period: Period) {
     select: { createdAt: true, lastActiveAt: true },
   })
 
-  const cohorts = new Map<string, { total: number; retainedAt: Record<string, number> }>()
+  const cohorts = new Map<string, { total: number; eligible: Record<string, number>; retainedAt: Record<string, number> }>()
   for (const u of cohortUsers) {
     const monthKey = u.createdAt.toISOString().slice(0, 7)
     if (!cohorts.has(monthKey)) {
-      cohorts.set(monthKey, { total: 0, retainedAt: { '7': 0, '14': 0, '30': 0, '60': 0, '90': 0 } })
+      cohorts.set(monthKey, { total: 0, eligible: { '7': 0, '14': 0, '30': 0, '60': 0, '90': 0 }, retainedAt: { '7': 0, '14': 0, '30': 0, '60': 0, '90': 0 } })
     }
     const cohort = cohorts.get(monthKey)!
     cohort.total++
 
-    if (u.lastActiveAt) {
-      const daysSinceSignup = Math.floor((new Date(u.lastActiveAt).getTime() - u.createdAt.getTime()) / (24 * 60 * 60 * 1000))
-      for (const day of [7, 14, 30, 60, 90]) {
-        if (daysSinceSignup >= day) cohort.retainedAt[String(day)]++
+    const signupTime = u.createdAt.getTime()
+    const daysSinceSignup = Math.floor((now.getTime() - signupTime) / (24 * 60 * 60 * 1000))
+
+    for (const day of [7, 14, 30, 60, 90]) {
+      if (daysSinceSignup < day) continue
+      cohort.eligible[String(day)]++
+      if (u.lastActiveAt) {
+        const lastActiveTime = new Date(u.lastActiveAt).getTime()
+        const checkpointTime = signupTime + day * 24 * 60 * 60 * 1000
+        if (lastActiveTime >= checkpointTime) cohort.retainedAt[String(day)]++
       }
     }
   }
@@ -193,7 +202,10 @@ export async function getHealthStats(orgId: string, period: Period) {
     month,
     total: data.total,
     ...Object.fromEntries(
-      Object.entries(data.retainedAt).map(([day, count]) => [`day${day}`, data.total > 0 ? Math.round((count / data.total) * 100) : 0])
+      Object.entries(data.retainedAt).map(([day, count]) => {
+        const eligible = data.eligible[day] ?? 0
+        return [`day${day}`, eligible > 0 ? Math.round((count / eligible) * 100) : 0]
+      })
     ),
   }))
 
@@ -348,9 +360,9 @@ export async function getEconomyStats(orgId: string, period: Period) {
   })
   const newMrr = newSubscriptions.reduce((sum, e) => sum + (e.paidAmountCents ?? e.product.priceAmountCents), 0)
 
-  // Lost MRR (cancelled in period)
+  // Lost MRR (cancelled in period, by cancelledAt)
   const cancelledSubscriptions = await prisma.entitlement.findMany({
-    where: { user: orgFilter, status: 'CANCELLED', stripeSubscriptionId: { not: null }, createdAt: { gte: since } },
+    where: { user: orgFilter, status: 'CANCELLED', stripeSubscriptionId: { not: null }, cancelledAt: { gte: since } },
     include: { product: { select: { priceAmountCents: true } } },
   })
   const lostMrr = cancelledSubscriptions.reduce((sum, e) => sum + (e.paidAmountCents ?? e.product.priceAmountCents), 0)
@@ -404,13 +416,13 @@ export async function getEconomyStats(orgId: string, period: Period) {
   })
   const revenuePerUser = activeUsers > 0 ? Math.round(mrr / activeUsers) : 0
 
-  // Average lifetime (median days from first entitlement to cancellation for churned users)
-  const churnedUsers = await prisma.entitlement.findMany({
-    where: { user: orgFilter, status: 'CANCELLED' },
-    select: { createdAt: true, user: { select: { createdAt: true } } },
+  // Average lifetime (median days from entitlement creation to cancellation)
+  const churnedEntitlements = await prisma.entitlement.findMany({
+    where: { user: orgFilter, status: 'CANCELLED', cancelledAt: { not: null } },
+    select: { createdAt: true, cancelledAt: true },
   })
-  const lifetimeDays = churnedUsers
-    .map(e => Math.floor((e.createdAt.getTime() - e.user.createdAt.getTime()) / (24 * 60 * 60 * 1000)))
+  const lifetimeDays = churnedEntitlements
+    .map(e => Math.floor((e.cancelledAt!.getTime() - e.createdAt.getTime()) / (24 * 60 * 60 * 1000)))
     .sort((a, b) => a - b)
   const medianLifetime = lifetimeDays.length > 0
     ? lifetimeDays[Math.floor(lifetimeDays.length / 2)]
@@ -472,24 +484,27 @@ export async function getBehaviorStats(orgId: string, period: Period) {
     }
   })
 
-  // Activity by hour
-  const progressRecords = await prisma.userContentProgress.findMany({
+  // Single query for activity, tags, and engagement (avoid 3 separate unbounded queries)
+  const allProgress = await prisma.userContentProgress.findMany({
     where: { user: orgFilter, createdAt: { gte: since } },
-    select: { createdAt: true },
+    select: {
+      userId: true,
+      createdAt: true,
+      contentUnit: { select: { tags: { select: { tag: { select: { id: true, name: true } } } } } },
+    },
+    take: 10000, // Safety limit
   })
+
+  // Activity by hour
   const hourCounts = new Array(24).fill(0)
-  for (const p of progressRecords) {
+  for (const p of allProgress) {
     hourCounts[p.createdAt.getHours()]++
   }
   const activityByHour = hourCounts.map((count, hour) => ({ hour, count }))
 
   // Popular tags
-  const tagActivity = await prisma.userContentProgress.findMany({
-    where: { user: orgFilter, createdAt: { gte: since } },
-    select: { contentUnit: { select: { tags: { select: { tag: { select: { id: true, name: true } } } } } } },
-  })
   const tagCounts = new Map<string, { name: string; count: number }>()
-  for (const p of tagActivity) {
+  for (const p of allProgress) {
     for (const t of p.contentUnit.tags) {
       const existing = tagCounts.get(t.tag.id) ?? { name: t.tag.name, count: 0 }
       existing.count++
@@ -502,10 +517,6 @@ export async function getBehaviorStats(orgId: string, period: Period) {
 
   // Engagement trend (avg interactions per user per week)
   const weeklyInteractions = new Map<string, Set<string>>()
-  const allProgress = await prisma.userContentProgress.findMany({
-    where: { user: orgFilter, createdAt: { gte: since } },
-    select: { userId: true, createdAt: true },
-  })
   const weeklyTotals = new Map<string, number>()
   for (const p of allProgress) {
     const d = new Date(p.createdAt)

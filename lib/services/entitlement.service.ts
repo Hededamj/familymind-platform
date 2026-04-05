@@ -128,7 +128,7 @@ export async function canAccessContent(
 export async function revokeEntitlement(id: string) {
   return prisma.entitlement.update({
     where: { id },
-    data: { status: 'CANCELLED' },
+    data: { status: 'CANCELLED', cancelledAt: new Date() },
   })
 }
 
@@ -138,6 +138,9 @@ export async function updateEntitlementStatus(
 ) {
   return prisma.entitlement.updateMany({
     where: { stripeSubscriptionId },
-    data: { status },
+    data: {
+      status,
+      cancelledAt: status === 'CANCELLED' ? new Date() : undefined,
+    },
   })
 }

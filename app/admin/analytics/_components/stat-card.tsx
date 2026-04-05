@@ -7,12 +7,13 @@ type StatCardProps = {
   subtitle?: string
   trend?: { current: number; previous: number }
   trendLabel?: string
+  invertTrend?: boolean // true = lavere er bedre (f.eks. churn rate)
 }
 
-export function StatCard({ title, value, subtitle, trend, trendLabel }: StatCardProps) {
+export function StatCard({ title, value, subtitle, trend, trendLabel, invertTrend }: StatCardProps) {
   const diff = trend ? trend.current - trend.previous : 0
-  const isUp = diff > 0
-  const isDown = diff < 0
+  const isUp = invertTrend ? diff < 0 : diff > 0
+  const isDown = invertTrend ? diff > 0 : diff < 0
 
   return (
     <Card>

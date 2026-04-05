@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart'
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis } from 'recharts'
 import { StatCard } from './stat-card'
+import { formatDKK } from '@/lib/format-currency'
 
 type EconomyData = {
   mrr: { current: number; new: number; lost: number; net: number }
@@ -14,10 +15,6 @@ type EconomyData = {
     medianLifetimeDays: number | null
     revenuePerUser: number
   }
-}
-
-function formatDKK(cents: number): string {
-  return new Intl.NumberFormat('da-DK', { style: 'currency', currency: 'DKK', maximumFractionDigits: 0 }).format(cents / 100)
 }
 
 const mrrConfig: ChartConfig = {

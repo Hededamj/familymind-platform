@@ -8,7 +8,7 @@
  *   - inactive: has an active entitlement but was NOT active recently
  */
 
-const INACTIVE_THRESHOLD_MS = 14 * 24 * 60 * 60 * 1000
+export const INACTIVE_THRESHOLD_MS = 14 * 24 * 60 * 60 * 1000
 
 type StatusUser = {
   lastActiveAt: Date | string | null

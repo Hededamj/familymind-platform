@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatCard } from './stat-card'
+import { formatDKK } from '@/lib/format-currency'
 
 type OverviewData = {
   activeMembers: { current: number; previous: number }
@@ -14,10 +15,6 @@ type OverviewData = {
     retained30d: number
     eligibleFor30d: number
   }
-}
-
-function formatDKK(cents: number): string {
-  return new Intl.NumberFormat('da-DK', { style: 'currency', currency: 'DKK', maximumFractionDigits: 0 }).format(cents / 100)
 }
 
 function funnelStep(label: string, count: number, prevCount: number | null) {
@@ -61,8 +58,9 @@ export function OverviewTab({ data }: { data: OverviewData }) {
         <StatCard
           title="Churn rate"
           value={`${data.churnRate.current}%`}
-          trend={{ current: data.churnRate.previous, previous: data.churnRate.current }}
+          trend={data.churnRate}
           trendLabel=" pp"
+          invertTrend
         />
         <StatCard
           title="MRR"
