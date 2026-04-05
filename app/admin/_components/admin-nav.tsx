@@ -15,6 +15,7 @@ import {
   Sparkles,
   Shield,
   Info,
+  TrendingUp,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import {
@@ -37,6 +38,12 @@ type NavSection = {
 }
 
 const navSections: NavSection[] = [
+  {
+    label: 'Indsigt',
+    items: [
+      { href: '/admin/analytics', label: 'Økonomi & Vækst', icon: TrendingUp, tooltip: 'Sundhed, konvertering, økonomi og brugeradfærd' },
+    ],
+  },
   {
     label: 'Indhold',
     items: [
@@ -71,6 +78,7 @@ const navSections: NavSection[] = [
 ]
 
 function isActive(pathname: string, href: string): boolean {
+  if (href === '/admin/analytics') return pathname.startsWith('/admin/analytics')
   if (href === '/admin/settings') return pathname === '/admin/settings'
   if (href === '/admin/community/rooms') return pathname.startsWith('/admin/community/rooms')
   if (href === '/admin/community/prompts') return pathname.startsWith('/admin/community/prompts')
