@@ -19,7 +19,7 @@ import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { createContentAction, updateContentAction } from '../actions'
 import { RichTextEditor } from '@/components/rich-text-editor'
-import { X } from 'lucide-react'
+import { X, Upload, Loader2, CheckCircle } from 'lucide-react'
 
 function generateSlug(title: string): string {
   return title
@@ -92,6 +92,9 @@ export function ContentForm({
   const [isPending, startTransition] = useTransition()
   const slugManuallyEdited = useRef(false)
 
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState('')
+
   const [formData, setFormData] = useState<ContentFormData>({
     title: initialData?.title ?? '',
     description: initialData?.description ?? '',
@@ -138,6 +141,30 @@ export function ContentForm({
         ? prev.tagIds.filter((id) => id !== tagId)
         : [...prev.tagIds, tagId],
     }))
+  }
+
+  async function handleFileUpload(file: File) {
+    setIsUploading(true)
+    setUploadProgress('Uploader...')
+    try {
+      const body = new FormData()
+      body.set('file', file)
+      body.set('mediaType', formData.mediaType)
+      const res = await fetch('/api/upload', { method: 'POST', body })
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error ?? 'Upload fejlede')
+      }
+      const { url } = await res.json()
+      setFormData((prev) => ({ ...prev, mediaUrl: url }))
+      setUploadProgress('Uploadet!')
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Upload fejlede'
+      toast.error(msg)
+      setUploadProgress('')
+    } finally {
+      setIsUploading(false)
+    }
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -283,42 +310,78 @@ export function ContentForm({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          {/* File upload for PDF/AUDIO */}
+          {(formData.mediaType === 'PDF' || formData.mediaType === 'AUDIO') && (
             <div className="space-y-2">
-              <Label htmlFor="mediaUrl">Medie-URL</Label>
-              <Input
-                id="mediaUrl"
-                type="url"
-                value={formData.mediaUrl}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    mediaUrl: e.target.value,
-                  }))
-                }
-                placeholder="https://..."
-              />
+              <Label>Upload fil</Label>
+              <div className="flex items-center gap-3">
+                <label className="flex cursor-pointer items-center gap-2 rounded-md border border-dashed px-4 py-3 text-sm text-muted-foreground transition-colors hover:border-primary hover:text-foreground">
+                  {isUploading ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : formData.mediaUrl ? (
+                    <CheckCircle className="size-4 text-green-600" />
+                  ) : (
+                    <Upload className="size-4" />
+                  )}
+                  {isUploading ? 'Uploader...' : formData.mediaUrl ? 'Skift fil' : `Vælg ${formData.mediaType === 'PDF' ? 'PDF' : 'lydfil'}...`}
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept={formData.mediaType === 'PDF' ? '.pdf' : 'audio/*'}
+                    disabled={isUploading}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) handleFileUpload(file)
+                    }}
+                  />
+                </label>
+                {formData.mediaUrl && (
+                  <span className="truncate text-xs text-muted-foreground max-w-[300px]">
+                    {formData.mediaUrl.split('/').pop()}
+                  </span>
+                )}
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="bunnyVideoId">Bunny Video ID</Label>
-              <Input
-                id="bunnyVideoId"
-                value={formData.bunnyVideoId}
-                onChange={(e) => {
-                  const videoId = e.target.value
-                  setFormData((prev) => ({
-                    ...prev,
-                    bunnyVideoId: videoId,
-                    // Auto-generate thumbnail URL from Bunny CDN
-                    thumbnailUrl: videoId
-                      ? `https://${process.env.NEXT_PUBLIC_BUNNY_CDN_HOSTNAME ?? 'vz-b4f34ae0-620.b-cdn.net'}/${videoId}/thumbnail.jpg`
-                      : prev.thumbnailUrl,
-                  }))
-                }}
-                placeholder="Bunny CDN video ID"
-              />
+          )}
+
+          {/* Video fields */}
+          {formData.mediaType === 'VIDEO' && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="bunnyVideoId">Bunny Video ID</Label>
+                <Input
+                  id="bunnyVideoId"
+                  value={formData.bunnyVideoId}
+                  onChange={(e) => {
+                    const videoId = e.target.value
+                    setFormData((prev) => ({
+                      ...prev,
+                      bunnyVideoId: videoId,
+                      thumbnailUrl: videoId
+                        ? `https://${process.env.NEXT_PUBLIC_BUNNY_CDN_HOSTNAME ?? 'vz-b4f34ae0-620.b-cdn.net'}/${videoId}/thumbnail.jpg`
+                        : prev.thumbnailUrl,
+                    }))
+                  }}
+                  placeholder="Bunny CDN video ID"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="mediaUrl">Medie-URL (valgfrit)</Label>
+                <Input
+                  id="mediaUrl"
+                  type="url"
+                  value={formData.mediaUrl}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      mediaUrl: e.target.value,
+                    }))
+                  }
+                  placeholder="https://..."
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="thumbnailUrl">Thumbnail-URL</Label>
