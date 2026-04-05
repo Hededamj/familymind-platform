@@ -7,9 +7,9 @@
 
 ### Personlig Check-in
 
-- [ ] **CHECKIN-01**: Dashboard viser dynamisk check-in prompt baseret på brugerens aktive journey eller primære udfordring
+- [x] **CHECKIN-01**: Dashboard viser dynamisk check-in prompt baseret på brugerens aktive journey eller primære udfordring
 - [ ] **CHECKIN-02**: Brugeren kan skrive en fri-tekst refleksion direkte fra dashboardet
-- [ ] **CHECKIN-03**: Check-in prompten skifter afhængigt af dashboard-state (ny bruger, aktiv journey, ingen journey, completed journey)
+- [x] **CHECKIN-03**: Check-in prompten skifter afhængigt af dashboard-state (ny bruger, aktiv journey, ingen journey, completed journey)
 
 ### Din Gode Uge
 
@@ -19,8 +19,8 @@
 
 ### Dashboard Kontekst
 
-- [ ] **CONTEXT-01**: Velkomst-besked tilpasses baseret på brugerens onboarding-data og journey-status
-- [ ] **CONTEXT-02**: Dashboard-beskeder er admin-konfigurerbare pr. state (via eksisterende DashboardMessage model)
+- [x] **CONTEXT-01**: Velkomst-besked tilpasses baseret på brugerens onboarding-data og journey-status
+- [x] **CONTEXT-02**: Dashboard-beskeder er admin-konfigurerbare pr. state (via eksisterende DashboardMessage model)
 
 ### Visuelt Redesign
 
@@ -49,14 +49,14 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CHECKIN-01 | Phase 5 | Pending |
+| CHECKIN-01 | Phase 5 | Complete |
 | CHECKIN-02 | Phase 6 | Pending |
-| CHECKIN-03 | Phase 5 | Pending |
+| CHECKIN-03 | Phase 5 | Complete |
 | WEEK-01 | Phase 5 | Pending |
 | WEEK-02 | Phase 6 | Pending |
 | WEEK-03 | Phase 5 | Pending |
-| CONTEXT-01 | Phase 5 | Pending |
-| CONTEXT-02 | Phase 5 | Pending |
+| CONTEXT-01 | Phase 5 | Complete |
+| CONTEXT-02 | Phase 5 | Complete |
 | VISUAL-01 | Phase 6 | Pending |
 | VISUAL-02 | Phase 6 | Pending |
 | VISUAL-03 | Phase 6 | Pending |

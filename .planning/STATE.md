@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: Personlig Dashboard
-status: roadmap_defined
-stopped_at: Roadmap created — ready to plan Phase 5
-last_updated: "2026-04-05"
+milestone: v1.0
+milestone_name: milestone
+status: executing
+stopped_at: Completed 05-01-PLAN.md
+last_updated: "2026-04-05T21:10:03.280Z"
 last_activity: 2026-04-05
 progress:
   total_phases: 2
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 2
+  completed_plans: 1
   percent: 0
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-05)
 
 **Core value:** Forældre skal have en smooth, native-lignende mobiloplevelse
-**Current focus:** Personlig Dashboard — dynamiske check-in prompts, ugentligt indhold, visuelt redesign
+**Current focus:** Phase 05 — Dashboard Service Layer
 
 ## Current Position
 
-Phase: Phase 5 — Dashboard Service Layer (not started)
-Plan: —
-Status: Roadmap defined, ready to plan
-Last activity: 2026-04-05 — Roadmap for v1.1 created
+Phase: 05 (Dashboard Service Layer) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-04-05
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -63,6 +63,7 @@ Previous milestone velocity (v1.0):
 | Phase 03-typography-spacing-touch P01 | 4min | 2 tasks | 2 files |
 | Phase 04-navigation-pwa P02 | 5min | 2 tasks | 2 files |
 | Phase 04-navigation-pwa P01 | 1min | 2 tasks | 4 files |
+| Phase 05-dashboard-service-layer P01 | 3 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -77,11 +78,15 @@ Recent decisions affecting current work:
 - Admin-configurable messages use existing DashboardMessage model — no new CMS needed
 
 Carried from v1.0:
+
 - Use inline style prop (not Tailwind class) for env() values — Tailwind 4 cannot generate dynamic calc with env() at compile time
 - Tab-bar-clearing sticky button pattern: calc(3.5rem + env(safe-area-inset-bottom, 0px) + 1rem)
 - break-words + hyphens-auto on UGC paragraphs — handles Danish compound words via lang=da on root html
 - min-h-[44px] added alongside size prop for touch targets — does not override shadcn Button size styles
 - theme_color #1A1A1A in manifest.json matches app dark topbar (brand identity)
+- [Phase 05-dashboard-service-layer]: DashboardState type exported so Plan 02 and UI can import it without duplication
+- [Phase 05-dashboard-service-layer]: getPersonalizedWelcome appends to DashboardMessage.body rather than replacing — preserves admin-editable base text
+- [Phase 05-dashboard-service-layer]: Age group labels: <12m=lille en, 12-36m=tumling, 37-72m=børnehavebarn, >72m=skolebarn
 
 ### Pending Todos
 
@@ -94,6 +99,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-05
-Stopped at: Roadmap created
+Last session: 2026-04-05T21:10:03.276Z
+Stopped at: Completed 05-01-PLAN.md
 Resume file: None

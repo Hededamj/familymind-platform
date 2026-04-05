@@ -30,7 +30,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans:** 2 plans
 
 Plans:
-- [ ] 05-01-PLAN.md — Check-in prompt resolver + personalized welcome function
+- [x] 05-01-PLAN.md — Check-in prompt resolver + personalized welcome function
 - [ ] 05-02-PLAN.md — Weekly focus resolver + wire all into getDashboardState
 
 **UI hint**: no
