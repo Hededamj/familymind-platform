@@ -49,7 +49,7 @@ export default async function Home() {
               <p className="mb-4 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                 Evidensbaseret forældreguide
               </p>
-              <h1 className="font-serif text-4xl leading-tight sm:text-5xl">
+              <h1 className="font-serif text-2xl leading-tight sm:text-4xl lg:text-5xl">
                 {tenant.heroHeading || 'Giv dit barn den bedste start'}
               </h1>
               <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
