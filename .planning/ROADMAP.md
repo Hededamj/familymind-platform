@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Safe Area & Viewport** - Apply safe-area insets to all fixed chrome so the UI is never obscured by notch or home indicator (completed 2026-04-03)
 - [ ] **Phase 2: Layout & Overflow** - Fix structural layout issues so content fits correctly at all screen widths
 - [ ] **Phase 3: Typography, Spacing & Touch** - Polish font sizes, padding, text wrapping and touch targets for a refined mobile feel
-- [ ] **Phase 4: Navigation & PWA** - Ensure consistent app navigation on all user routes and add PWA manifest/meta tags
+- [x] **Phase 4: Navigation & PWA** - Ensure consistent app navigation on all user routes and add PWA manifest/meta tags (completed 2026-04-05)
 
 ## Phase Details
 
@@ -79,8 +79,8 @@ Plans:
   5. The browser chrome on Android matches the app theme color when the app is open
 **Plans**: 2 plans
 Plans:
-- [ ] 04-01-PLAN.md — Add AppLayout to subscribe/content routes and extend topbar/footer hide lists (NAV-01, NAV-02, NAV-03)
-- [ ] 04-02-PLAN.md — Create PWA manifest.json and add apple/theme-color meta tags (PWA-01, PWA-02, PWA-03)
+- [x] 04-01-PLAN.md — Add AppLayout to subscribe/content routes and extend topbar/footer hide lists (NAV-01, NAV-02, NAV-03)
+- [x] 04-02-PLAN.md — Create PWA manifest.json and add apple/theme-color meta tags (PWA-01, PWA-02, PWA-03)
 **UI hint**: yes
 
 ## Progress
@@ -93,4 +93,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 1. Safe Area & Viewport | 2/2 | Complete   | 2026-04-03 |
 | 2. Layout & Overflow | 0/2 | Planned | - |
 | 3. Typography, Spacing & Touch | 0/3 | Planned | - |
-| 4. Navigation & PWA | 0/2 | Planned | - |
+| 4. Navigation & PWA | 2/2 | Complete   | 2026-04-05 |

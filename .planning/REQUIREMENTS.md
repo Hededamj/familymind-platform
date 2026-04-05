@@ -43,9 +43,9 @@ Requirements for mobile-first overhaul. Each maps to roadmap phases.
 
 ### PWA
 
-- [ ] **PWA-01**: Web app manifest med app-navn, ikoner og theme-color
-- [ ] **PWA-02**: Meta tags for standalone webapp (apple-mobile-web-app-capable)
-- [ ] **PWA-03**: Theme-color matcher app-design
+- [x] **PWA-01**: Web app manifest med app-navn, ikoner og theme-color
+- [x] **PWA-02**: Meta tags for standalone webapp (apple-mobile-web-app-capable)
+- [x] **PWA-03**: Theme-color matcher app-design
 
 ## v2 Requirements
 
@@ -96,9 +96,9 @@ Deferred to future milestones.
 | NAV-01 | Phase 4 | Pending |
 | NAV-02 | Phase 4 | Pending |
 | NAV-03 | Phase 4 | Pending |
-| PWA-01 | Phase 4 | Pending |
-| PWA-02 | Phase 4 | Pending |
-| PWA-03 | Phase 4 | Pending |
+| PWA-01 | Phase 4 | Complete |
+| PWA-02 | Phase 4 | Complete |
+| PWA-03 | Phase 4 | Complete |
 
 **Coverage:**
 - v1.0 requirements: 22 total
