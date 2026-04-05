@@ -8,7 +8,7 @@
 ### Personlig Check-in
 
 - [x] **CHECKIN-01**: Dashboard viser dynamisk check-in prompt baseret på brugerens aktive journey eller primære udfordring
-- [ ] **CHECKIN-02**: Brugeren kan skrive en fri-tekst refleksion direkte fra dashboardet
+- [x] **CHECKIN-02**: Brugeren kan skrive en fri-tekst refleksion direkte fra dashboardet
 - [x] **CHECKIN-03**: Check-in prompten skifter afhængigt af dashboard-state (ny bruger, aktiv journey, ingen journey, completed journey)
 
 ### Din Gode Uge
@@ -25,8 +25,8 @@
 ### Visuelt Redesign
 
 - [ ] **VISUAL-01**: Dashboard bruger store indholdskort med afrundede hjørner og illustration/billede
-- [ ] **VISUAL-02**: Check-in sektion har visuelt fremhævet container (inspireret af konkurrents gule boks)
-- [ ] **VISUAL-03**: Sektioner har tydelige overskrifter og sekundær tekst (f.eks. "Nyt hver mandag")
+- [x] **VISUAL-02**: Check-in sektion har visuelt fremhævet container (inspireret af konkurrents gule boks)
+- [x] **VISUAL-03**: Sektioner har tydelige overskrifter og sekundær tekst (f.eks. "Nyt hver mandag")
 
 ## v2 Requirements
 
@@ -50,7 +50,7 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | CHECKIN-01 | Phase 5 | Complete |
-| CHECKIN-02 | Phase 6 | Pending |
+| CHECKIN-02 | Phase 6 | Complete |
 | CHECKIN-03 | Phase 5 | Complete |
 | WEEK-01 | Phase 5 | Complete |
 | WEEK-02 | Phase 6 | Pending |
@@ -58,8 +58,8 @@
 | CONTEXT-01 | Phase 5 | Complete |
 | CONTEXT-02 | Phase 5 | Complete |
 | VISUAL-01 | Phase 6 | Pending |
-| VISUAL-02 | Phase 6 | Pending |
-| VISUAL-03 | Phase 6 | Pending |
+| VISUAL-02 | Phase 6 | Complete |
+| VISUAL-03 | Phase 6 | Complete |
 
 **Coverage:**
 - v1.1 requirements: 11 total

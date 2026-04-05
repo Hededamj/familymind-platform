@@ -45,10 +45,10 @@ Plans:
   3. The check-in section is visually distinguished from surrounding content (prominent coloured or elevated container)
   4. Each dashboard section has a clear heading and supporting secondary text (e.g. "Din gode uge" with "Nyt hver mandag")
   5. All dashboard cards use rounded corners and adequate spacing — the overall layout feels polished on a 375px screen
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
-- [ ] 06-01-PLAN.md — Check-in component, server action, and section heading
+- [x] 06-01-PLAN.md — Check-in component, server action, and section heading
 - [ ] 06-02-PLAN.md — Weekly focus card and dashboard page restructuring
 
 **UI hint**: yes
@@ -61,4 +61,4 @@ Phases execute in numeric order: 5 → 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 5. Dashboard Service Layer | 0/2 | Not started | - |
-| 6. Dashboard UI Redesign | 0/2 | Not started | - |
+| 6. Dashboard UI Redesign | 1/2 | In Progress|  |
