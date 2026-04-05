@@ -77,7 +77,10 @@ Plans:
   3. Back navigation works correctly on all sub-pages — tapping back returns to the expected previous screen
   4. Adding the app to the iOS home screen shows the correct app name, icon and theme color
   5. The browser chrome on Android matches the app theme color when the app is open
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 04-01-PLAN.md — Add AppLayout to subscribe/content routes and extend topbar/footer hide lists (NAV-01, NAV-02, NAV-03)
+- [ ] 04-02-PLAN.md — Create PWA manifest.json and add apple/theme-color meta tags (PWA-01, PWA-02, PWA-03)
 **UI hint**: yes
 
 ## Progress
@@ -90,4 +93,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 1. Safe Area & Viewport | 2/2 | Complete   | 2026-04-03 |
 | 2. Layout & Overflow | 0/2 | Planned | - |
 | 3. Typography, Spacing & Touch | 0/3 | Planned | - |
-| 4. Navigation & PWA | 0/? | Not started | - |
+| 4. Navigation & PWA | 0/2 | Planned | - |
