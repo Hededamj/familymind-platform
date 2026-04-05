@@ -49,6 +49,9 @@ export async function generateMetadata(): Promise<Metadata> {
     title: tenant.brandName,
     description: tenant.description || tenant.tagline || '',
     manifest: '/manifest.json',
+    icons: {
+      apple: '/images/icon-512.png',
+    },
     other: {
       'apple-mobile-web-app-capable': 'yes',
       'apple-mobile-web-app-status-bar-style': 'default',
