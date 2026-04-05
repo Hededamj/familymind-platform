@@ -11,7 +11,15 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Plus, ImageIcon } from 'lucide-react'
+import { Plus, Video, Headphones, FileText, Type } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+
+const mediaTypeIcons: Record<string, LucideIcon> = {
+  VIDEO: Video,
+  AUDIO: Headphones,
+  PDF: FileText,
+  TEXT: Type,
+}
 import { ContentActions } from './_components/content-actions'
 
 const mediaTypeLabels: Record<string, string> = {
@@ -92,11 +100,14 @@ export default async function ContentListPage() {
                         alt={unit.title}
                         className="h-10 w-16 rounded object-cover"
                       />
-                    ) : (
-                      <div className="flex h-10 w-16 items-center justify-center rounded bg-muted">
-                        <ImageIcon className="size-4 text-muted-foreground" />
-                      </div>
-                    )}
+                    ) : (() => {
+                      const Icon = mediaTypeIcons[unit.mediaType] ?? FileText
+                      return (
+                        <div className="flex h-10 w-16 items-center justify-center rounded bg-muted">
+                          <Icon className="size-4 text-muted-foreground" />
+                        </div>
+                      )
+                    })()}
                   </TableCell>
                   <TableCell className="font-medium">
                     {unit.title}
