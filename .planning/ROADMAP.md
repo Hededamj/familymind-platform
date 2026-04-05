@@ -60,7 +60,11 @@ Plans:
   3. Long community posts with no spaces wrap and hyphenate correctly — no horizontal overflow
   4. Every button, link and interactive element has a tap target of at least 44px
   5. Horizontal scroll carousels scroll smoothly without a visible scrollbar on iOS and Android
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 03-01-PLAN.md — Fix hero and progress page heading responsive sizes (TYPO-01, TYPO-02, TYPO-04)
+- [ ] 03-02-PLAN.md — Add break-words/hyphens to community posts and line-clamp to community cards (TYPO-03, TOUCH-03)
+- [ ] 03-03-PLAN.md — Add min-h-[44px] touch targets to buttons and community pill links (TOUCH-01, TOUCH-02)
 **UI hint**: yes
 
 ### Phase 4: Navigation & PWA
@@ -85,5 +89,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. Safe Area & Viewport | 2/2 | Complete   | 2026-04-03 |
 | 2. Layout & Overflow | 0/2 | Planned | - |
-| 3. Typography, Spacing & Touch | 0/? | Not started | - |
+| 3. Typography, Spacing & Touch | 0/3 | Planned | - |
 | 4. Navigation & PWA | 0/? | Not started | - |
