@@ -13,9 +13,9 @@
 
 ### Din Gode Uge
 
-- [ ] **WEEK-01**: Dashboard viser "Din gode uge" sektion med de næste dage fra aktiv journey
+- [x] **WEEK-01**: Dashboard viser "Din gode uge" sektion med de næste dage fra aktiv journey
 - [ ] **WEEK-02**: Dagens fokus vises som et stort visuelt indholdskort med titel og beskrivelse
-- [ ] **WEEK-03**: Ugeoversigten viser progress (X af Y dage denne uge)
+- [x] **WEEK-03**: Ugeoversigten viser progress (X af Y dage denne uge)
 
 ### Dashboard Kontekst
 
@@ -52,9 +52,9 @@
 | CHECKIN-01 | Phase 5 | Complete |
 | CHECKIN-02 | Phase 6 | Pending |
 | CHECKIN-03 | Phase 5 | Complete |
-| WEEK-01 | Phase 5 | Pending |
+| WEEK-01 | Phase 5 | Complete |
 | WEEK-02 | Phase 6 | Pending |
-| WEEK-03 | Phase 5 | Pending |
+| WEEK-03 | Phase 5 | Complete |
 | CONTEXT-01 | Phase 5 | Complete |
 | CONTEXT-02 | Phase 5 | Complete |
 | VISUAL-01 | Phase 6 | Pending |
