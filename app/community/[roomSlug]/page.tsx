@@ -119,7 +119,7 @@ export default async function RoomFeedPage({ params }: Props) {
                   </div>
 
                   {/* Body preview */}
-                  <p className="text-sm leading-relaxed text-foreground/90">
+                  <p className="text-sm leading-relaxed text-foreground/90 line-clamp-2">
                     {bodyPreview}
                   </p>
 

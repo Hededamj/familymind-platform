@@ -54,7 +54,7 @@ export default async function CommunityPage() {
                     <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-accent text-accent-foreground">
                       <Icon className="size-5" />
                     </div>
-                    <h2 className="font-serif text-lg text-foreground group-hover:text-accent-foreground">
+                    <h2 className="font-serif text-lg text-foreground group-hover:text-accent-foreground line-clamp-1">
                       {room.name}
                     </h2>
                   </div>
