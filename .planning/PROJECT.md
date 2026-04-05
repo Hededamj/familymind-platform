@@ -24,16 +24,20 @@ Forældre skal have en smooth, native-lignende mobiloplevelse der gør det nemt 
 - ✓ Multi-tenant med Stripe Connect — v0
 - ✓ GDPR-compliant video hosting via Bunny.net — v0
 - ✓ Admin-panel med fuld CMS-funktionalitet — v0
+- ✓ Mobile-first layout med safe-area håndtering — v1.0
+- ✓ Responsive typography og spacing — v1.0
+- ✓ Touch-optimeret UI (44px targets) — v1.0
+- ✓ Konsistent navigation på alle bruger-routes — v1.0
+- ✓ PWA (manifest, viewport, theme-color) — v1.0
 
 ### Active
 
 <!-- Current scope. Building toward these. -->
 
-- [ ] Mobile-first layout med safe-area håndtering
-- [ ] Responsive typography og spacing på alle bruger-sider
-- [ ] Touch-optimeret UI (44px targets, smooth interactions)
-- [ ] Konsistent navigation på alle bruger-routes
-- [ ] PWA-forberedelse (manifest, viewport, theme-color)
+- [ ] Personlig check-in prompt baseret på brugerens udfordring/aktive journey
+- [ ] "Din gode uge" sektion med denne uges fokus fra aktiv journey
+- [ ] Dynamiske dashboard-beskeder der afspejler brugerens kontekst
+- [ ] Visuelt opdateret dashboard med store indholdskort
 
 ### Out of Scope
 
@@ -42,18 +46,18 @@ Forældre skal have en smooth, native-lignende mobiloplevelse der gør det nemt 
 - Push notifications — Separat projekt, kræver Service Workers + backend
 - Native app (Capacitor) — Fokusér på webapp-kvalitet først
 - Redesign af admin-panel — Admin er desktop-only, lav prioritet
-- Nye features (AI chat, gamification) — Først polish, så features
+- AI chat/assistent — Interessant men for komplekst til denne milestone
+- Admin-konfigurerbart PWA app-ikon — Parkeret til næste milestone
 
-## Current Milestone: v1.0 Mobile-First Overhaul
+## Current Milestone: v1.1 Personlig Dashboard
 
-**Goal:** Gør FamilyMind til en poleret mobile webapp der føles native.
+**Goal:** Gør dashboardet personligt og engagerende ved at bruge onboarding-data og journey-status til dynamiske check-in prompts og ugentligt indhold.
 
 **Target features:**
-- Safe-area håndtering (notch, home indicator) på alle sider
-- Responsive layout fixes (overflow, padding, typography)
-- Touch-optimerede interaktioner
-- Konsistent navigation på alle bruger-routes
-- PWA-forberedelse
+- Personlig check-in prompt baseret på brugerens udfordring/aktive journey
+- "Din gode uge" sektion med denne uges fokus fra aktiv journey
+- Dynamiske dashboard-beskeder der afspejler brugerens kontekst
+- Visuelt opdateret dashboard med store indholdskort
 
 ## Context
 
@@ -99,4 +103,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-03 after milestone v1.0 initialization*
+*Last updated: 2026-04-05 after milestone v1.1 initialization*

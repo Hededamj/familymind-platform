@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: verifying
-stopped_at: Completed 04-navigation-pwa 04-01-PLAN.md
-last_updated: "2026-04-05T10:27:31.183Z"
+milestone: v1.1
+milestone_name: Personlig Dashboard
+status: defining_requirements
+stopped_at: Defining requirements for v1.1
+last_updated: "2026-04-05"
 last_activity: 2026-04-05
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 9
-  completed_plans: 9
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
   percent: 0
 ---
 
@@ -18,17 +18,17 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-03)
+See: .planning/PROJECT.md (updated 2026-04-05)
 
 **Core value:** Forældre skal have en smooth, native-lignende mobiloplevelse
-**Current focus:** Phase 04 — Navigation & PWA
+**Current focus:** Personlig Dashboard
 
 ## Current Position
 
-Phase: 04
-Plan: Not started
-Status: Phase complete — ready for verification
-Last activity: 2026-04-05
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-05 — Milestone v1.1 started
 
 Progress: [░░░░░░░░░░] 0%
 
