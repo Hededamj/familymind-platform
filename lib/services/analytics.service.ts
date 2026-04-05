@@ -58,7 +58,7 @@ export async function getOverviewStats(orgId: string, period: Period) {
     where: { user: orgFilter, status: 'ACTIVE', stripeSubscriptionId: { not: null } },
     include: { product: { select: { priceAmountCents: true } } },
   })
-  const mrr = subscriptionEntitlements.reduce((sum, e) => sum + e.product.priceAmountCents, 0)
+  const mrr = subscriptionEntitlements.reduce((sum, e) => sum + (e.paidAmountCents ?? e.product.priceAmountCents), 0)
 
   // Onboarding rate
   const [newSignups, onboarded] = await Promise.all([
@@ -339,21 +339,21 @@ export async function getEconomyStats(orgId: string, period: Period) {
     where: { user: orgFilter, status: 'ACTIVE', stripeSubscriptionId: { not: null } },
     include: { product: { select: { priceAmountCents: true, title: true } } },
   })
-  const mrr = activeSubscriptions.reduce((sum, e) => sum + e.product.priceAmountCents, 0)
+  const mrr = activeSubscriptions.reduce((sum, e) => sum + (e.paidAmountCents ?? e.product.priceAmountCents), 0)
 
   // New MRR (new subscriptions in period)
   const newSubscriptions = await prisma.entitlement.findMany({
     where: { user: orgFilter, status: 'ACTIVE', stripeSubscriptionId: { not: null }, createdAt: { gte: since } },
     include: { product: { select: { priceAmountCents: true } } },
   })
-  const newMrr = newSubscriptions.reduce((sum, e) => sum + e.product.priceAmountCents, 0)
+  const newMrr = newSubscriptions.reduce((sum, e) => sum + (e.paidAmountCents ?? e.product.priceAmountCents), 0)
 
   // Lost MRR (cancelled in period)
   const cancelledSubscriptions = await prisma.entitlement.findMany({
     where: { user: orgFilter, status: 'CANCELLED', stripeSubscriptionId: { not: null }, createdAt: { gte: since } },
     include: { product: { select: { priceAmountCents: true } } },
   })
-  const lostMrr = cancelledSubscriptions.reduce((sum, e) => sum + e.product.priceAmountCents, 0)
+  const lostMrr = cancelledSubscriptions.reduce((sum, e) => sum + (e.paidAmountCents ?? e.product.priceAmountCents), 0)
 
   // Revenue by product
   const allEntitlements = await prisma.entitlement.findMany({
@@ -363,7 +363,7 @@ export async function getEconomyStats(orgId: string, period: Period) {
   const revenueByProduct = new Map<string, { title: string; revenue: number }>()
   for (const e of allEntitlements) {
     const existing = revenueByProduct.get(e.product.id) ?? { title: e.product.title, revenue: 0 }
-    existing.revenue += e.product.priceAmountCents
+    existing.revenue += e.paidAmountCents ?? e.product.priceAmountCents
     revenueByProduct.set(e.product.id, existing)
   }
   const revenuePerProduct = Array.from(revenueByProduct.values())
@@ -372,7 +372,7 @@ export async function getEconomyStats(orgId: string, period: Period) {
   // MRR trend (approximate by counting active subscriptions per week)
   const allSubs = await prisma.entitlement.findMany({
     where: { user: orgFilter, stripeSubscriptionId: { not: null }, createdAt: { gte: since } },
-    select: { createdAt: true, status: true, product: { select: { priceAmountCents: true } } },
+    select: { createdAt: true, status: true, paidAmountCents: true, product: { select: { priceAmountCents: true } } },
   })
   const mrrByWeek = new Map<string, number>()
   for (const e of allSubs) {
@@ -380,7 +380,8 @@ export async function getEconomyStats(orgId: string, period: Period) {
     const weekStart = new Date(d)
     weekStart.setDate(d.getDate() - d.getDay())
     const key = weekStart.toISOString().slice(0, 10)
-    const amount = e.status === 'CANCELLED' ? -e.product.priceAmountCents : e.product.priceAmountCents
+    const paid = e.paidAmountCents ?? e.product.priceAmountCents
+    const amount = e.status === 'CANCELLED' ? -paid : paid
     mrrByWeek.set(key, (mrrByWeek.get(key) ?? 0) + amount)
   }
   const mrrTrend = Array.from(mrrByWeek.entries())
@@ -395,7 +396,7 @@ export async function getEconomyStats(orgId: string, period: Period) {
     where: { user: orgFilter },
     include: { product: { select: { priceAmountCents: true } } },
   })
-  const totalRevenueAmount = totalRevenue.reduce((sum, e) => sum + e.product.priceAmountCents, 0)
+  const totalRevenueAmount = totalRevenue.reduce((sum, e) => sum + (e.paidAmountCents ?? e.product.priceAmountCents), 0)
   const avgLtv = totalPayingUsers > 0 ? Math.round(totalRevenueAmount / totalPayingUsers) : 0
 
   const activeUsers = await prisma.user.count({

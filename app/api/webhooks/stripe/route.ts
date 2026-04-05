@@ -73,6 +73,9 @@ export async function POST(req: Request) {
       })
       if (existingEntitlement) break // Already processed
 
+      const paidAmountCents = session.amount_total ?? undefined
+      const paidCurrency = session.currency?.toUpperCase() ?? undefined
+
       if (product.type === 'SUBSCRIPTION') {
         await createEntitlement({
           userId,
@@ -80,6 +83,8 @@ export async function POST(req: Request) {
           source: 'SUBSCRIPTION',
           stripeSubscriptionId: session.subscription as string,
           stripeCheckoutSessionId: session.id,
+          paidAmountCents,
+          paidCurrency,
         })
       } else if (product.type === 'BUNDLE') {
         // Atomic: create bundle + included product entitlements in one transaction
@@ -89,6 +94,8 @@ export async function POST(req: Request) {
             productId,
             source: 'PURCHASE',
             stripeCheckoutSessionId: session.id,
+            paidAmountCents,
+            paidCurrency,
           }, tx)
           for (const item of product.bundleItems) {
             await createEntitlement({
@@ -105,6 +112,8 @@ export async function POST(req: Request) {
           productId,
           source: 'PURCHASE',
           stripeCheckoutSessionId: session.id,
+          paidAmountCents,
+          paidCurrency,
         })
       }
 

@@ -342,6 +342,8 @@ model Entitlement {
   status                  EntitlementStatus @default(ACTIVE)
   stripeSubscriptionId    String?
   stripeCheckoutSessionId String?           @unique
+  paidAmountCents         Int?              // Faktisk betalt beløb (efter rabat), sat fra Stripe webhook
+  paidCurrency            String?           // Valuta, f.eks. "DKK"
   expiresAt               DateTime?
   createdAt               DateTime          @default(now())
 

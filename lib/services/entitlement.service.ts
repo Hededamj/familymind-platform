@@ -17,6 +17,8 @@ export async function createEntitlement(
     stripeCheckoutSessionId?: string
     organizationId?: string
     expiresAt?: Date
+    paidAmountCents?: number
+    paidCurrency?: string
   },
   tx?: Parameters<Parameters<typeof prisma.$transaction>[0]>[0]
 ) {
