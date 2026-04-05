@@ -55,14 +55,14 @@ export function CourseProgressCard({
 
         {/* Continue button */}
         {nextLesson ? (
-          <Button asChild className="w-full" size="sm">
+          <Button asChild className="w-full min-h-[44px]" size="sm">
             <Link href={`/content/${nextLesson.slug}`}>
               Fortsæt
               <ArrowRight className="ml-2 size-4" />
             </Link>
           </Button>
         ) : (
-          <Button asChild variant="outline" className="w-full" size="sm">
+          <Button asChild variant="outline" className="w-full min-h-[44px]" size="sm">
             <Link href={`/products/${product.slug}`}>Se kursus</Link>
           </Button>
         )}

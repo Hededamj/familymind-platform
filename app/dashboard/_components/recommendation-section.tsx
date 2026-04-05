@@ -63,7 +63,7 @@ export function RecommendationSection({
                 )}
               </CardHeader>
               <CardContent className="mt-auto">
-                <Button asChild variant="outline" className="w-full" size="sm">
+                <Button asChild variant="outline" className="w-full min-h-[44px]" size="sm">
                   <Link href={href}>
                     {ctaLabel}
                     <ArrowRight className="ml-2 size-4" />
