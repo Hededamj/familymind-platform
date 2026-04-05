@@ -28,6 +28,8 @@ export function Footer({ brandName, logoUrl, tagline, description, contactUrl, f
     pathname?.startsWith('/browse') ||
     pathname?.startsWith('/products') ||
     pathname?.startsWith('/community') ||
+    pathname?.startsWith('/subscribe') ||
+    pathname?.startsWith('/content') ||
     (pathname?.includes('/day/'))
   ) {
     return null

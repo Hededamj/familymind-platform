@@ -47,6 +47,8 @@ export function Topbar({ brandName, logoUrl }: Props) {
   if (pathname?.startsWith('/browse') && isLoggedIn) return null
   if (pathname?.startsWith('/products') && isLoggedIn) return null
   if (pathname?.startsWith('/community') && isLoggedIn) return null
+  if (pathname?.startsWith('/subscribe') && isLoggedIn) return null
+  if (pathname?.startsWith('/content') && isLoggedIn) return null
 
   const isAuthPage = pathname === '/login' || pathname === '/signup'
   const nav = isLoggedIn ? authNav : publicNav
