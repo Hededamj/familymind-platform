@@ -10,6 +10,20 @@ export type DashboardState =
   | 'no_journey_has_courses'
   | 'completed_journey'
 
+export interface WeeklyFocus {
+  days: Array<{
+    id: string
+    title: string | null
+    position: number
+    phaseTitle: string
+    completed: boolean
+    isCurrent: boolean
+  }>
+  completedCount: number
+  totalCount: number
+  currentDay: { id: string; title: string | null; position: number; phaseTitle: string } | null
+}
+
 export async function getCheckInPrompt(userId: string): Promise<string> {
   const activeJourney = await getUserActiveJourney(userId)
 
@@ -116,6 +130,55 @@ export async function getPersonalizedWelcome(
   }
 }
 
+export async function getWeeklyFocus(userId: string): Promise<WeeklyFocus | null> {
+  const activeJourney = await getUserActiveJourney(userId)
+
+  if (!activeJourney || !activeJourney.currentDayId) {
+    return null
+  }
+
+  // Flatten all days preserving phase title per day
+  const allDays = activeJourney.journey.phases.flatMap(p =>
+    p.days.map(d => ({ ...d, phaseTitle: p.title ?? '' }))
+  )
+
+  const currentIndex = allDays.findIndex(d => d.id === activeJourney.currentDayId)
+  if (currentIndex === -1) {
+    return null
+  }
+
+  // Window: current day + up to 6 more (7 days total)
+  const windowDays = allDays.slice(currentIndex, currentIndex + 7)
+
+  // Build set of completed day IDs from check-ins
+  const completedDayIds = new Set(activeJourney.checkIns.map(c => c.dayId))
+
+  // Map window to include completed and isCurrent flags
+  const days = windowDays.map(d => ({
+    id: d.id,
+    title: d.title ?? null,
+    position: d.position,
+    phaseTitle: d.phaseTitle,
+    completed: completedDayIds.has(d.id),
+    isCurrent: d.id === activeJourney.currentDayId,
+  }))
+
+  // Count completed days within the window only
+  const completedCount = days.filter(d => d.completed).length
+
+  const firstDay = days[0]
+  const currentDay = firstDay
+    ? { id: firstDay.id, title: firstDay.title, position: firstDay.position, phaseTitle: firstDay.phaseTitle }
+    : null
+
+  return {
+    days,
+    completedCount,
+    totalCount: days.length,
+    currentDay,
+  }
+}
+
 export async function getDashboardState(userId: string) {
   const [activeJourney, inProgressCourses, recommendations, recentlyCompleted] =
     await Promise.all([
@@ -146,9 +209,19 @@ export async function getDashboardState(userId: string) {
   // Load dashboard message for this state
   const message = await prisma.dashboardMessage.findUnique({ where: { stateKey } })
 
+  // Resolve all personalized fields in parallel
+  const [checkInPrompt, weeklyFocus, personalizedWelcome] = await Promise.all([
+    getCheckInPrompt(userId),
+    getWeeklyFocus(userId),
+    getPersonalizedWelcome(userId, stateKey),
+  ])
+
   return {
     stateKey,
     message,
+    checkInPrompt,
+    weeklyFocus,
+    personalizedWelcome,
     activeJourney,
     journeyProgress,
     inProgressCourses,
