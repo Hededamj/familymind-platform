@@ -91,7 +91,7 @@ export default async function SinglePostPage({ params }: Props) {
             </div>
 
             {/* Body */}
-            <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90 sm:text-base">
+            <p className="whitespace-pre-wrap break-words hyphens-auto text-sm leading-relaxed text-foreground/90 sm:text-base">
               {post.body}
             </p>
 
@@ -129,7 +129,7 @@ export default async function SinglePostPage({ params }: Props) {
                         {formatRelativeTime(reply.createdAt)}
                       </time>
                     </div>
-                    <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">
+                    <p className="whitespace-pre-wrap break-words hyphens-auto text-sm leading-relaxed text-foreground/90">
                       {reply.body}
                     </p>
                   </div>
