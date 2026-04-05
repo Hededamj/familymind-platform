@@ -32,7 +32,7 @@ export function CommunityPills({ rooms }: { rooms: Room[] }) {
             <Link
               key={room.id}
               href={`/community/${room.slug}`}
-              className="flex items-center gap-1.5 rounded-full border border-[var(--color-border)] bg-white px-3 py-1.5 hover:bg-[var(--color-sand)] hover:text-[var(--foreground)]"
+              className="flex min-h-[44px] items-center gap-1.5 rounded-full border border-[var(--color-border)] bg-white px-3 py-1.5 hover:bg-[var(--color-sand)] hover:text-[var(--foreground)]"
             >
               <Icon className="size-3.5 text-muted-foreground" />
               <span className="text-xs font-medium sm:text-sm">{room.name}</span>
