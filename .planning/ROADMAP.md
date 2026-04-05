@@ -27,7 +27,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. The welcome message on the dashboard reflects the user's onboarding data (e.g. child age group, challenge area)
   4. The "Din gode uge" section resolves the upcoming days from the user's active journey with a completed-day count (e.g. "2 af 5 dage")
   5. Dashboard messages can be updated by an admin in the existing CMS without a code deploy
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 05-01-PLAN.md — Check-in prompt resolver + personalized welcome function
+- [ ] 05-02-PLAN.md — Weekly focus resolver + wire all into getDashboardState
+
 **UI hint**: no
 
 ### Phase 6: Dashboard UI Redesign
@@ -50,5 +55,5 @@ Phases execute in numeric order: 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 5. Dashboard Service Layer | 0/? | Not started | - |
+| 5. Dashboard Service Layer | 0/2 | Not started | - |
 | 6. Dashboard UI Redesign | 0/? | Not started | - |
