@@ -40,6 +40,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
+  themeColor: '#1A1A1A',
 }
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -47,6 +48,13 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: tenant.brandName,
     description: tenant.description || tenant.tagline || '',
+    manifest: '/manifest.json',
+    other: {
+      'apple-mobile-web-app-capable': 'yes',
+      'apple-mobile-web-app-status-bar-style': 'default',
+      'apple-mobile-web-app-title': tenant.brandName,
+      'mobile-web-app-capable': 'yes',
+    },
   }
 }
 
