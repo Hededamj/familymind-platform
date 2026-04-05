@@ -49,23 +49,23 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CHECKIN-01 | — | Pending |
-| CHECKIN-02 | — | Pending |
-| CHECKIN-03 | — | Pending |
-| WEEK-01 | — | Pending |
-| WEEK-02 | — | Pending |
-| WEEK-03 | — | Pending |
-| CONTEXT-01 | — | Pending |
-| CONTEXT-02 | — | Pending |
-| VISUAL-01 | — | Pending |
-| VISUAL-02 | — | Pending |
-| VISUAL-03 | — | Pending |
+| CHECKIN-01 | Phase 5 | Pending |
+| CHECKIN-02 | Phase 6 | Pending |
+| CHECKIN-03 | Phase 5 | Pending |
+| WEEK-01 | Phase 5 | Pending |
+| WEEK-02 | Phase 6 | Pending |
+| WEEK-03 | Phase 5 | Pending |
+| CONTEXT-01 | Phase 5 | Pending |
+| CONTEXT-02 | Phase 5 | Pending |
+| VISUAL-01 | Phase 6 | Pending |
+| VISUAL-02 | Phase 6 | Pending |
+| VISUAL-03 | Phase 6 | Pending |
 
 **Coverage:**
 - v1.1 requirements: 11 total
-- Mapped to phases: 0
-- Unmapped: 11
+- Mapped to phases: 11
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-05*
-*Last updated: 2026-04-05 after initial definition*
+*Last updated: 2026-04-05 after roadmap creation*

@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Personlig Dashboard
-status: defining_requirements
-stopped_at: Defining requirements for v1.1
+status: roadmap_defined
+stopped_at: Roadmap created — ready to plan Phase 5
 last_updated: "2026-04-05"
 last_activity: 2026-04-05
 progress:
-  total_phases: 0
+  total_phases: 2
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-05)
 
 **Core value:** Forældre skal have en smooth, native-lignende mobiloplevelse
-**Current focus:** Personlig Dashboard
+**Current focus:** Personlig Dashboard — dynamiske check-in prompts, ugentligt indhold, visuelt redesign
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: Phase 5 — Dashboard Service Layer (not started)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-04-05 — Milestone v1.1 started
+Status: Roadmap defined, ready to plan
+Last activity: 2026-04-05 — Roadmap for v1.1 created
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -52,6 +52,8 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: —
 
 *Updated after each plan completion*
+
+Previous milestone velocity (v1.0):
 | Phase 01-safe-area-viewport P01 | 8 | 2 tasks | 3 files |
 | Phase 01-safe-area-viewport P02 | 8min | 2 tasks | 2 files |
 | Phase 02-layout-overflow P02 | 1min | 1 tasks | 1 files |
@@ -69,26 +71,17 @@ Progress: [░░░░░░░░░░] 0%
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- Milestone v1.0: 4-phase structure derived from 22 requirements — safe area foundation first, then layout, then typography/touch, then navigation/PWA
-- [Phase 01-safe-area-viewport]: Use Next.js viewport export for viewport-fit=cover (not meta tag) — canonical App Router approach
-- [Phase 01-safe-area-viewport]: Safe-area chrome: remove h-14, use style prop with calc(3.5rem + env(safe-area-inset-*, 0px))
-- [Phase 01-safe-area-viewport]: Use inline style prop (not Tailwind class) for env() values — Tailwind 4 cannot generate dynamic calc with env() at compile time
-- [Phase 01-safe-area-viewport]: Tab-bar-clearing sticky button pattern: calc(3.5rem + env(safe-area-inset-bottom, 0px) + 1rem)
-- [Phase 02-layout-overflow]: 3-cell monthly stat grid kept at grid-cols-3 since cells hold only numeric values with single-word labels, no overflow risk
-- [Phase 02-layout-overflow]: LAYOUT-02 verified across all pages: dashboard max-w-2xl, browse max-w-4xl, community max-w-3xl, journeys max-w-2xl, content max-w-3xl, progress max-w-2xl
-- [Phase 02-layout-overflow]: Use overflow-hidden on base Card component so all consumers inherit clipping without individual fixes
-- [Phase 02-layout-overflow]: Apply min-w-0 to flex text containers alongside overflow-hidden to prevent flex children overflowing parents
-- [Phase 03-typography-spacing-touch]: Use break-words + hyphens-auto together on UGC paragraphs — handles both ASCII overflow and Danish compound word hyphenation via lang=da on root html
-- [Phase 03-typography-spacing-touch]: line-clamp-1 on room card names and line-clamp-2 on feed previews for consistent card layouts in community grid
-- [Phase 03-typography-spacing-touch]: min-h-[44px] added to className alongside size prop — avoids overriding shadcn Button size styles while meeting iOS/Android 44px tap target minimum
-- [Phase 03-typography-spacing-touch]: TOUCH-02 satisfied by confirming scrollbar-none utility in globals.css — no horizontal scroll areas in app, no file changes needed
-- [Phase 03-typography-spacing-touch]: Responsive heading pattern: start one size smaller on mobile, step up at sm breakpoint, optional lg step for hero headings
-- [Phase 03-typography-spacing-touch]: Progress section h2s drop one Tailwind step at mobile base to maintain visual hierarchy when h1 also shrinks
-- [Phase 04-navigation-pwa]: theme_color #1A1A1A in manifest.json matches app dark topbar/footer (brand identity), not primary purple #5C6AC4
-- [Phase 04-navigation-pwa]: manifest.json uses hardcoded values — static file served before JS, cannot read from DB
-- [Phase 04-navigation-pwa]: topbar guards for /subscribe and /content use && isLoggedIn — semi-public routes still show marketing bar to unauthenticated visitors
-- [Phase 04-navigation-pwa]: footer guards for /subscribe and /content are unconditional — marketing footer inappropriate on full-bleed app pages regardless of auth state
-- [Phase 04-navigation-pwa]: NAV-03 (back button) auto-satisfied by topLevelRoutes array in app-topbar.tsx — no change needed
+- Milestone v1.1: 2-phase structure — service layer before UI (nothing to render without resolved data)
+- Existing models in scope: UserProfile, UserJourney, DashboardMessage, CheckInOption — no schema changes permitted
+- Dashboard state machine: 4 states — new user, active journey, no journey, completed journey (drives check-in prompt logic)
+- Admin-configurable messages use existing DashboardMessage model — no new CMS needed
+
+Carried from v1.0:
+- Use inline style prop (not Tailwind class) for env() values — Tailwind 4 cannot generate dynamic calc with env() at compile time
+- Tab-bar-clearing sticky button pattern: calc(3.5rem + env(safe-area-inset-bottom, 0px) + 1rem)
+- break-words + hyphens-auto on UGC paragraphs — handles Danish compound words via lang=da on root html
+- min-h-[44px] added alongside size prop for touch targets — does not override shadcn Button size styles
+- theme_color #1A1A1A in manifest.json matches app dark topbar (brand identity)
 
 ### Pending Todos
 
@@ -96,11 +89,11 @@ None yet.
 
 ### Blockers/Concerns
 
-- Mobile audit found 4 critical issues — all captured in SAFE-01..04 (Phase 1 priority)
-- Some layout fixes already shipped (min-w-0, community pills, banner text) — verify these during Phase 2 to avoid duplicate work
+- Phase 6 UI depends on Phase 5 service functions being available — do not start Phase 6 plans until Phase 5 is complete
+- Check-in free-text flow (CHECKIN-02) must integrate with existing CheckIn data model — verify schema before planning Phase 6
 
 ## Session Continuity
 
-Last session: 2026-04-05T10:26:58.642Z
-Stopped at: Completed 04-navigation-pwa 04-01-PLAN.md
+Last session: 2026-04-05
+Stopped at: Roadmap created
 Resume file: None
