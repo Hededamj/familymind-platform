@@ -31,9 +31,9 @@ Requirements for mobile-first overhaul. Each maps to roadmap phases.
 
 ### Navigation
 
-- [ ] **NAV-01**: Alle bruger-routes har AppLayout med bottom tab bar og sidebar
-- [ ] **NAV-02**: Topbar og footer skjules korrekt for indloggede brugere på app-routes
-- [ ] **NAV-03**: Back-button fungerer korrekt på alle sub-sider
+- [x] **NAV-01**: Alle bruger-routes har AppLayout med bottom tab bar og sidebar
+- [x] **NAV-02**: Topbar og footer skjules korrekt for indloggede brugere på app-routes
+- [x] **NAV-03**: Back-button fungerer korrekt på alle sub-sider
 
 ### Touch & Interaction
 
@@ -93,9 +93,9 @@ Deferred to future milestones.
 | TOUCH-01 | Phase 3 | Complete |
 | TOUCH-02 | Phase 3 | Complete |
 | TOUCH-03 | Phase 3 | Complete |
-| NAV-01 | Phase 4 | Pending |
-| NAV-02 | Phase 4 | Pending |
-| NAV-03 | Phase 4 | Pending |
+| NAV-01 | Phase 4 | Complete |
+| NAV-02 | Phase 4 | Complete |
+| NAV-03 | Phase 4 | Complete |
 | PWA-01 | Phase 4 | Complete |
 | PWA-02 | Phase 4 | Complete |
 | PWA-03 | Phase 4 | Complete |

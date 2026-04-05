@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: verifying
-stopped_at: Completed 04-navigation-pwa 04-02-PLAN.md
-last_updated: "2026-04-05T10:26:47.260Z"
+stopped_at: Completed 04-navigation-pwa 04-01-PLAN.md
+last_updated: "2026-04-05T10:26:58.647Z"
 last_activity: 2026-04-05
 progress:
   total_phases: 4
@@ -86,6 +86,9 @@ Recent decisions affecting current work:
 - [Phase 03-typography-spacing-touch]: Progress section h2s drop one Tailwind step at mobile base to maintain visual hierarchy when h1 also shrinks
 - [Phase 04-navigation-pwa]: theme_color #1A1A1A in manifest.json matches app dark topbar/footer (brand identity), not primary purple #5C6AC4
 - [Phase 04-navigation-pwa]: manifest.json uses hardcoded values — static file served before JS, cannot read from DB
+- [Phase 04-navigation-pwa]: topbar guards for /subscribe and /content use && isLoggedIn — semi-public routes still show marketing bar to unauthenticated visitors
+- [Phase 04-navigation-pwa]: footer guards for /subscribe and /content are unconditional — marketing footer inappropriate on full-bleed app pages regardless of auth state
+- [Phase 04-navigation-pwa]: NAV-03 (back button) auto-satisfied by topLevelRoutes array in app-topbar.tsx — no change needed
 
 ### Pending Todos
 
@@ -98,6 +101,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-05T10:26:35.304Z
-Stopped at: Completed 04-navigation-pwa 04-02-PLAN.md
+Last session: 2026-04-05T10:26:58.642Z
+Stopped at: Completed 04-navigation-pwa 04-01-PLAN.md
 Resume file: None
