@@ -344,6 +344,7 @@ export async function getConversionStats(orgId: string, period: Period) {
 
 export async function getEconomyStats(orgId: string, period: Period) {
   const since = periodToDate(period)
+  const now = new Date()
   const orgFilter = { organizationId: orgId }
 
   // Current MRR
@@ -381,23 +382,45 @@ export async function getEconomyStats(orgId: string, period: Period) {
   const revenuePerProduct = Array.from(revenueByProduct.values())
     .sort((a, b) => b.revenue - a.revenue)
 
-  // MRR trend (approximate by counting active subscriptions per week)
+  // MRR trend — løbende total per uge
+  // Hent alle subscriptions (inkl. før perioden for baseline)
   const allSubs = await prisma.entitlement.findMany({
-    where: { user: orgFilter, stripeSubscriptionId: { not: null }, createdAt: { gte: since } },
-    select: { createdAt: true, status: true, paidAmountCents: true, product: { select: { priceAmountCents: true } } },
+    where: { user: orgFilter, stripeSubscriptionId: { not: null } },
+    select: { createdAt: true, cancelledAt: true, status: true, paidAmountCents: true, product: { select: { priceAmountCents: true } } },
   })
-  const mrrByWeek = new Map<string, number>()
+
+  // Byg events: +MRR ved oprettelse, -MRR ved opsigelse
+  const events: Array<{ date: Date; amount: number }> = []
   for (const e of allSubs) {
-    const d = new Date(e.createdAt)
-    const weekStart = new Date(d)
-    weekStart.setDate(d.getDate() - d.getDay())
-    const key = weekStart.toISOString().slice(0, 10)
     const paid = e.paidAmountCents ?? e.product.priceAmountCents
-    const amount = e.status === 'CANCELLED' ? -paid : paid
-    mrrByWeek.set(key, (mrrByWeek.get(key) ?? 0) + amount)
+    events.push({ date: e.createdAt, amount: paid })
+    if (e.cancelledAt) {
+      events.push({ date: e.cancelledAt, amount: -paid })
+    }
   }
-  const mrrTrend = Array.from(mrrByWeek.entries())
-    .map(([week, change]) => ({ week, change }))
+  events.sort((a, b) => a.date.getTime() - b.date.getTime())
+
+  // Beregn kumulativ MRR per uge inden for perioden
+  const weeklyMrr = new Map<string, number>()
+  let runningMrr = 0
+  let eventIdx = 0
+
+  // Generer uger i perioden
+  const periodStart = since.getTime()
+  const periodEnd = now.getTime()
+  const weekMs = 7 * 24 * 60 * 60 * 1000
+  for (let t = periodStart; t <= periodEnd; t += weekMs) {
+    const weekDate = new Date(t)
+    // Anvend alle events op til denne uge
+    while (eventIdx < events.length && events[eventIdx].date.getTime() <= t) {
+      runningMrr += events[eventIdx].amount
+      eventIdx++
+    }
+    const key = weekDate.toISOString().slice(0, 10)
+    weeklyMrr.set(key, runningMrr)
+  }
+  const mrrTrend = Array.from(weeklyMrr.entries())
+    .map(([week, total]) => ({ week, total }))
     .sort((a, b) => a.week.localeCompare(b.week))
 
   // Key metrics
@@ -495,10 +518,11 @@ export async function getBehaviorStats(orgId: string, period: Period) {
     take: 10000, // Safety limit
   })
 
-  // Activity by hour
+  // Activity by hour (dansk tid — Europe/Copenhagen)
   const hourCounts = new Array(24).fill(0)
   for (const p of allProgress) {
-    hourCounts[p.createdAt.getHours()]++
+    const dkHour = parseInt(p.createdAt.toLocaleString('da-DK', { timeZone: 'Europe/Copenhagen', hour: '2-digit', hour12: false }), 10)
+    hourCounts[dkHour]++
   }
   const activityByHour = hourCounts.map((count, hour) => ({ hour, count }))
 

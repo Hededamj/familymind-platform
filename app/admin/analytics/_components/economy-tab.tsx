@@ -8,7 +8,7 @@ import { formatDKK } from '@/lib/format-currency'
 
 type EconomyData = {
   mrr: { current: number; new: number; lost: number; net: number }
-  mrrTrend: Array<{ week: string; change: number }>
+  mrrTrend: Array<{ week: string; total: number }>
   revenuePerProduct: Array<{ title: string; revenue: number }>
   keyMetrics: {
     avgLtv: number
@@ -18,7 +18,7 @@ type EconomyData = {
 }
 
 const mrrConfig: ChartConfig = {
-  change: { label: 'MRR-ændring', color: 'hsl(220, 90%, 56%)' },
+  total: { label: 'MRR', color: 'hsl(220, 90%, 56%)' },
 }
 
 const productConfig: ChartConfig = {
@@ -73,7 +73,7 @@ export function EconomyTab({ data }: { data: EconomyData }) {
                   <XAxis dataKey="week" tickFormatter={(v) => v.slice(5)} fontSize={12} />
                   <YAxis fontSize={12} tickFormatter={(v) => `${Math.round(v / 100)}`} />
                   <ChartTooltip content={<ChartTooltipContent />} />
-                  <Area type="monotone" dataKey="change" stroke="var(--color-change)" fill="var(--color-change)" fillOpacity={0.2} />
+                  <Area type="monotone" dataKey="total" stroke="var(--color-total)" fill="var(--color-total)" fillOpacity={0.2} />
                 </AreaChart>
               </ChartContainer>
             )}
