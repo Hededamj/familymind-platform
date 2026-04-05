@@ -24,13 +24,19 @@ export function AnalyticsTabs({ children }: { children: React.ReactNode }) {
 
   return (
     <Tabs value={current} onValueChange={handleChange}>
-      <TabsList className="w-full justify-start">
-        {tabs.map((t) => (
-          <TabsTrigger key={t.value} value={t.value}>
-            {t.label}
-          </TabsTrigger>
-        ))}
-      </TabsList>
+      <div className="border-b">
+        <TabsList className="w-full justify-start gap-0 rounded-none bg-transparent p-0">
+          {tabs.map((t) => (
+            <TabsTrigger
+              key={t.value}
+              value={t.value}
+              className="relative rounded-none border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none"
+            >
+              {t.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </div>
       {children}
     </Tabs>
   )
