@@ -26,7 +26,7 @@ Requirements for mobile-first overhaul. Each maps to roadmap phases.
 
 - [ ] **TYPO-01**: Landing page hero bruger responsive font sizes (text-2xl til text-5xl)
 - [ ] **TYPO-02**: Alle sider har konsistent mobil-padding (px-4) og desktop-padding (px-8)
-- [ ] **TYPO-03**: Bruger-genereret indhold (community posts) har break-words og hyphens
+- [x] **TYPO-03**: Bruger-genereret indhold (community posts) har break-words og hyphens
 - [ ] **TYPO-04**: Progress-side headings er responsive (text-2xl til text-3xl)
 
 ### Navigation
@@ -39,7 +39,7 @@ Requirements for mobile-first overhaul. Each maps to roadmap phases.
 
 - [ ] **TOUCH-01**: Alle interaktive elementer har minimum 44px touch target
 - [ ] **TOUCH-02**: Horisontale scroll-areas har usynlig scrollbar
-- [ ] **TOUCH-03**: Lange titler i cards har line-clamp for at forhindre overflow
+- [x] **TOUCH-03**: Lange titler i cards har line-clamp for at forhindre overflow
 
 ### PWA
 
@@ -88,11 +88,11 @@ Deferred to future milestones.
 | LAYOUT-05 | Phase 2 | Complete |
 | TYPO-01 | Phase 3 | Pending |
 | TYPO-02 | Phase 3 | Pending |
-| TYPO-03 | Phase 3 | Pending |
+| TYPO-03 | Phase 3 | Complete |
 | TYPO-04 | Phase 3 | Pending |
 | TOUCH-01 | Phase 3 | Pending |
 | TOUCH-02 | Phase 3 | Pending |
-| TOUCH-03 | Phase 3 | Pending |
+| TOUCH-03 | Phase 3 | Complete |
 | NAV-01 | Phase 4 | Pending |
 | NAV-02 | Phase 4 | Pending |
 | NAV-03 | Phase 4 | Pending |

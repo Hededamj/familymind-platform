@@ -62,9 +62,9 @@ Plans:
   5. Horizontal scroll carousels scroll smoothly without a visible scrollbar on iOS and Android
 **Plans**: 3 plans
 Plans:
-- [ ] 03-01-PLAN.md — Fix hero and progress page heading responsive sizes (TYPO-01, TYPO-02, TYPO-04)
-- [ ] 03-02-PLAN.md — Add break-words/hyphens to community posts and line-clamp to community cards (TYPO-03, TOUCH-03)
-- [ ] 03-03-PLAN.md — Add min-h-[44px] touch targets to buttons and community pill links (TOUCH-01, TOUCH-02)
+- [x] 03-01-PLAN.md — Fix hero and progress page heading responsive sizes (TYPO-01, TYPO-02, TYPO-04)
+- [x] 03-02-PLAN.md — Add break-words/hyphens to community posts and line-clamp to community cards (TYPO-03, TOUCH-03)
+- [x] 03-03-PLAN.md — Add min-h-[44px] touch targets to buttons and community pill links (TOUCH-01, TOUCH-02)
 **UI hint**: yes
 
 ### Phase 4: Navigation & PWA
