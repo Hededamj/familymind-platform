@@ -33,7 +33,7 @@ export default async function ProgressPage() {
           Tilbage
         </Link>
 
-        <h1 className="mb-1 font-serif text-3xl">
+        <h1 className="mb-1 font-serif text-2xl sm:text-3xl">
           Din fremgang
         </h1>
         <p className="mb-8 text-sm text-muted-foreground">
@@ -83,7 +83,7 @@ export default async function ProgressPage() {
 
         {/* Milestones */}
         <div className="mb-8">
-          <h2 className="mb-4 font-serif text-xl">Milepæle</h2>
+          <h2 className="mb-4 font-serif text-lg sm:text-xl">Milepæle</h2>
           {milestones.length === 0 ? (
             <div className="rounded-2xl bg-sand p-6 text-center">
               <Trophy className="mx-auto mb-2 size-8 text-muted-foreground/30" />
@@ -123,7 +123,7 @@ export default async function ProgressPage() {
 
         {/* Monthly breakdown */}
         <div>
-          <h2 className="mb-4 font-serif text-xl">Månedlig aktivitet</h2>
+          <h2 className="mb-4 font-serif text-lg sm:text-xl">Månedlig aktivitet</h2>
           {monthlyBreakdown.length === 0 ? (
             <div className="rounded-2xl bg-sand p-6 text-center">
               <p className="text-sm text-muted-foreground">
