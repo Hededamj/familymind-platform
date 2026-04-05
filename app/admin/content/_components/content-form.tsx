@@ -18,6 +18,7 @@ import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { createContentAction, updateContentAction } from '../actions'
+import { RichTextEditor } from '@/components/rich-text-editor'
 import { X } from 'lucide-react'
 
 function generateSlug(title: string): string {
@@ -52,6 +53,7 @@ type ContentFormData = {
   isStandalone: boolean
   isFree: boolean
   accessLevel: 'FREE' | 'SUBSCRIPTION' | 'PURCHASE'
+  bodyHtml: string
   tagIds: string[]
 }
 
@@ -71,6 +73,7 @@ type ContentUnit = {
   isStandalone: boolean
   isFree: boolean
   accessLevel: 'FREE' | 'SUBSCRIPTION' | 'PURCHASE'
+  bodyHtml: string | null
   tags: { tagId: string; tag: Tag }[]
 }
 
@@ -104,6 +107,7 @@ export function ContentForm({
     isStandalone: initialData?.isStandalone ?? false,
     isFree: initialData?.isFree ?? false,
     accessLevel: initialData?.accessLevel ?? 'FREE',
+    bodyHtml: initialData?.bodyHtml ?? '',
     tagIds: initialData?.tags?.map((t) => t.tagId) ?? [],
   })
 
@@ -156,6 +160,7 @@ export function ContentForm({
       isStandalone: formData.isStandalone,
       isFree: formData.isFree,
       accessLevel: formData.accessLevel,
+      bodyHtml: formData.mediaType === 'TEXT' && formData.bodyHtml ? formData.bodyHtml : undefined,
       tagIds: formData.tagIds.length > 0 ? formData.tagIds : undefined,
     }
 
@@ -344,6 +349,22 @@ export function ContentForm({
           </div>
         </CardContent>
       </Card>
+
+      {/* Rich Text Editor (TEXT only) */}
+      {formData.mediaType === 'TEXT' && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Artikelindhold</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <RichTextEditor
+              content={formData.bodyHtml}
+              onChange={(html) => setFormData((prev) => ({ ...prev, bodyHtml: html }))}
+              placeholder="Skriv din artikel her — brug toolbar til overskrifter, lister, links osv."
+            />
+          </CardContent>
+        </Card>
+      )}
 
       {/* Classification */}
       <Card>

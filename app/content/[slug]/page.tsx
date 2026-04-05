@@ -234,6 +234,14 @@ export default async function ContentPage({
             </div>
           )}
 
+          {/* Rich text article body (TEXT type) */}
+          {content.mediaType === 'TEXT' && content.bodyHtml && (
+            <div
+              className="prose prose-sm max-w-none sm:prose-base mb-8"
+              dangerouslySetInnerHTML={{ __html: content.bodyHtml }}
+            />
+          )}
+
           {/* Mark as complete button */}
           {user && (
             <div className="border-t border-border pt-6">

@@ -238,6 +238,7 @@ model ContentUnit {
   isStandalone    Boolean     @default(false)
   isFree          Boolean     @default(false)
   accessLevel     AccessLevel @default(FREE)
+  bodyHtml        String?     // Rich text artikelindhold (HTML) — bruges når mediaType=TEXT
   publishedAt     DateTime?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt

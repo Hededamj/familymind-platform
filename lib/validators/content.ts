@@ -15,6 +15,7 @@ export const createContentUnitSchema = z.object({
   isStandalone: z.boolean().default(false),
   isFree: z.boolean().default(false),
   accessLevel: z.enum(['FREE', 'SUBSCRIPTION', 'PURCHASE']).default('FREE'),
+  bodyHtml: z.string().optional(),
   tagIds: z.array(z.string().uuid()).optional(),
 })
 
