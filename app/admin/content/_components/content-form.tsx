@@ -20,7 +20,13 @@ import { toast } from 'sonner'
 import { createContentAction, updateContentAction } from '../actions'
 import { RichTextEditor } from '@/components/rich-text-editor'
 import { VideoUploader } from '@/components/video-uploader'
-import { X, Upload, Loader2, CheckCircle } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { X, Upload, Loader2, CheckCircle, FolderOpen, Search, FileText as FileTextIcon, Headphones } from 'lucide-react'
 
 function generateSlug(title: string): string {
   return title
@@ -311,38 +317,15 @@ export function ContentForm({
             </div>
           </div>
 
-          {/* File upload for PDF/AUDIO */}
+          {/* File upload/pick for PDF/AUDIO */}
           {(formData.mediaType === 'PDF' || formData.mediaType === 'AUDIO') && (
-            <div className="space-y-2">
-              <Label>Upload fil</Label>
-              <div className="flex items-center gap-3">
-                <label className="flex cursor-pointer items-center gap-2 rounded-md border border-dashed px-4 py-3 text-sm text-muted-foreground transition-colors hover:border-primary hover:text-foreground">
-                  {isUploading ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : formData.mediaUrl ? (
-                    <CheckCircle className="size-4 text-green-600" />
-                  ) : (
-                    <Upload className="size-4" />
-                  )}
-                  {isUploading ? 'Uploader...' : formData.mediaUrl ? 'Skift fil' : `Vælg ${formData.mediaType === 'PDF' ? 'PDF' : 'lydfil'}...`}
-                  <input
-                    type="file"
-                    className="hidden"
-                    accept={formData.mediaType === 'PDF' ? '.pdf' : 'audio/*'}
-                    disabled={isUploading}
-                    onChange={(e) => {
-                      const file = e.target.files?.[0]
-                      if (file) handleFileUpload(file)
-                    }}
-                  />
-                </label>
-                {formData.mediaUrl && (
-                  <span className="truncate text-xs text-muted-foreground max-w-[300px]">
-                    {formData.mediaUrl.split('/').pop()}
-                  </span>
-                )}
-              </div>
-            </div>
+            <FileUploadSection
+              mediaType={formData.mediaType}
+              currentUrl={formData.mediaUrl}
+              isUploading={isUploading}
+              onUpload={handleFileUpload}
+              onSelect={(url) => setFormData((prev) => ({ ...prev, mediaUrl: url }))}
+            />
           )}
 
           {/* Video upload */}
@@ -596,5 +579,217 @@ export function ContentForm({
         </Button>
       </div>
     </form>
+  )
+}
+
+// ─── File Upload + Pick Section ──────────────────────
+
+type StorageFile = { name: string; size: number; url: string; lastModified: string }
+
+function FileUploadSection({
+  mediaType,
+  currentUrl,
+  isUploading,
+  onUpload,
+  onSelect,
+}: {
+  mediaType: 'PDF' | 'AUDIO'
+  currentUrl: string
+  isUploading: boolean
+  onUpload: (file: File) => void
+  onSelect: (url: string) => void
+}) {
+  const [showPicker, setShowPicker] = useState(false)
+  const isPdf = mediaType === 'PDF'
+  const Icon = isPdf ? FileTextIcon : Headphones
+  const label = isPdf ? 'PDF' : 'lydfil'
+
+  if (currentUrl) {
+    return (
+      <div className="space-y-2">
+        <Label>Fil</Label>
+        <div className="flex items-center gap-3 rounded-md border p-3">
+          <Icon className="size-5 text-muted-foreground shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium flex items-center gap-1.5">
+              <CheckCircle className="size-4 text-green-600" />
+              Fil tilknyttet
+            </p>
+            <p className="text-xs text-muted-foreground truncate">{currentUrl.split('/').pop()}</p>
+          </div>
+          <div className="flex gap-1.5">
+            <label className="cursor-pointer">
+              <Button type="button" variant="outline" size="sm" asChild>
+                <span>Upload ny</span>
+              </Button>
+              <input
+                type="file"
+                className="hidden"
+                accept={isPdf ? '.pdf' : 'audio/*'}
+                disabled={isUploading}
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (file) onUpload(file)
+                }}
+              />
+            </label>
+            <Button type="button" variant="outline" size="sm" onClick={() => setShowPicker(true)}>
+              Vælg
+            </Button>
+          </div>
+        </div>
+        <FilePicker
+          open={showPicker}
+          onOpenChange={setShowPicker}
+          folder={isPdf ? 'pdf' : 'audio'}
+          mediaType={mediaType}
+          onSelect={(url) => { onSelect(url); setShowPicker(false) }}
+        />
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-2">
+      <Label>Fil</Label>
+      <div className="grid grid-cols-2 gap-3">
+        <label className="flex cursor-pointer flex-col items-center gap-2 rounded-lg border-2 border-dashed p-6 text-center transition-colors hover:border-primary hover:bg-muted/30">
+          <Upload className="size-8 text-muted-foreground" />
+          <div>
+            <p className="text-sm font-medium">Upload ny {label}</p>
+            <p className="text-xs text-muted-foreground">Max 100 MB</p>
+          </div>
+          <input
+            type="file"
+            className="hidden"
+            accept={isPdf ? '.pdf' : 'audio/*'}
+            disabled={isUploading}
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+              if (file) onUpload(file)
+            }}
+          />
+        </label>
+        <button
+          type="button"
+          onClick={() => setShowPicker(true)}
+          className="flex flex-col items-center gap-2 rounded-lg border-2 border-dashed p-6 text-center transition-colors hover:border-primary hover:bg-muted/30"
+        >
+          <FolderOpen className="size-8 text-muted-foreground" />
+          <div>
+            <p className="text-sm font-medium">Vælg eksisterende</p>
+            <p className="text-xs text-muted-foreground">Fra mediebiblioteket</p>
+          </div>
+        </button>
+      </div>
+      {isUploading && (
+        <div className="flex items-center gap-3 rounded-lg border p-4">
+          <Loader2 className="size-5 animate-spin text-primary" />
+          <span className="text-sm">Uploader...</span>
+        </div>
+      )}
+      <FilePicker
+        open={showPicker}
+        onOpenChange={setShowPicker}
+        folder={isPdf ? 'pdf' : 'audio'}
+        mediaType={mediaType}
+        onSelect={(url) => { onSelect(url); setShowPicker(false) }}
+      />
+    </div>
+  )
+}
+
+// ─── File Picker Dialog ──────────────────────────────
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+function FilePicker({
+  open,
+  onOpenChange,
+  folder,
+  mediaType,
+  onSelect,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  folder: string
+  mediaType: string
+  onSelect: (url: string) => void
+}) {
+  const [files, setFiles] = useState<StorageFile[]>([])
+  const [loading, setLoading] = useState(false)
+  const [search, setSearch] = useState('')
+
+  useEffect(() => {
+    if (open) {
+      setLoading(true)
+      setSearch('')
+      fetch(`/api/files?folder=${folder}`)
+        .then((res) => res.json())
+        .then((data) => setFiles(data.files ?? []))
+        .catch(() => toast.error('Kunne ikke hente filer'))
+        .finally(() => setLoading(false))
+    }
+  }, [open, folder])
+
+  const filtered = search
+    ? files.filter((f) => f.name.toLowerCase().includes(search.toLowerCase()))
+    : files
+
+  const Icon = mediaType === 'PDF' ? FileTextIcon : Headphones
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg max-h-[70vh] flex flex-col">
+        <DialogHeader>
+          <DialogTitle>Vælg {mediaType === 'PDF' ? 'PDF' : 'lydfil'} fra mediebiblioteket</DialogTitle>
+        </DialogHeader>
+
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Søg..."
+            className="pl-9"
+          />
+        </div>
+
+        <div className="flex-1 overflow-y-auto min-h-0">
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="size-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="py-12 text-center">
+              <p className="text-sm text-muted-foreground">
+                {search ? 'Ingen filer matcher søgningen' : 'Ingen filer uploadet endnu'}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-1">
+              {filtered.map((file) => (
+                <button
+                  key={file.name}
+                  type="button"
+                  onClick={() => onSelect(file.url)}
+                  className="flex w-full items-center gap-3 rounded-lg p-2 text-left transition-colors hover:bg-muted/50"
+                >
+                  <Icon className="size-5 text-muted-foreground shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{file.name}</p>
+                    <p className="text-xs text-muted-foreground">{formatFileSize(file.size)}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }
