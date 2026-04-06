@@ -3,6 +3,7 @@
 import * as Sentry from '@sentry/nextjs'
 import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
+import { AlertTriangle } from 'lucide-react'
 
 export default function AdminError({
   error,
@@ -16,12 +17,13 @@ export default function AdminError({
   }, [error])
 
   return (
-    <div className="p-6 text-center">
-      <h2 className="mb-2 font-serif text-lg">Fejl i admin</h2>
-      <p className="mb-4 text-sm text-muted-foreground">
-        {error.message || 'Noget gik galt. Prøv igen.'}
+    <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4 px-4">
+      <AlertTriangle className="h-12 w-12 text-destructive" />
+      <h2 className="text-lg font-semibold">Noget gik galt</h2>
+      <p className="text-muted-foreground text-center max-w-md">
+        Der opstod en uventet fejl. Prøv igen, eller kontakt support hvis problemet fortsætter.
       </p>
-      <Button onClick={reset} className="rounded-xl">
+      <Button onClick={() => reset()}>
         Prøv igen
       </Button>
     </div>

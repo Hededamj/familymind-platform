@@ -33,6 +33,7 @@ export function BottomTabBar() {
           <Link
             key={tab.href}
             href={tab.href}
+            aria-current={isActive ? 'page' : undefined}
             className={`flex min-h-[44px] min-w-[44px] flex-col items-center justify-center ${
               isActive
                 ? 'text-[var(--accent)]'

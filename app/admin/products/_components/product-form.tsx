@@ -22,6 +22,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { toast } from 'sonner'
 import {
   createProductAction,
@@ -163,6 +173,7 @@ export function ProductForm({
     initialData?.modules ?? []
   )
   const [showModuleDialog, setShowModuleDialog] = useState(false)
+  const [deleteModuleTarget, setDeleteModuleTarget] = useState<{ id: string; title: string } | null>(null)
   const [newModuleTitle, setNewModuleTitle] = useState('')
 
   type LandingPageData = {
@@ -443,7 +454,9 @@ export function ProductForm({
     })
   }
 
-  async function handleDeleteModule(moduleId: string) {
+  function handleDeleteModuleConfirmed() {
+    if (!deleteModuleTarget) return
+    const moduleId = deleteModuleTarget.id
     startTransition(async () => {
       try {
         await deleteModuleAction(moduleId)
@@ -451,6 +464,7 @@ export function ProductForm({
         // Unassign lessons from this module locally
         setLessons(prev => prev.map(l => l.moduleId === moduleId ? { ...l, moduleId: null, module: null } : l))
         toast.success('Modul slettet')
+        setDeleteModuleTarget(null)
       } catch {
         toast.error('Kunne ikke slette modul')
       }
@@ -840,7 +854,7 @@ export function ProductForm({
                           <Button type="button" variant="ghost" size="sm" className="size-8 p-0" onClick={() => handleMoveModule(index, 'down')} disabled={index === modules.length - 1 || isPending}>
                             <ArrowDown className="size-4" /><span className="sr-only">Flyt ned</span>
                           </Button>
-                          <Button type="button" variant="ghost" size="sm" className="size-8 p-0 text-destructive hover:text-destructive" onClick={() => handleDeleteModule(mod.id)} disabled={isPending}>
+                          <Button type="button" variant="ghost" size="sm" className="size-8 p-0 text-destructive hover:text-destructive" onClick={() => setDeleteModuleTarget({ id: mod.id, title: mod.title })} disabled={isPending}>
                             <X className="size-4" /><span className="sr-only">Slet</span>
                           </Button>
                         </div>
@@ -1484,6 +1498,28 @@ export function ProductForm({
           </div>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!deleteModuleTarget} onOpenChange={(open) => !open && setDeleteModuleTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Slet modul</AlertDialogTitle>
+            <AlertDialogDescription>
+              Er du sikker på, at du vil slette modulet &quot;{deleteModuleTarget?.title}&quot;?
+              Lektioner i modulet fjernes fra modulet, men slettes ikke. Denne handling kan ikke fortrydes.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuller</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteModuleConfirmed}
+              className="bg-destructive text-white hover:bg-destructive/90"
+              disabled={isPending}
+            >
+              {isPending ? 'Sletter...' : 'Slet'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </form>
   )
 }

@@ -84,6 +84,7 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
           type="button"
           variant="ghost"
           size="sm"
+          aria-label="Fed skrift"
           className={`size-8 p-0 ${editor.isActive('bold') ? 'bg-muted' : ''}`}
           onClick={() => editor.chain().focus().toggleBold().run()}
         >
@@ -93,6 +94,7 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
           type="button"
           variant="ghost"
           size="sm"
+          aria-label="Kursiv"
           className={`size-8 p-0 ${editor.isActive('italic') ? 'bg-muted' : ''}`}
           onClick={() => editor.chain().focus().toggleItalic().run()}
         >
@@ -102,6 +104,7 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
           type="button"
           variant="ghost"
           size="sm"
+          aria-label="Understregning"
           className={`size-8 p-0 ${editor.isActive('underline') ? 'bg-muted' : ''}`}
           onClick={() => editor.chain().focus().toggleUnderline().run()}
         >
@@ -114,6 +117,7 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
           type="button"
           variant="ghost"
           size="sm"
+          aria-label="Overskrift 2"
           className={`size-8 p-0 ${editor.isActive('heading', { level: 2 }) ? 'bg-muted' : ''}`}
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
         >
@@ -123,6 +127,7 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
           type="button"
           variant="ghost"
           size="sm"
+          aria-label="Overskrift 3"
           className={`size-8 p-0 ${editor.isActive('heading', { level: 3 }) ? 'bg-muted' : ''}`}
           onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
         >
@@ -135,6 +140,7 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
           type="button"
           variant="ghost"
           size="sm"
+          aria-label="Punktliste"
           className={`size-8 p-0 ${editor.isActive('bulletList') ? 'bg-muted' : ''}`}
           onClick={() => editor.chain().focus().toggleBulletList().run()}
         >
@@ -144,6 +150,7 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
           type="button"
           variant="ghost"
           size="sm"
+          aria-label="Nummereret liste"
           className={`size-8 p-0 ${editor.isActive('orderedList') ? 'bg-muted' : ''}`}
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
         >
@@ -153,6 +160,7 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
           type="button"
           variant="ghost"
           size="sm"
+          aria-label="Citat"
           className={`size-8 p-0 ${editor.isActive('blockquote') ? 'bg-muted' : ''}`}
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
         >
@@ -162,6 +170,7 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
           type="button"
           variant="ghost"
           size="sm"
+          aria-label="Vandret linje"
           className="size-8 p-0"
           onClick={() => editor.chain().focus().setHorizontalRule().run()}
         >
@@ -174,6 +183,7 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
           type="button"
           variant="ghost"
           size="sm"
+          aria-label="Indsæt link"
           className={`size-8 p-0 ${editor.isActive('link') ? 'bg-muted' : ''}`}
           onClick={setLink}
         >
@@ -183,6 +193,7 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
           type="button"
           variant="ghost"
           size="sm"
+          aria-label="Indsæt billede"
           className="size-8 p-0"
           onClick={addImage}
         >
@@ -195,6 +206,7 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
           type="button"
           variant="ghost"
           size="sm"
+          aria-label="Fortryd"
           className="size-8 p-0"
           onClick={() => editor.chain().focus().undo().run()}
           disabled={!editor.can().undo()}
@@ -205,6 +217,7 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
           type="button"
           variant="ghost"
           size="sm"
+          aria-label="Annullér fortryd"
           className="size-8 p-0"
           onClick={() => editor.chain().focus().redo().run()}
           disabled={!editor.can().redo()}

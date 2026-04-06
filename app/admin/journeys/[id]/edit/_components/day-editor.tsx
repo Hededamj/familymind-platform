@@ -15,6 +15,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { toast } from 'sonner'
 import {
   Trash2,
@@ -108,6 +118,8 @@ export function DayEditor({ day, allContentUnits }: DayEditorProps) {
 
   // Delete confirmation
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [deleteActionTarget, setDeleteActionTarget] = useState<string | null>(null)
+  const [deletePromptTarget, setDeletePromptTarget] = useState<string | null>(null)
 
   function handleSaveTitle() {
     startTransition(async () => {
@@ -203,11 +215,13 @@ export function DayEditor({ day, allContentUnits }: DayEditorProps) {
     })
   }
 
-  function handleDeleteAction(id: string) {
+  function handleDeleteActionConfirmed() {
+    if (!deleteActionTarget) return
     startTransition(async () => {
       try {
-        await deleteDayActionItemAction(id)
+        await deleteDayActionItemAction(deleteActionTarget)
         toast.success('Handling slettet')
+        setDeleteActionTarget(null)
         router.refresh()
       } catch {
         toast.error('Kunne ikke slette handling')
@@ -255,11 +269,13 @@ export function DayEditor({ day, allContentUnits }: DayEditorProps) {
     })
   }
 
-  function handleDeletePrompt(id: string) {
+  function handleDeletePromptConfirmed() {
+    if (!deletePromptTarget) return
     startTransition(async () => {
       try {
-        await deletePromptAction(id)
+        await deletePromptAction(deletePromptTarget)
         toast.success('Diskussionsspørgsmål slettet')
+        setDeletePromptTarget(null)
         router.refresh()
       } catch {
         toast.error('Kunne ikke slette diskussionsspørgsmål')
@@ -476,7 +492,7 @@ export function DayEditor({ day, allContentUnits }: DayEditorProps) {
                     size="sm"
                     variant="ghost"
                     className="size-6 p-0 text-destructive hover:text-destructive"
-                    onClick={() => handleDeleteAction(action.id)}
+                    onClick={() => setDeleteActionTarget(action.id)}
                     disabled={isPending}
                   >
                     <Trash2 className="size-3" />
@@ -624,7 +640,7 @@ export function DayEditor({ day, allContentUnits }: DayEditorProps) {
                     size="sm"
                     variant="ghost"
                     className="size-6 p-0 text-destructive hover:text-destructive"
-                    onClick={() => handleDeletePrompt(prompt.id)}
+                    onClick={() => setDeletePromptTarget(prompt.id)}
                     disabled={isPending}
                   >
                     <Trash2 className="size-3" />
@@ -741,6 +757,50 @@ export function DayEditor({ day, allContentUnits }: DayEditorProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete action item confirmation */}
+      <AlertDialog open={!!deleteActionTarget} onOpenChange={(open) => !open && setDeleteActionTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Slet handling</AlertDialogTitle>
+            <AlertDialogDescription>
+              Er du sikker på, at du vil slette denne handling? Denne handling kan ikke fortrydes.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuller</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteActionConfirmed}
+              className="bg-destructive text-white hover:bg-destructive/90"
+              disabled={isPending}
+            >
+              {isPending ? 'Sletter...' : 'Slet'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete prompt confirmation */}
+      <AlertDialog open={!!deletePromptTarget} onOpenChange={(open) => !open && setDeletePromptTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Slet diskussionsspørgsmål</AlertDialogTitle>
+            <AlertDialogDescription>
+              Er du sikker på, at du vil slette dette diskussionsspørgsmål? Denne handling kan ikke fortrydes.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuller</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeletePromptConfirmed}
+              className="bg-destructive text-white hover:bg-destructive/90"
+              disabled={isPending}
+            >
+              {isPending ? 'Sletter...' : 'Slet'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

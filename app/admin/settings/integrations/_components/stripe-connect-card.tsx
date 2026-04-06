@@ -1,11 +1,21 @@
 'use client'
 
-import { useEffect, useTransition } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { toast } from 'sonner'
 import {
   initiateStripeConnectAction,
@@ -21,6 +31,7 @@ type Props = {
 function StripeConnectCardInner({ status, accountId }: Props) {
   const [isPending, startTransition] = useTransition()
   const searchParams = useSearchParams()
+  const [showDisconnectDialog, setShowDisconnectDialog] = useState(false)
 
   const connectError = searchParams.get('connect_error')
   const connectSuccess = searchParams.get('connect_success')
@@ -37,13 +48,11 @@ function StripeConnectCardInner({ status, accountId }: Props) {
   }
 
   function handleDisconnect() {
-    if (!confirm('Er du sikker på du vil frakoble Stripe? Checkout vil blive deaktiveret.')) {
-      return
-    }
     startTransition(async () => {
       try {
         await disconnectStripeAction()
         toast.success('Stripe-konto frakoblet')
+        setShowDisconnectDialog(false)
       } catch {
         toast.error('Kunne ikke frakoble Stripe')
       }
@@ -51,81 +60,105 @@ function StripeConnectCardInner({ status, accountId }: Props) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          Stripe
-          <StatusBadge status={status} />
-        </CardTitle>
-        <CardDescription>
-          <StatusDescription status={status} />
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {status === 'not_connected' && (
-          <Button onClick={handleConnect} disabled={isPending}>
-            {isPending ? 'Omdirigerer...' : 'Forbind Stripe'}
-          </Button>
-        )}
-
-        {status === 'pending' && (
-          <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">
-              Din Stripe-konto afventer verificering hos Stripe. Udfyld venligst alle påkrævede oplysninger.
-            </p>
-            <div className="flex gap-2">
-              <Button variant="outline" asChild>
-                <a
-                  href="https://dashboard.stripe.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Åbn Stripe Dashboard <ExternalLink className="ml-1 size-4" />
-                </a>
-              </Button>
-              <Button variant="destructive" onClick={handleDisconnect} disabled={isPending}>
-                Frakobl
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {status === 'active' && (
-          <div className="space-y-3">
-            {accountId && (
-              <p className="text-sm font-mono text-muted-foreground">
-                Konto: {accountId}
-              </p>
-            )}
-            <Button variant="destructive" onClick={handleDisconnect} disabled={isPending}>
-              {isPending ? 'Frakobler...' : 'Frakobl Stripe'}
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            Stripe
+            <StatusBadge status={status} />
+          </CardTitle>
+          <CardDescription>
+            <StatusDescription status={status} />
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {status === 'not_connected' && (
+            <Button onClick={handleConnect} disabled={isPending}>
+              {isPending ? 'Omdirigerer...' : 'Forbind Stripe'}
             </Button>
-          </div>
-        )}
+          )}
 
-        {status === 'restricted' && (
-          <div className="space-y-3">
-            <p className="text-sm text-destructive">
-              Stripe har begrænset din konto. Tjek dit Stripe Dashboard for detaljer.
-            </p>
-            <div className="flex gap-2">
-              <Button variant="outline" asChild>
-                <a
-                  href="https://dashboard.stripe.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Åbn Stripe Dashboard <ExternalLink className="ml-1 size-4" />
-                </a>
-              </Button>
-              <Button variant="destructive" onClick={handleDisconnect} disabled={isPending}>
-                Frakobl
+          {status === 'pending' && (
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Din Stripe-konto afventer verificering hos Stripe. Udfyld venligst alle påkrævede oplysninger.
+              </p>
+              <div className="flex gap-2">
+                <Button variant="outline" asChild>
+                  <a
+                    href="https://dashboard.stripe.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Åbn Stripe Dashboard <ExternalLink className="ml-1 size-4" />
+                  </a>
+                </Button>
+                <Button variant="destructive" onClick={() => setShowDisconnectDialog(true)} disabled={isPending}>
+                  Frakobl
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {status === 'active' && (
+            <div className="space-y-3">
+              {accountId && (
+                <p className="text-sm font-mono text-muted-foreground">
+                  Konto: {accountId}
+                </p>
+              )}
+              <Button variant="destructive" onClick={() => setShowDisconnectDialog(true)} disabled={isPending}>
+                {isPending ? 'Frakobler...' : 'Frakobl Stripe'}
               </Button>
             </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          )}
+
+          {status === 'restricted' && (
+            <div className="space-y-3">
+              <p className="text-sm text-destructive">
+                Stripe har begrænset din konto. Tjek dit Stripe Dashboard for detaljer.
+              </p>
+              <div className="flex gap-2">
+                <Button variant="outline" asChild>
+                  <a
+                    href="https://dashboard.stripe.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Åbn Stripe Dashboard <ExternalLink className="ml-1 size-4" />
+                  </a>
+                </Button>
+                <Button variant="destructive" onClick={() => setShowDisconnectDialog(true)} disabled={isPending}>
+                  Frakobl
+                </Button>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <AlertDialog open={showDisconnectDialog} onOpenChange={setShowDisconnectDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Frakobl Stripe</AlertDialogTitle>
+            <AlertDialogDescription>
+              Er du sikker på, at du vil frakoble Stripe? Checkout vil blive deaktiveret,
+              og du vil ikke kunne modtage betalinger, før du forbinder igen.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuller</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDisconnect}
+              className="bg-destructive text-white hover:bg-destructive/90"
+              disabled={isPending}
+            >
+              {isPending ? 'Frakobler...' : 'Frakobl'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }
 

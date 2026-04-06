@@ -7,7 +7,7 @@ import {
   sendJourneyNudges,
 } from '@/lib/services/engagement.service'
 import { getDanishTime } from '@/lib/utils/timezone'
-import type { NotificationType } from '@prisma/client'
+import { NotificationType } from '@prisma/client'
 
 /**
  * Check whether we already sent this notification type to this user within

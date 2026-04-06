@@ -146,6 +146,7 @@ export async function updateProductImagesAction(id: string, data: { coverImageUr
 export async function updateLandingPageAction(id: string, landingPage: Record<string, unknown>) {
   await requireAdmin()
   // Cast is safe: the form sends a JSON-serializable object with string/string[] values
-  await productService.updateProductLandingPage(id, landingPage as import('@prisma/client').Prisma.InputJsonValue)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await productService.updateProductLandingPage(id, landingPage as any)
   revalidatePath('/admin/products')
 }

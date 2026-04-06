@@ -1,36 +1,41 @@
-export default function DashboardLoading() {
+import { Skeleton } from "@/components/ui/skeleton"
+
+export default function Loading() {
   return (
-    <div className="px-4 py-6 pb-24 sm:px-8 sm:py-8">
-      <div className="mx-auto w-full max-w-4xl space-y-6">
-        {/* Header skeleton */}
-        <div className="space-y-2">
-          <div className="h-4 w-24 animate-pulse rounded-full bg-sand" />
-          <div className="h-9 w-56 animate-pulse rounded-xl bg-sand" />
-          <div className="h-4 w-72 animate-pulse rounded-full bg-sand" />
+    <div className="overflow-hidden px-4 py-6 sm:px-8 sm:py-8">
+      <div className="mx-auto w-full max-w-2xl">
+        {/* Greeting */}
+        <Skeleton className="mb-2 h-8 w-56" />
+        <Skeleton className="mb-6 h-4 w-72" />
+
+        {/* Community pills */}
+        <div className="flex gap-2">
+          <Skeleton className="h-8 w-24 rounded-full" />
+          <Skeleton className="h-8 w-28 rounded-full" />
+          <Skeleton className="h-8 w-20 rounded-full" />
         </div>
 
-        {/* Message banner skeleton */}
-        <div className="h-24 w-full animate-pulse rounded-2xl bg-sand" />
+        <div className="mt-6 space-y-8">
+          {/* Check-in section */}
+          <section>
+            <Skeleton className="mb-2 h-5 w-40" />
+            <Skeleton className="h-24 rounded-2xl" />
+          </section>
 
-        {/* Journey card skeleton */}
-        <div className="rounded-2xl border border-border bg-white p-6">
-          <div className="space-y-3">
-            <div className="h-5 w-40 animate-pulse rounded-full bg-sand" />
-            <div className="h-2 w-full animate-pulse rounded-full bg-sand" />
-            <div className="h-10 w-32 animate-pulse rounded-xl bg-sand" />
-          </div>
-        </div>
+          {/* Weekly focus */}
+          <section>
+            <Skeleton className="mb-2 h-5 w-32" />
+            <Skeleton className="h-40 rounded-2xl" />
+          </section>
 
-        {/* Content cards skeleton */}
-        <div className="grid gap-4 sm:grid-cols-2">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="rounded-2xl border border-border bg-white p-5">
-              <div className="space-y-2">
-                <div className="h-4 w-32 animate-pulse rounded-full bg-sand" />
-                <div className="h-3 w-full animate-pulse rounded-full bg-sand" />
-              </div>
+          {/* Courses grid */}
+          <section>
+            <Skeleton className="mb-2 h-5 w-28" />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Skeleton className="h-32 rounded-2xl" />
+              <Skeleton className="h-32 rounded-2xl" />
             </div>
-          ))}
+          </section>
         </div>
       </div>
     </div>

@@ -131,12 +131,12 @@ export async function updateLandingJsonAction(data: z.infer<typeof landingJsonSc
   await prisma.organization.update({
     where: { id: user.organizationId },
     data: {
-      landingBenefits: d.landingBenefits.length > 0 ? d.landingBenefits : Prisma.JsonNull,
-      landingSteps: d.landingSteps.length > 0 ? d.landingSteps : Prisma.JsonNull,
-      landingFeatures: d.landingFeatures.length > 0 ? d.landingFeatures : Prisma.JsonNull,
-      landingTestimonials: d.landingTestimonials.length > 0 ? d.landingTestimonials : Prisma.JsonNull,
-      landingFaq: d.landingFaq.length > 0 ? d.landingFaq : Prisma.JsonNull,
-      footerLinks: d.footerLinks.length > 0 ? d.footerLinks : Prisma.JsonNull,
+      landingBenefits: d.landingBenefits.length > 0 ? d.landingBenefits : Prisma.JsonNull as unknown as Prisma.InputJsonValue,
+      landingSteps: d.landingSteps.length > 0 ? d.landingSteps : Prisma.JsonNull as unknown as Prisma.InputJsonValue,
+      landingFeatures: d.landingFeatures.length > 0 ? d.landingFeatures : Prisma.JsonNull as unknown as Prisma.InputJsonValue,
+      landingTestimonials: d.landingTestimonials.length > 0 ? d.landingTestimonials : Prisma.JsonNull as unknown as Prisma.InputJsonValue,
+      landingFaq: d.landingFaq.length > 0 ? d.landingFaq : Prisma.JsonNull as unknown as Prisma.InputJsonValue,
+      footerLinks: d.footerLinks.length > 0 ? d.footerLinks : Prisma.JsonNull as unknown as Prisma.InputJsonValue,
     },
   })
 

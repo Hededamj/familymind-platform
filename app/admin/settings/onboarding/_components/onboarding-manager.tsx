@@ -28,6 +28,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { toast } from 'sonner'
 import {
   Plus,
@@ -471,6 +481,7 @@ function OptionsEditor({
   const [editLabel, setEditLabel] = useState('')
   const [editValue, setEditValue] = useState('')
   const [editTagId, setEditTagId] = useState('')
+  const [deleteOptionTarget, setDeleteOptionTarget] = useState<string | null>(null)
 
   function handleCreate() {
     if (!newLabel.trim() || !newValue.trim()) return
@@ -516,11 +527,13 @@ function OptionsEditor({
     })
   }
 
-  function handleDelete(id: string) {
+  function handleDeleteConfirmed() {
+    if (!deleteOptionTarget) return
     startTransition(async () => {
       try {
-        await deleteOptionAction(id)
+        await deleteOptionAction(deleteOptionTarget)
         toast.success('Svarmulighed slettet')
+        setDeleteOptionTarget(null)
       } catch {
         toast.error('Kunne ikke slette svarmulighed')
       }
@@ -648,7 +661,7 @@ function OptionsEditor({
                         variant="ghost"
                         size="sm"
                         className="size-7 p-0 text-destructive hover:text-destructive"
-                        onClick={() => handleDelete(opt.id)}
+                        onClick={() => setDeleteOptionTarget(opt.id)}
                         disabled={isPending}
                       >
                         <Trash2 className="size-3" />
@@ -715,6 +728,27 @@ function OptionsEditor({
           </div>
         </div>
       )}
+
+      <AlertDialog open={!!deleteOptionTarget} onOpenChange={(open) => !open && setDeleteOptionTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Slet svarmulighed</AlertDialogTitle>
+            <AlertDialogDescription>
+              Er du sikker på, at du vil slette denne svarmulighed? Denne handling kan ikke fortrydes.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuller</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirmed}
+              className="bg-destructive text-white hover:bg-destructive/90"
+              disabled={isPending}
+            >
+              {isPending ? 'Sletter...' : 'Slet'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

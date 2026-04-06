@@ -18,6 +18,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { toast } from 'sonner'
 import { MoreHorizontal, Pencil, Globe, GlobeLock, Trash2 } from 'lucide-react'
 import {
@@ -40,17 +50,29 @@ export function ContentActions({
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showUnpublishDialog, setShowUnpublishDialog] = useState(false)
 
   function handlePublishToggle() {
+    if (isPublished) {
+      setShowUnpublishDialog(true)
+      return
+    }
     startTransition(async () => {
       try {
-        if (isPublished) {
-          await unpublishContentAction(contentId)
-          toast.success('Indhold afpubliceret')
-        } else {
-          await publishContentAction(contentId)
-          toast.success('Indhold publiceret')
-        }
+        await publishContentAction(contentId)
+        toast.success('Indhold publiceret')
+      } catch {
+        toast.error('Handling fejlede')
+      }
+    })
+  }
+
+  function handleUnpublish() {
+    startTransition(async () => {
+      try {
+        await unpublishContentAction(contentId)
+        toast.success('Indhold afpubliceret')
+        setShowUnpublishDialog(false)
       } catch {
         toast.error('Handling fejlede')
       }
@@ -136,6 +158,28 @@ export function ContentActions({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={showUnpublishDialog} onOpenChange={setShowUnpublishDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Afpublicer indhold</AlertDialogTitle>
+            <AlertDialogDescription>
+              Er du sikker på, at du vil afpublicere &quot;{title}&quot;? Indholdet vil
+              ikke længere være synligt for brugere.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuller</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleUnpublish}
+              className="bg-destructive text-white hover:bg-destructive/90"
+              disabled={isPending}
+            >
+              {isPending ? 'Afpublicerer...' : 'Afpublicer'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

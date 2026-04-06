@@ -6,6 +6,16 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Menu, X, LogOut, User, Compass, CreditCard } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 const publicNav = [
   { href: '/browse', label: 'Opdag', icon: Compass },
@@ -26,6 +36,7 @@ export function Topbar({ brandName, logoUrl }: Props) {
   const pathname = usePathname()
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false)
 
   useEffect(() => {
     const supabase = createClient()
@@ -106,7 +117,7 @@ export function Topbar({ brandName, logoUrl }: Props) {
               </Link>
             ) : isLoggedIn ? (
               <button
-                onClick={handleLogout}
+                onClick={() => setShowLogoutDialog(true)}
                 className="flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium text-white/60 transition-colors hover:bg-white/10 hover:text-white"
               >
                 <LogOut className="size-3.5" />
@@ -179,7 +190,10 @@ export function Topbar({ brandName, logoUrl }: Props) {
 
             {isLoggedIn ? (
               <button
-                onClick={handleLogout}
+                onClick={() => {
+                  setMobileOpen(false)
+                  setShowLogoutDialog(true)
+                }}
                 className="flex items-center gap-3 rounded-xl px-4 py-3.5 text-base font-medium text-white/60 transition-colors hover:bg-white/10 hover:text-white"
               >
                 <LogOut className="size-5" />
@@ -204,6 +218,26 @@ export function Topbar({ brandName, logoUrl }: Props) {
           </nav>
         </div>
       )}
+
+      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Log ud</AlertDialogTitle>
+            <AlertDialogDescription>
+              Du bliver logget ud af din konto. Er du sikker?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuller</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleLogout}
+              className="bg-destructive text-white hover:bg-destructive/90"
+            >
+              Log ud
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

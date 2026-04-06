@@ -38,7 +38,7 @@ export function MemberActions({ cohortId, userId, userName }: MemberActionsProps
       disabled={isPending}
     >
       <Ban className="size-3.5" />
-      Udeluk
+      {isPending ? 'Udelukker...' : 'Udeluk'}
     </Button>
   )
 }

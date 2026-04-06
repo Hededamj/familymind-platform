@@ -5,7 +5,7 @@ import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { AlertTriangle } from 'lucide-react'
 
-export default function DashboardError({
+export default function JourneysError({
   error,
   reset,
 }: {

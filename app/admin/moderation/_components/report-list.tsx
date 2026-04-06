@@ -180,7 +180,7 @@ export function ReportList({ reports }: ReportListProps) {
                     disabled={isPending}
                   >
                     <EyeOff className="size-3.5" />
-                    Skjul indhold
+                    {isPending ? 'Skjuler...' : 'Skjul indhold'}
                   </Button>
                   <Button
                     size="sm"
@@ -190,7 +190,7 @@ export function ReportList({ reports }: ReportListProps) {
                     disabled={isPending}
                   >
                     <Ban className="size-3.5" />
-                    Udeluk bruger
+                    {isPending ? 'Udelukker...' : 'Udeluk bruger'}
                   </Button>
                   <Button
                     size="sm"
@@ -200,7 +200,7 @@ export function ReportList({ reports }: ReportListProps) {
                     disabled={isPending}
                   >
                     <X className="size-3.5" />
-                    Afvis
+                    {isPending ? 'Afviser...' : 'Afvis'}
                   </Button>
                 </div>
               )}

@@ -5,6 +5,16 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import {
   Home,
   MessageCircle,
   BookOpen,
@@ -44,6 +54,7 @@ export function AppSidebar({ brandName, userName, userEmail, userRole }: Props) 
   const pathname = usePathname()
   const router = useRouter()
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   const isAdmin = userRole === 'ADMIN' || userRole === 'MODERATOR'
@@ -205,7 +216,10 @@ export function AppSidebar({ brandName, userName, userEmail, userRole }: Props) 
                 </Link>
                 <div className="mx-3 my-1 border-t border-[var(--color-border)]" />
                 <button
-                  onClick={handleLogout}
+                  onClick={() => {
+                    setDropdownOpen(false)
+                    setShowLogoutDialog(true)
+                  }}
                   className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
                 >
                   <LogOut className="size-4" />
@@ -216,6 +230,25 @@ export function AppSidebar({ brandName, userName, userEmail, userRole }: Props) 
           )}
         </div>
       </div>
+      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Log ud</AlertDialogTitle>
+            <AlertDialogDescription>
+              Du bliver logget ud af din konto. Er du sikker?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuller</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleLogout}
+              className="bg-destructive text-white hover:bg-destructive/90"
+            >
+              Log ud
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </aside>
   )
 }
