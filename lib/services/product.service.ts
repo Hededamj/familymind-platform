@@ -22,7 +22,15 @@ export async function updateProduct(id: string, data: UpdateProductInput) {
 }
 
 export async function deleteProduct(id: string) {
-  return prisma.product.delete({ where: { id } })
+  return prisma.$transaction(async (tx) => {
+    // Slet relationer der ikke har onDelete: Cascade
+    await tx.courseLesson.deleteMany({ where: { productId: id } })
+    await tx.courseModule.deleteMany({ where: { productId: id } })
+    await tx.entitlement.deleteMany({ where: { productId: id } })
+    await tx.discountCode.updateMany({ where: { applicableProductId: id }, data: { applicableProductId: null } })
+    await tx.journey.updateMany({ where: { productId: id }, data: { productId: null } })
+    return tx.product.delete({ where: { id } })
+  })
 }
 
 export async function listProducts(filters?: {
