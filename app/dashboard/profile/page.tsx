@@ -7,9 +7,11 @@ import {
   Settings,
   Shield,
   ChevronRight,
+  Bookmark,
 } from 'lucide-react'
 import { requireAuth } from '@/lib/auth'
 import { LogoutButton } from './_components/logout-button'
+import { getSavedLessons } from '@/lib/services/savedContent.service'
 
 const menuItems = [
   { icon: User, label: 'Rediger profil', href: '/dashboard/settings' },
@@ -35,6 +37,8 @@ export default async function ProfilePage() {
     year: 'numeric',
   })
 
+  const savedLessons = await getSavedLessons(user.id)
+
   const isPrivileged = user.role === 'ADMIN' || user.role === 'MODERATOR'
 
   return (
@@ -56,6 +60,32 @@ export default async function ProfilePage() {
 
         {/* Separator */}
         <div className="my-6 border-t border-border" />
+
+        {/* Gemte lektioner */}
+        {savedLessons.length > 0 && (
+          <div className="mb-6">
+            <h2 className="mb-3 flex items-center gap-2 text-sm font-medium text-muted-foreground">
+              <Bookmark className="size-4" />
+              Gemt ({savedLessons.length})
+            </h2>
+            <div className="space-y-1">
+              {savedLessons.map((saved) => (
+                <Link
+                  key={saved.id}
+                  href={`/content/${saved.contentUnit.slug}`}
+                  className="flex min-h-[44px] items-center gap-3 rounded-lg px-3 py-3 hover:bg-[var(--color-sand)] transition-colors"
+                >
+                  <Bookmark className="size-4 fill-current text-primary shrink-0" />
+                  <span className="flex-1 text-sm text-foreground line-clamp-1">{saved.contentUnit.title}</span>
+                  <span className="text-xs text-muted-foreground shrink-0">
+                    {saved.contentUnit.mediaType === 'VIDEO' ? 'Video' : saved.contentUnit.mediaType === 'PDF' ? 'PDF' : saved.contentUnit.mediaType === 'AUDIO' ? 'Lyd' : 'Tekst'}
+                  </span>
+                </Link>
+              ))}
+            </div>
+            <div className="mt-4 border-t border-border" />
+          </div>
+        )}
 
         {/* Menu items */}
         <nav className="space-y-1">
