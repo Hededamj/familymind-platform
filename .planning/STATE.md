@@ -4,7 +4,7 @@ milestone: v1.2
 milestone_name: Kursus-visning Redesign
 status: verifying
 stopped_at: Completed 07-02-PLAN.md
-last_updated: "2026-04-06T20:16:46.200Z"
+last_updated: "2026-04-06T20:21:36.944Z"
 last_activity: 2026-04-06
 progress:
   total_phases: 3
@@ -25,8 +25,8 @@ See: .planning/PROJECT.md (updated 2026-04-06)
 
 ## Current Position
 
-Phase: 07 (kursus-data-layer-savedcontent) — EXECUTING
-Plan: 2 of 2
+Phase: 8
+Plan: Not started
 Status: Phase complete — ready for verification
 Last activity: 2026-04-06
 
