@@ -122,7 +122,7 @@ Plans:
 
 Plans:
 - [x] 08-01-PLAN.md — LessonCard component (thumbnail, badge, duration, bookmark toggle)
-- [ ] 08-02-PLAN.md — ChapterSection component + horizontal scroll layout + course page restructuring + progress bar
+- [x] 08-02-PLAN.md — ChapterSection component + horizontal scroll layout + course page restructuring + progress bar
 
 **UI hint**: yes
 
@@ -157,5 +157,5 @@ Phases execute in numeric order: 7 → 8 → 9
 | 5. Dashboard Service Layer | v1.1 | 2/2 | Complete | 2026-04-06 |
 | 6. Dashboard UI Redesign | v1.1 | 2/2 | Complete | 2026-04-06 |
 | 7. Kursus Data Layer + SavedContent | v1.2 | 0/2 | Not started | - |
-| 8. Lektionskort + Kapitel-layout | v1.2 | 1/2 | In Progress|  |
+| 8. Lektionskort + Kapitel-layout | v1.2 | 2/2 | Complete   | 2026-04-06 |
 | 9. Kursus-header + Filter | v1.2 | 0/2 | Not started | - |
