@@ -97,7 +97,6 @@ export default async function ContentListPage() {
                 <TableRow key={unit.id}>
                   <TableCell>
                     {(() => {
-                      // Video thumbnail: altid fra Bunny CDN via bunnyVideoId
                       const thumb = unit.bunnyVideoId && BUNNY_CDN
                         ? `https://${BUNNY_CDN}/${unit.bunnyVideoId}/thumbnail.jpg`
                         : unit.thumbnailUrl
@@ -107,7 +106,6 @@ export default async function ContentListPage() {
                             src={thumb}
                             alt={unit.title}
                             className="h-10 w-16 rounded object-cover"
-                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
                           />
                         )
                       }
