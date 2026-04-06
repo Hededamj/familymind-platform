@@ -38,11 +38,29 @@ export function VideoUploader({ onUploadComplete, currentVideoId }: VideoUploade
   const [state, setState] = useState<'idle' | 'creating' | 'uploading' | 'done'>('idle')
   const [progress, setProgress] = useState(0)
   const [fileName, setFileName] = useState('')
+  const [videoTitle, setVideoTitle] = useState('')
+  const [videoDuration, setVideoDuration] = useState(0)
   const [showPicker, setShowPicker] = useState(false)
   const uploadRef = useRef<tus.Upload | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const cdnHostname = process.env.NEXT_PUBLIC_BUNNY_CDN_HOSTNAME ?? ''
+
+  // Fetch video title when currentVideoId is set
+  useEffect(() => {
+    if (currentVideoId && state === 'idle') {
+      fetch(`/api/videos?search=`)
+        .then(res => res.json())
+        .then(data => {
+          const video = (data.videos ?? []).find((v: BunnyVideo) => v.id === currentVideoId)
+          if (video) {
+            setVideoTitle(video.title)
+            setVideoDuration(video.duration)
+          }
+        })
+        .catch(() => {})
+    }
+  }, [currentVideoId, state])
 
   async function handleFileSelect(file: File) {
     if (!file.type.startsWith('video/')) {
@@ -103,6 +121,7 @@ export function VideoUploader({ onUploadComplete, currentVideoId }: VideoUploade
         onSuccess: () => {
           setState('done')
           setProgress(100)
+          setVideoTitle(title)
           onUploadComplete(videoId)
           toast.success('Video uploadet!')
         },
@@ -128,8 +147,9 @@ export function VideoUploader({ onUploadComplete, currentVideoId }: VideoUploade
     setFileName('')
   }
 
-  function handlePickVideo(videoId: string) {
+  function handlePickVideo(videoId: string, title?: string) {
     setShowPicker(false)
+    if (title) setVideoTitle(title)
     onUploadComplete(videoId)
     toast.success('Video valgt')
   }
@@ -150,9 +170,14 @@ export function VideoUploader({ onUploadComplete, currentVideoId }: VideoUploade
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium flex items-center gap-1.5">
               <CheckCircle className="size-4 text-green-600" />
-              Video tilknyttet
+              {videoTitle || 'Video tilknyttet'}
             </p>
-            <p className="text-xs text-muted-foreground truncate">{currentVideoId}</p>
+            {videoDuration > 0 && (
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                <Clock className="size-3" />
+                {formatDuration(videoDuration)}
+              </p>
+            )}
           </div>
           <div className="flex gap-1.5">
             <Button type="button" variant="outline" size="sm" onClick={() => setShowPicker(true)}>
@@ -258,8 +283,8 @@ export function VideoUploader({ onUploadComplete, currentVideoId }: VideoUploade
         <div className="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-4">
           <CheckCircle className="size-5 text-green-600" />
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-green-800">Video uploadet</p>
-            <p className="text-xs text-green-600 truncate">{fileName}</p>
+            <p className="text-sm font-medium text-green-800">{videoTitle || 'Video uploadet'}</p>
+            <p className="text-xs text-green-600">Uploadet</p>
           </div>
         </div>
       )}
@@ -272,7 +297,7 @@ export function VideoUploader({ onUploadComplete, currentVideoId }: VideoUploade
 type VideoPickerProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSelect: (videoId: string) => void
+  onSelect: (videoId: string, title?: string) => void
   onUploadNew: () => void
 }
 
@@ -363,7 +388,7 @@ function VideoPicker({ open, onOpenChange, onSelect, onUploadNew }: VideoPickerP
                 <button
                   key={video.id}
                   type="button"
-                  onClick={() => onSelect(video.id)}
+                  onClick={() => onSelect(video.id, video.title)}
                   className="flex w-full items-center gap-3 rounded-lg p-2 text-left transition-colors hover:bg-muted/50"
                 >
                   <img

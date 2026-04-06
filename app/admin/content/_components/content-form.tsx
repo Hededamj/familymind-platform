@@ -28,6 +28,13 @@ import {
 } from '@/components/ui/dialog'
 import { X, Upload, Loader2, CheckCircle, FolderOpen, Search, FileText as FileTextIcon, Headphones } from 'lucide-react'
 
+/** Gør filnavne menneskelæselige: "hjaelp-til-soevn-1712345678.pdf" → "hjaelp-til-soevn.pdf" */
+function prettifyFileName(urlOrName: string): string {
+  const name = urlOrName.split('/').pop() ?? urlOrName
+  // Fjern timestamp suffix (f.eks. "-1712345678")
+  return name.replace(/-\d{10,}(\.[^.]+)$/, '$1')
+}
+
 function generateSlug(title: string): string {
   return title
     .toLowerCase()
@@ -600,9 +607,8 @@ function FileUploadSection({
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium flex items-center gap-1.5">
               <CheckCircle className="size-4 text-green-600" />
-              Fil tilknyttet
+              {prettifyFileName(currentUrl)}
             </p>
-            <p className="text-xs text-muted-foreground truncate">{currentUrl.split('/').pop()}</p>
           </div>
           <div className="flex gap-1.5">
             <label className="cursor-pointer">
@@ -768,7 +774,7 @@ function FilePicker({
                 >
                   <Icon className="size-5 text-muted-foreground shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{file.name}</p>
+                    <p className="text-sm font-medium truncate">{prettifyFileName(file.name)}</p>
                     <p className="text-xs text-muted-foreground">{formatFileSize(file.size)}</p>
                   </div>
                 </button>
