@@ -49,23 +49,23 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CARD-01 | — | Pending |
-| CARD-02 | — | Pending |
-| CARD-03 | — | Pending |
-| CHAP-01 | — | Pending |
-| CHAP-02 | — | Pending |
-| CHAP-03 | — | Pending |
-| COURSE-01 | — | Pending |
-| COURSE-02 | — | Pending |
-| COURSE-03 | — | Pending |
-| FILTER-01 | — | Pending |
-| SAVE-01 | — | Pending |
+| CARD-01 | Phase 8 | Pending |
+| CARD-02 | Phase 8 | Pending |
+| CARD-03 | Phase 8 | Pending |
+| CHAP-01 | Phase 8 | Pending |
+| CHAP-02 | Phase 8 | Pending |
+| CHAP-03 | Phase 8 | Pending |
+| COURSE-01 | Phase 7 | Pending |
+| COURSE-02 | Phase 7 | Pending |
+| COURSE-03 | Phase 9 | Pending |
+| FILTER-01 | Phase 9 | Pending |
+| SAVE-01 | Phase 7 | Pending |
 
 **Coverage:**
 - v1.2 requirements: 11 total
-- Mapped to phases: 0
-- Unmapped: 11
+- Mapped to phases: 11
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-06*
-*Last updated: 2026-04-06 after initial definition*
+*Last updated: 2026-04-06 after roadmap creation (v1.2)*
