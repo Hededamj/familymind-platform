@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { Bookmark, PlayCircle, FileText, Headphones, Type, CheckCircle2 } from 'lucide-react'
 import { toggleBookmarkAction } from '@/app/actions/savedContent'
@@ -27,7 +26,14 @@ const typeLabels: Record<string, string> = {
   TEXT: 'Tekst',
 }
 
-const fallbackIcons: Record<string, typeof PlayCircle> = {
+const typeColors: Record<string, string> = {
+  VIDEO: 'bg-blue-50 text-blue-600',
+  PDF: 'bg-rose-50 text-rose-600',
+  AUDIO: 'bg-violet-50 text-violet-600',
+  TEXT: 'bg-amber-50 text-amber-700',
+}
+
+const typeIcons: Record<string, typeof PlayCircle> = {
   VIDEO: PlayCircle,
   PDF: FileText,
   AUDIO: Headphones,
@@ -38,7 +44,8 @@ export function LessonCard({ lesson, initialSaved, completed, courseSlug }: Less
   const [isSaved, setIsSaved] = useState(initialSaved)
 
   const typeLabel = typeLabels[lesson.mediaType] ?? lesson.mediaType
-  const FallbackIcon = fallbackIcons[lesson.mediaType] ?? PlayCircle
+  const colorClass = typeColors[lesson.mediaType] ?? 'bg-muted text-muted-foreground'
+  const Icon = typeIcons[lesson.mediaType] ?? PlayCircle
 
   async function handleBookmark(e: React.MouseEvent) {
     e.preventDefault()
@@ -48,65 +55,54 @@ export function LessonCard({ lesson, initialSaved, completed, courseSlug }: Less
     try {
       await toggleBookmarkAction(lesson.id, prev)
     } catch {
-      setIsSaved(prev) // revert on error
+      setIsSaved(prev)
     }
   }
 
   return (
     <Link
       href={`/content/${lesson.slug}?course=${courseSlug}`}
-      className="group relative flex w-[140px] shrink-0 flex-col overflow-hidden rounded-xl border border-border/60 bg-white shadow-sm transition-shadow hover:shadow-md"
+      className="group flex items-center gap-3 rounded-xl border border-border/50 bg-white p-3 transition-all hover:border-border hover:shadow-sm active:scale-[0.98]"
     >
-      {/* Thumbnail area */}
-      <div className="relative h-20 w-full bg-[var(--color-sand)]">
-        {lesson.thumbnailUrl ? (
-          <Image
-            src={lesson.thumbnailUrl}
-            alt={lesson.title}
-            fill
-            className="object-cover"
-            sizes="140px"
-          />
+      {/* Icon circle */}
+      <div className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${colorClass}`}>
+        {completed ? (
+          <CheckCircle2 className="size-5 text-emerald-500" />
         ) : (
-          <div className="flex h-full items-center justify-center">
-            <FallbackIcon className="size-6 text-muted-foreground/30" />
-          </div>
+          <Icon className="size-5" />
         )}
-
-        {/* Completion indicator */}
-        {completed && (
-          <div className="absolute left-1.5 top-1.5 flex size-5 items-center justify-center rounded-full bg-emerald-500 text-white">
-            <CheckCircle2 className="size-3.5" />
-          </div>
-        )}
-
-        {/* Bookmark button — 44px tap area, small visual */}
-        <button
-          onClick={handleBookmark}
-          aria-label={isSaved ? 'Fjern bogmærke' : 'Gem lektion'}
-          className="absolute -right-1 -top-1 flex min-h-[44px] min-w-[44px] items-center justify-center"
-        >
-          <span className="flex size-7 items-center justify-center rounded-full bg-white/70 backdrop-blur-sm transition-all hover:bg-white">
-            <Bookmark
-              className={`size-3.5 transition-colors ${isSaved ? 'fill-current text-[var(--color-coral)]' : 'text-muted-foreground/60'}`}
-            />
-          </span>
-        </button>
       </div>
 
-      {/* Card body */}
-      <div className="flex flex-1 flex-col gap-1 px-2.5 py-2">
-        <p className="line-clamp-2 text-xs font-medium leading-snug">{lesson.title}</p>
-
-        <div className="mt-auto flex items-center gap-1.5 pt-1">
-          <span className="rounded bg-muted px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">
-            {typeLabel}
-          </span>
+      {/* Content */}
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <p className="truncate text-sm font-medium">{lesson.title}</p>
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span>{typeLabel}</span>
           {lesson.durationMinutes != null && lesson.durationMinutes > 0 && (
-            <span className="text-[11px] text-muted-foreground">{lesson.durationMinutes} min</span>
+            <>
+              <span>·</span>
+              <span>{lesson.durationMinutes} min</span>
+            </>
+          )}
+          {completed && (
+            <>
+              <span>·</span>
+              <span className="text-emerald-600">Gennemført</span>
+            </>
           )}
         </div>
       </div>
+
+      {/* Bookmark */}
+      <button
+        onClick={handleBookmark}
+        aria-label={isSaved ? 'Fjern bogmærke' : 'Gem lektion'}
+        className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center"
+      >
+        <Bookmark
+          className={`size-4 transition-colors ${isSaved ? 'fill-current text-[var(--color-coral)]' : 'text-muted-foreground/40 group-hover:text-muted-foreground'}`}
+        />
+      </button>
     </Link>
   )
 }
