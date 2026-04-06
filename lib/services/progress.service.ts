@@ -120,12 +120,18 @@ export async function getUserInProgressCourses(userId: string) {
       (l) => l.contentUnit.userProgress[0]?.completedAt
     ).length
     const percentComplete = Math.round((completedLessons / totalLessons) * 100)
+    const totalDurationMinutes = lessons.reduce(
+      (sum, l) => sum + (l.contentUnit.durationMinutes ?? 0),
+      0
+    )
 
     courses.push({
       product: ent.product,
       totalLessons,
       completedLessons,
       percentComplete,
+      chapterCount: 0,
+      totalDurationMinutes,
       lessons: lessons.map((l) => ({
         id: l.id,
         contentUnitId: l.contentUnit.id,

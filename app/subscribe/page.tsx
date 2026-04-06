@@ -4,7 +4,7 @@ import { getUserEntitlements } from '@/lib/services/entitlement.service'
 import { getTenantConfig } from '@/lib/services/tenant.service'
 import { prisma } from '@/lib/prisma'
 import { Button } from '@/components/ui/button'
-import { Check } from 'lucide-react'
+import { Check, ArrowLeft, Mail } from 'lucide-react'
 import { SubscribeCTA } from './_components/subscribe-cta'
 
 const defaultBenefits = [
@@ -34,9 +34,26 @@ export default async function SubscribePage() {
     where: { type: 'SUBSCRIPTION', isActive: true },
   })
 
+  // Use default benefits if tenant has none or too few
+  const benefits =
+    tenant.landingBenefits && tenant.landingBenefits.length >= 3
+      ? tenant.landingBenefits
+      : defaultBenefits
+
   return (
     <div className="bg-sand px-4 py-16 sm:px-8">
       <div className="mx-auto w-full max-w-lg">
+        {/* Back link */}
+        {user && (
+          <Link
+            href="/dashboard/settings"
+            className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="size-4" />
+            Tilbage til indstillinger
+          </Link>
+        )}
+
         {/* Header */}
         <div className="mb-10 text-center">
           <p className="mb-2 text-xs font-semibold uppercase tracking-[0.08em] text-primary">
@@ -58,7 +75,7 @@ export default async function SubscribePage() {
           </div>
 
           <ul className="mb-8 space-y-3">
-            {(tenant.landingBenefits ?? defaultBenefits).map((benefit) => (
+            {benefits.map((benefit) => (
               <li key={benefit} className="flex items-start gap-3 text-sm">
                 <Check className="mt-0.5 size-4 shrink-0 text-success" />
                 <span>{benefit}</span>
@@ -87,15 +104,32 @@ export default async function SubscribePage() {
               </Link>
             </Button>
           ) : (
-            <p className="text-center text-sm text-muted-foreground">
-              Abonnement er ikke tilgængeligt lige nu.
-            </p>
+            <div className="space-y-4 text-center">
+              <p className="text-sm text-muted-foreground">
+                Abonnement er ikke tilgængeligt lige nu.
+              </p>
+              {tenant.contactEmail && (
+                <Button asChild variant="outline" className="rounded-xl">
+                  <a href={`mailto:${tenant.contactEmail}`}>
+                    <Mail className="size-4" />
+                    Kontakt os
+                  </a>
+                </Button>
+              )}
+              <div>
+                <Button asChild variant="ghost" size="sm">
+                  <Link href="/browse">Udforsk gratis indhold</Link>
+                </Button>
+              </div>
+            </div>
           )}
         </div>
 
-        <p className="mt-4 text-center text-xs text-muted-foreground">
-          Prøv gratis — betal først når du er klar
-        </p>
+        {subscriptionProduct && !hasSubscription && (
+          <p className="mt-4 text-center text-xs text-muted-foreground">
+            Prøv gratis — betal først når du er klar
+          </p>
+        )}
       </div>
     </div>
   )
