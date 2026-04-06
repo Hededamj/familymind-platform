@@ -345,33 +345,20 @@ export function ContentForm({
             </div>
           )}
 
-          <div className="space-y-2">
-            <Label htmlFor="thumbnailUrl">Thumbnail-URL</Label>
-            <Input
-              id="thumbnailUrl"
-              type="url"
-              value={formData.thumbnailUrl}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  thumbnailUrl: e.target.value,
-                }))
-              }
-              placeholder="Autoudfyldes fra Bunny Video ID"
-            />
-            {formData.thumbnailUrl && (
-              <div className="mt-2">
-                <img
-                  src={formData.thumbnailUrl}
-                  alt="Thumbnail preview"
-                  className="h-24 w-auto rounded border object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none'
-                  }}
-                />
-              </div>
-            )}
-          </div>
+          {/* Thumbnail preview — auto-genereret fra Bunny */}
+          {formData.thumbnailUrl && (
+            <div className="space-y-2">
+              <Label>Thumbnail</Label>
+              <img
+                src={formData.thumbnailUrl}
+                alt="Thumbnail preview"
+                className="h-24 w-auto rounded border object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none'
+                }}
+              />
+            </div>
+          )}
         </CardContent>
       </Card>
 
