@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: verifying
-stopped_at: Completed 06-02-PLAN.md
-last_updated: "2026-04-06T09:06:11.416Z"
+milestone: v1.2
+milestone_name: Kursus-visning Redesign
+status: defining_requirements
+stopped_at: Defining requirements for v1.2
+last_updated: "2026-04-06"
 last_activity: 2026-04-06
 progress:
-  total_phases: 2
-  completed_phases: 2
-  total_plans: 4
-  completed_plans: 4
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
   percent: 0
 ---
 

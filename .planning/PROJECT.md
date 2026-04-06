@@ -29,15 +29,19 @@ Forældre skal have en smooth, native-lignende mobiloplevelse der gør det nemt 
 - ✓ Touch-optimeret UI (44px targets) — v1.0
 - ✓ Konsistent navigation på alle bruger-routes — v1.0
 - ✓ PWA (manifest, viewport, theme-color) — v1.0
+- ✓ Personlig check-in prompt og dashboard-kontekst — v1.1
+- ✓ "Din gode uge" ugentligt fokus fra aktiv journey — v1.1
+- ✓ Visuelt redesignet dashboard med store indholdskort — v1.1
 
 ### Active
 
 <!-- Current scope. Building toward these. -->
 
-- [ ] Personlig check-in prompt baseret på brugerens udfordring/aktive journey
-- [ ] "Din gode uge" sektion med denne uges fokus fra aktiv journey
-- [ ] Dynamiske dashboard-beskeder der afspejler brugerens kontekst
-- [ ] Visuelt opdateret dashboard med store indholdskort
+- [ ] Visuelt rige lektionskort med thumbnails, type-badge og varighed
+- [ ] Kapitel-sektioner med horisontal scroll af lektioner
+- [ ] Kursus-oversigt med progress-bar og metadata
+- [ ] Content-type filter (Alle, Video, Artikler)
+- [ ] Bookmark/gem funktionalitet på lektioner
 
 ### Out of Scope
 
@@ -49,15 +53,16 @@ Forældre skal have en smooth, native-lignende mobiloplevelse der gør det nemt 
 - AI chat/assistent — Interessant men for komplekst til denne milestone
 - Admin-konfigurerbart PWA app-ikon — Parkeret til næste milestone
 
-## Current Milestone: v1.1 Personlig Dashboard
+## Current Milestone: v1.2 Kursus-visning Redesign
 
-**Goal:** Gør dashboardet personligt og engagerende ved at bruge onboarding-data og journey-status til dynamiske check-in prompts og ugentligt indhold.
+**Goal:** Redesign kursus-siden så den er visuelt engagerende med thumbnails, varighed, type-badges og horisontal scroll pr. kapitel.
 
 **Target features:**
-- Personlig check-in prompt baseret på brugerens udfordring/aktive journey
-- "Din gode uge" sektion med denne uges fokus fra aktiv journey
-- Dynamiske dashboard-beskeder der afspejler brugerens kontekst
-- Visuelt opdateret dashboard med store indholdskort
+- Visuelt rige lektionskort med thumbnails, type-badge og varighed
+- Kapitel-sektioner med horisontal scroll af lektioner
+- Kursus-oversigt med progress-bar og metadata
+- Content-type filter
+- Bookmark/gem funktionalitet
 
 ## Context
 
@@ -103,4 +108,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-05 after milestone v1.1 initialization*
+*Last updated: 2026-04-06 after milestone v1.2 initialization*
