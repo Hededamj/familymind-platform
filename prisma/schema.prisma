@@ -147,6 +147,7 @@ model User {
   contentReports     ContentReport[]
   cookieConsents     CookieConsent[]
   tags               UserTag[]
+  savedContent       SavedContent[]
 
   @@index([lastActiveAt])
 }
@@ -248,6 +249,7 @@ model ContentUnit {
   courseLessons      CourseLesson[]
   journeyDayContents JourneyDayContent[]
   userProgress       UserContentProgress[]
+  savedContent       SavedContent[]
 }
 
 model ContentTag {
@@ -389,6 +391,19 @@ model UserContentProgress {
 
   @@unique([userId, contentUnitId])
   @@index([userId, completedAt])
+}
+
+model SavedContent {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @db.Uuid
+  contentUnitId String   @db.Uuid
+  savedAt       DateTime @default(now())
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contentUnit ContentUnit @relation(fields: [contentUnitId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, contentUnitId])
+  @@index([userId, savedAt])
 }
 
 // ──────────────────────────────────────────────
