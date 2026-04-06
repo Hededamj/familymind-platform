@@ -1,4 +1,4 @@
-import { notFound, redirect } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { getProduct } from '@/lib/services/product.service'
@@ -7,8 +7,8 @@ import { getUserEntitlements } from '@/lib/services/entitlement.service'
 import { getCourseProgress } from '@/lib/services/progress.service'
 import { getSavedLessons } from '@/lib/services/savedContent.service'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Check, PlayCircle, FileText, Headphones, Type, CheckCircle } from 'lucide-react'
+import { Check } from 'lucide-react'
+import { ChapterSection } from './_components/ChapterSection'
 
 type LandingPageConfig = {
   subtitle?: string
@@ -17,13 +17,6 @@ type LandingPageConfig = {
   faq?: Array<{ question: string; answer: string }>
   ctaText?: string
   ctaUrl?: string
-}
-
-const mediaTypeIcons: Record<string, typeof PlayCircle> = {
-  VIDEO: PlayCircle,
-  PDF: FileText,
-  AUDIO: Headphones,
-  TEXT: Type,
 }
 
 export default async function CourseLandingPage({
@@ -59,41 +52,8 @@ export default async function CourseLandingPage({
 
   // Brugeren har adgang — vis kursusindhold med lektioner
   if (hasAccess && courseProgress) {
-    const progressLessons = courseProgress.lessons
-    const completedIds = new Set(
-      progressLessons.filter((l) => l.completed).map((l) => l.contentUnitId)
-    )
     const lessons = product.courseLessons
       ?.sort((a: any, b: any) => a.position - b.position) ?? []
-
-    const productSlug = product!.slug
-
-    function LessonRow({ lesson }: { lesson: any }) {
-      const isCompleted = completedIds.has(lesson.contentUnit.id)
-      const Icon = mediaTypeIcons[lesson.contentUnit.mediaType] ?? PlayCircle
-      const typeLabel = lesson.contentUnit.mediaType === 'VIDEO' ? 'Video'
-        : lesson.contentUnit.mediaType === 'PDF' ? 'PDF'
-        : lesson.contentUnit.mediaType === 'AUDIO' ? 'Lyd' : 'Tekst'
-      return (
-        <Link
-          key={lesson.id}
-          href={`/content/${lesson.contentUnit.slug}?course=${productSlug}`}
-          className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-muted/30"
-        >
-          {isCompleted ? (
-            <CheckCircle className="size-5 text-green-600 shrink-0" />
-          ) : (
-            <Icon className="size-5 text-muted-foreground shrink-0" />
-          )}
-          <span className={`text-sm ${isCompleted ? 'text-muted-foreground' : 'font-medium'}`}>
-            {lesson.contentUnit.title}
-          </span>
-          <Badge variant="secondary" className="ml-auto text-xs">
-            {typeLabel}
-          </Badge>
-        </Link>
-      )
-    }
 
     return (
       <div className="px-4 py-6 sm:px-8 sm:py-8">
@@ -120,34 +80,83 @@ export default async function CourseLandingPage({
             )}
           </div>
 
-          {product.modules && product.modules.length > 0 ? (
-            <div className="space-y-6">
-              {product.modules.sort((a: any, b: any) => a.position - b.position).map((module: any, i: number) => {
-                const moduleLessons = lessons.filter((l: any) => l.moduleId === module.id)
-                return (
-                  <div key={module.id} className="rounded-xl border">
-                    <div className="border-b px-5 py-4">
-                      <h2 className="font-medium">
-                        <span className="mr-2 text-muted-foreground">{i + 1}.</span>
-                        {module.title}
-                      </h2>
-                    </div>
-                    <div className="divide-y">
-                      {moduleLessons.map((lesson: any) => (
-                        <LessonRow key={lesson.id} lesson={lesson} />
-                      ))}
-                    </div>
-                  </div>
-                )
-              })}
+          {/* Progress bar */}
+          <div className="mb-6">
+            <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--color-sand)]">
+              <div
+                className="h-full rounded-full bg-[var(--color-coral)] transition-all"
+                style={{ width: `${courseProgress.percentComplete}%` }}
+              />
             </div>
-          ) : (
-            <div className="rounded-xl border divide-y">
-              {lessons.map((lesson: any) => (
-                <LessonRow key={lesson.id} lesson={lesson} />
-              ))}
-            </div>
-          )}
+          </div>
+
+          <div className="space-y-8">
+            {/* Module-based chapters */}
+            {product.modules && product.modules.length > 0 && (
+              <>
+                {product.modules.sort((a: any, b: any) => a.position - b.position).map((module: any) => {
+                  const moduleLessons = lessons
+                    .filter((l: any) => l.moduleId === module.id)
+                    .map((l: any) => ({
+                      id: l.contentUnit.id,
+                      slug: l.contentUnit.slug,
+                      title: l.contentUnit.title,
+                      mediaType: l.contentUnit.mediaType,
+                      durationMinutes: l.contentUnit.durationMinutes,
+                      thumbnailUrl: l.contentUnit.thumbnailUrl,
+                    }))
+                  return (
+                    <ChapterSection
+                      key={module.id}
+                      title={module.title}
+                      lessons={moduleLessons}
+                      savedLessonIds={savedLessonIds}
+                      courseSlug={product.slug}
+                    />
+                  )
+                })}
+              </>
+            )}
+
+            {/* Unassigned lessons — CHAP-03 */}
+            {(() => {
+              const unassigned = lessons
+                .filter((l: any) => !l.moduleId)
+                .map((l: any) => ({
+                  id: l.contentUnit.id,
+                  slug: l.contentUnit.slug,
+                  title: l.contentUnit.title,
+                  mediaType: l.contentUnit.mediaType,
+                  durationMinutes: l.contentUnit.durationMinutes,
+                  thumbnailUrl: l.contentUnit.thumbnailUrl,
+                }))
+              return unassigned.length > 0 ? (
+                <ChapterSection
+                  title="Øvrige lektioner"
+                  lessons={unassigned}
+                  savedLessonIds={savedLessonIds}
+                  courseSlug={product.slug}
+                />
+              ) : null
+            })()}
+
+            {/* No modules fallback */}
+            {(!product.modules || product.modules.length === 0) && (
+              <ChapterSection
+                title="Lektioner"
+                lessons={lessons.map((l: any) => ({
+                  id: l.contentUnit.id,
+                  slug: l.contentUnit.slug,
+                  title: l.contentUnit.title,
+                  mediaType: l.contentUnit.mediaType,
+                  durationMinutes: l.contentUnit.durationMinutes,
+                  thumbnailUrl: l.contentUnit.thumbnailUrl,
+                }))}
+                savedLessonIds={savedLessonIds}
+                courseSlug={product.slug}
+              />
+            )}
+          </div>
         </div>
       </div>
     )
