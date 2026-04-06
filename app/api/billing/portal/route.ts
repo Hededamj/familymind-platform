@@ -27,14 +27,21 @@ export async function POST() {
     )
   }
 
-  const subscription = await stripe.subscriptions.retrieve(
-    entitlement.stripeSubscriptionId
-  )
+  try {
+    const subscription = await stripe.subscriptions.retrieve(
+      entitlement.stripeSubscriptionId
+    )
 
-  const session = await stripe.billingPortal.sessions.create({
-    customer: subscription.customer as string,
-    return_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
-  })
+    const session = await stripe.billingPortal.sessions.create({
+      customer: subscription.customer as string,
+      return_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
+    })
 
-  return NextResponse.json({ url: session.url })
+    return NextResponse.json({ url: session.url })
+  } catch {
+    return NextResponse.json(
+      { error: 'Kunne ikke oprette forbindelse til betalingssystemet. Kontakt support.' },
+      { status: 502 }
+    )
+  }
 }
