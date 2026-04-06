@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { ArrowLeft, User, CreditCard, LogOut } from 'lucide-react'
 import { ManageSubscriptionButton } from './_components/manage-subscription-button'
 import { LogoutButton } from './_components/logout-button'
+import { DeleteAccountSection } from './_components/delete-account-section'
 
 export default async function SettingsPage() {
   const user = await requireAuth()
@@ -116,6 +117,14 @@ export default async function SettingsPage() {
             </div>
           </div>
         </div>
+
+        {/* Delete account section — only for non-admin users */}
+        {user.role !== 'ADMIN' && (
+          <>
+            <div className="my-8 border-t border-border" />
+            <DeleteAccountSection />
+          </>
+        )}
       </div>
     </div>
   )

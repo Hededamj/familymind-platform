@@ -127,6 +127,7 @@ model User {
   role                UserRole @default(USER)
   organizationId      String?  @db.Uuid
   onboardingCompleted Boolean  @default(false)
+  hasSeenWelcome      Boolean  @default(false)
   lastActiveAt        DateTime?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt

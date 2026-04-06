@@ -5,6 +5,17 @@ import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { getUserActiveJourney } from '@/lib/services/journey.service'
 
+export async function markWelcomeSeen() {
+  const user = await requireAuth()
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { hasSeenWelcome: true },
+  })
+
+  revalidatePath('/dashboard')
+}
+
 export async function submitDashboardReflection(reflection: string) {
   if (!reflection.trim()) {
     throw new Error('Refleksion må ikke være tom.')

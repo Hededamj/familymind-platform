@@ -12,6 +12,7 @@ import { CompletedJourneyCard } from './_components/completed-journey-card'
 import { DashboardCheckIn } from './_components/dashboard-check-in'
 import { SectionHeading } from './_components/section-heading'
 import { WeeklyFocusCard } from './_components/weekly-focus-card'
+import { WelcomeDialog } from '@/components/welcome-dialog'
 
 function getGreeting(): string {
   const hour = new Date().getHours()
@@ -29,7 +30,7 @@ export default async function DashboardPage() {
     redirect('/onboarding')
   }
 
-  const [dashboardState, , rooms] = await Promise.all([
+  const [dashboardState, tenantConfig, rooms] = await Promise.all([
     getDashboardState(user.id),
     getTenantConfig(),
     listRooms(),
@@ -47,9 +48,17 @@ export default async function DashboardPage() {
 
   const displayName = user.name || user.email.split('@')[0]
 
+  const showWelcome = !user.hasSeenWelcome && !recentlyCompleted
+
   return (
     <div className="overflow-hidden px-4 py-6 sm:px-8 sm:py-8">
       <div className="mx-auto w-full max-w-2xl">
+        {showWelcome && (
+          <WelcomeDialog
+            brandName={tenantConfig.brandName}
+            hasActiveJourney={!!activeJourney}
+          />
+        )}
         {/* Greeting */}
         <h1 className="mb-2 font-serif text-2xl sm:text-3xl">
           {getGreeting()}, {displayName}
