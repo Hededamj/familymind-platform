@@ -14,7 +14,7 @@
 ### Din Gode Uge
 
 - [x] **WEEK-01**: Dashboard viser "Din gode uge" sektion med de næste dage fra aktiv journey
-- [ ] **WEEK-02**: Dagens fokus vises som et stort visuelt indholdskort med titel og beskrivelse
+- [x] **WEEK-02**: Dagens fokus vises som et stort visuelt indholdskort med titel og beskrivelse
 - [x] **WEEK-03**: Ugeoversigten viser progress (X af Y dage denne uge)
 
 ### Dashboard Kontekst
@@ -24,7 +24,7 @@
 
 ### Visuelt Redesign
 
-- [ ] **VISUAL-01**: Dashboard bruger store indholdskort med afrundede hjørner og illustration/billede
+- [x] **VISUAL-01**: Dashboard bruger store indholdskort med afrundede hjørner og illustration/billede
 - [x] **VISUAL-02**: Check-in sektion har visuelt fremhævet container (inspireret af konkurrents gule boks)
 - [x] **VISUAL-03**: Sektioner har tydelige overskrifter og sekundær tekst (f.eks. "Nyt hver mandag")
 
@@ -53,11 +53,11 @@
 | CHECKIN-02 | Phase 6 | Complete |
 | CHECKIN-03 | Phase 5 | Complete |
 | WEEK-01 | Phase 5 | Complete |
-| WEEK-02 | Phase 6 | Pending |
+| WEEK-02 | Phase 6 | Complete |
 | WEEK-03 | Phase 5 | Complete |
 | CONTEXT-01 | Phase 5 | Complete |
 | CONTEXT-02 | Phase 5 | Complete |
-| VISUAL-01 | Phase 6 | Pending |
+| VISUAL-01 | Phase 6 | Complete |
 | VISUAL-02 | Phase 6 | Complete |
 | VISUAL-03 | Phase 6 | Complete |
 
