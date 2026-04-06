@@ -53,19 +53,13 @@ export function CourseProgressCard({
           <Progress value={percentComplete} />
         </div>
 
-        {/* Continue button */}
-        {nextLesson ? (
-          <Button asChild className="w-full min-h-[44px]" size="sm">
-            <Link href={`/content/${nextLesson.slug}`}>
-              Fortsæt
-              <ArrowRight className="ml-2 size-4" />
-            </Link>
-          </Button>
-        ) : (
-          <Button asChild variant="outline" className="w-full min-h-[44px]" size="sm">
-            <Link href={`/products/${product.slug}`}>Se kursus</Link>
-          </Button>
-        )}
+        {/* Continue button — always go to course overview with modules */}
+        <Button asChild className="w-full min-h-[44px]" size="sm">
+          <Link href={`/courses/${product.slug}`}>
+            {percentComplete === 100 ? 'Se kursus' : 'Fortsæt'}
+            <ArrowRight className="ml-2 size-4" />
+          </Link>
+        </Button>
       </CardContent>
     </Card>
   )
