@@ -60,40 +60,50 @@ export default async function CourseLandingPage({
 
     return (
       <div className="px-4 py-6 sm:px-8 sm:py-8">
-        <div className="mx-auto w-full max-w-3xl">
+        <div className="mx-auto w-full max-w-2xl">
           <Link
             href="/dashboard/courses"
-            className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+            className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             ← Mine forløb
           </Link>
 
-          <h1 className="mb-2 font-serif text-2xl sm:text-3xl">{product.title}</h1>
-          {product.description && (
-            <p className="mb-6 text-muted-foreground">{product.description}</p>
-          )}
-
-          <div className="mb-6 text-sm text-muted-foreground">
-            {courseProgress.percentComplete}% gennemført ({courseProgress.completedLessons} af {courseProgress.totalLessons} lektioner)
-            {courseProgress.chapterCount > 0 && (
-              <span className="ml-2">· {courseProgress.chapterCount} kapitler</span>
+          {/* Course header card */}
+          <div className="mb-8 overflow-hidden rounded-2xl bg-gradient-to-br from-[var(--color-sand)] to-white p-5 sm:p-6">
+            <h1 className="mb-1.5 font-serif text-xl sm:text-2xl">{product.title}</h1>
+            {product.description && (
+              <p className="mb-4 text-sm leading-relaxed text-muted-foreground">{product.description}</p>
             )}
-            {courseProgress.totalDurationMinutes > 0 && (
-              <span className="ml-2">· ca. {courseProgress.totalDurationMinutes} min</span>
-            )}
-          </div>
 
-          {/* Progress bar */}
-          <div className="mb-6">
-            <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--color-sand)]">
-              <div
-                className="h-full rounded-full bg-[var(--color-coral)] transition-all"
-                style={{ width: `${courseProgress.percentComplete}%` }}
-              />
+            {/* Progress section */}
+            <div className="space-y-2">
+              <div className="flex items-baseline justify-between">
+                <span className="text-sm font-medium">
+                  {courseProgress.percentComplete}% gennemført
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {courseProgress.completedLessons} af {courseProgress.totalLessons} lektioner
+                </span>
+              </div>
+              <div className="h-2 w-full overflow-hidden rounded-full bg-white">
+                <div
+                  className="h-full rounded-full bg-[var(--color-coral)] transition-all duration-500"
+                  style={{ width: `${courseProgress.percentComplete}%` }}
+                />
+              </div>
+              <div className="flex gap-3 text-xs text-muted-foreground">
+                {courseProgress.chapterCount > 0 && (
+                  <span>{courseProgress.chapterCount} kapitler</span>
+                )}
+                {courseProgress.totalDurationMinutes > 0 && (
+                  <span>ca. {courseProgress.totalDurationMinutes} min</span>
+                )}
+              </div>
             </div>
           </div>
 
-          <div className="space-y-6">
+          {/* Chapter sections */}
+          <div className="space-y-8">
             {/* Module-based chapters */}
             {product.modules && product.modules.length > 0 && (
               <>
