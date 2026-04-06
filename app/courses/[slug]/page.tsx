@@ -54,6 +54,9 @@ export default async function CourseLandingPage({
   if (hasAccess && courseProgress) {
     const lessons = product.courseLessons
       ?.sort((a: any, b: any) => a.position - b.position) ?? []
+    const completedLessonIds = new Set(
+      courseProgress.lessons.filter((l) => l.completed).map((l) => l.contentUnitId)
+    )
 
     return (
       <div className="px-4 py-6 sm:px-8 sm:py-8">
@@ -111,6 +114,7 @@ export default async function CourseLandingPage({
                       title={module.title}
                       lessons={moduleLessons}
                       savedLessonIds={savedLessonIds}
+                      completedLessonIds={completedLessonIds}
                       courseSlug={product.slug}
                     />
                   )
@@ -135,6 +139,7 @@ export default async function CourseLandingPage({
                   title="Øvrige lektioner"
                   lessons={unassigned}
                   savedLessonIds={savedLessonIds}
+                  completedLessonIds={completedLessonIds}
                   courseSlug={product.slug}
                 />
               ) : null
@@ -153,6 +158,7 @@ export default async function CourseLandingPage({
                   thumbnailUrl: l.contentUnit.thumbnailUrl,
                 }))}
                 savedLessonIds={savedLessonIds}
+                completedLessonIds={completedLessonIds}
                 courseSlug={product.slug}
               />
             )}
