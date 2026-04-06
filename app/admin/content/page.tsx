@@ -14,6 +14,8 @@ import {
 import { Plus, Video, Headphones, FileText, Type } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
+const BUNNY_CDN = process.env.BUNNY_CDN_HOSTNAME ?? ''
+
 const mediaTypeIcons: Record<string, LucideIcon> = {
   VIDEO: Video,
   AUDIO: Headphones,
@@ -94,13 +96,21 @@ export default async function ContentListPage() {
               {contentUnits.map((unit) => (
                 <TableRow key={unit.id}>
                   <TableCell>
-                    {unit.thumbnailUrl ? (
-                      <img
-                        src={unit.thumbnailUrl}
-                        alt={unit.title}
-                        className="h-10 w-16 rounded object-cover"
-                      />
-                    ) : (() => {
+                    {(() => {
+                      // Video thumbnail: altid fra Bunny CDN via bunnyVideoId
+                      const thumb = unit.bunnyVideoId && BUNNY_CDN
+                        ? `https://${BUNNY_CDN}/${unit.bunnyVideoId}/thumbnail.jpg`
+                        : unit.thumbnailUrl
+                      if (thumb) {
+                        return (
+                          <img
+                            src={thumb}
+                            alt={unit.title}
+                            className="h-10 w-16 rounded object-cover"
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                          />
+                        )
+                      }
                       const Icon = mediaTypeIcons[unit.mediaType] ?? FileText
                       return (
                         <div className="flex h-10 w-16 items-center justify-center rounded bg-muted">
