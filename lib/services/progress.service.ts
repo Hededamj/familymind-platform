@@ -29,17 +29,20 @@ export async function getContentProgress(userId: string, contentUnitId: string) 
 }
 
 export async function getCourseProgress(userId: string, productId: string) {
-  const lessons = await prisma.courseLesson.findMany({
-    where: { productId },
-    include: {
-      contentUnit: {
-        include: {
-          userProgress: { where: { userId } },
+  const [lessons, moduleCount] = await Promise.all([
+    prisma.courseLesson.findMany({
+      where: { productId },
+      include: {
+        contentUnit: {
+          include: {
+            userProgress: { where: { userId } },
+          },
         },
       },
-    },
-    orderBy: { position: 'asc' },
-  })
+      orderBy: { position: 'asc' },
+    }),
+    prisma.courseModule.count({ where: { productId } }),
+  ])
 
   const totalLessons = lessons.length
   const completedLessons = lessons.filter(
@@ -50,10 +53,18 @@ export async function getCourseProgress(userId: string, productId: string) {
       ? Math.round((completedLessons / totalLessons) * 100)
       : 0
 
+  const chapterCount = moduleCount
+  const totalDurationMinutes = lessons.reduce(
+    (sum, l) => sum + (l.contentUnit.durationMinutes ?? 0),
+    0
+  )
+
   return {
     totalLessons,
     completedLessons,
     percentComplete,
+    chapterCount,
+    totalDurationMinutes,
     lessons: lessons.map((l) => ({
       id: l.id,
       contentUnitId: l.contentUnit.id,

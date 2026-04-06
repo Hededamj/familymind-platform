@@ -5,6 +5,7 @@ import { getProduct } from '@/lib/services/product.service'
 import { getCurrentUser } from '@/lib/auth'
 import { getUserEntitlements } from '@/lib/services/entitlement.service'
 import { getCourseProgress } from '@/lib/services/progress.service'
+import { getSavedLessons } from '@/lib/services/savedContent.service'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Check, PlayCircle, FileText, Headphones, Type, CheckCircle } from 'lucide-react'
@@ -41,12 +42,18 @@ export default async function CourseLandingPage({
   const user = await getCurrentUser()
   let hasAccess = false
   let courseProgress: Awaited<ReturnType<typeof getCourseProgress>> | null = null
+  let savedLessonIds = new Set<string>()
 
   if (user) {
     const entitlements = await getUserEntitlements(user.id)
     hasAccess = entitlements.some((e) => e.productId === product.id)
     if (hasAccess) {
-      courseProgress = await getCourseProgress(user.id, product.id)
+      const [progress, saved] = await Promise.all([
+        getCourseProgress(user.id, product.id),
+        getSavedLessons(user.id),
+      ])
+      courseProgress = progress
+      savedLessonIds = new Set(saved.map((s) => s.contentUnitId))
     }
   }
 
@@ -104,7 +111,13 @@ export default async function CourseLandingPage({
           )}
 
           <div className="mb-6 text-sm text-muted-foreground">
-            {courseProgress.completedLessons} af {courseProgress.totalLessons} lektioner gennemført
+            {courseProgress.percentComplete}% gennemført ({courseProgress.completedLessons} af {courseProgress.totalLessons} lektioner)
+            {courseProgress.chapterCount > 0 && (
+              <span className="ml-2">· {courseProgress.chapterCount} kapitler</span>
+            )}
+            {courseProgress.totalDurationMinutes > 0 && (
+              <span className="ml-2">· ca. {courseProgress.totalDurationMinutes} min</span>
+            )}
           </div>
 
           {product.modules && product.modules.length > 0 ? (
