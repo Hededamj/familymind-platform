@@ -19,6 +19,7 @@ import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { createContentAction, updateContentAction } from '../actions'
 import { RichTextEditor } from '@/components/rich-text-editor'
+import { VideoUploader } from '@/components/video-uploader'
 import { X, Upload, Loader2, CheckCircle } from 'lucide-react'
 
 function generateSlug(title: string): string {
@@ -344,42 +345,20 @@ export function ContentForm({
             </div>
           )}
 
-          {/* Video fields */}
+          {/* Video upload */}
           {formData.mediaType === 'VIDEO' && (
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="bunnyVideoId">Bunny Video ID</Label>
-                <Input
-                  id="bunnyVideoId"
-                  value={formData.bunnyVideoId}
-                  onChange={(e) => {
-                    const videoId = e.target.value
-                    setFormData((prev) => ({
-                      ...prev,
-                      bunnyVideoId: videoId,
-                      thumbnailUrl: videoId
-                        ? `https://${process.env.NEXT_PUBLIC_BUNNY_CDN_HOSTNAME ?? 'vz-b4f34ae0-620.b-cdn.net'}/${videoId}/thumbnail.jpg`
-                        : prev.thumbnailUrl,
-                    }))
-                  }}
-                  placeholder="Bunny CDN video ID"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="mediaUrl">Medie-URL (valgfrit)</Label>
-                <Input
-                  id="mediaUrl"
-                  type="url"
-                  value={formData.mediaUrl}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      mediaUrl: e.target.value,
-                    }))
-                  }
-                  placeholder="https://..."
-                />
-              </div>
+            <div className="space-y-2">
+              <Label>Video</Label>
+              <VideoUploader
+                currentVideoId={formData.bunnyVideoId || undefined}
+                onUploadComplete={(videoId) => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    bunnyVideoId: videoId,
+                    thumbnailUrl: `https://${process.env.NEXT_PUBLIC_BUNNY_CDN_HOSTNAME ?? ''}/${videoId}/thumbnail.jpg`,
+                  }))
+                }}
+              />
             </div>
           )}
 

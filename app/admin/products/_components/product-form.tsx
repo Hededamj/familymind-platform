@@ -41,6 +41,7 @@ import {
   updateLandingPageAction,
 } from '../actions'
 import { createContentAction } from '../../content/actions'
+import { VideoUploader } from '@/components/video-uploader'
 import {
   ArrowUp,
   ArrowDown,
@@ -1353,11 +1354,10 @@ export function ProductForm({
               </div>
               {newLesson.mediaType === 'VIDEO' && (
                 <div className="space-y-2">
-                  <Label>Bunny Video ID</Label>
-                  <Input
-                    value={newLesson.bunnyVideoId}
-                    onChange={(e) => setNewLesson(prev => ({ ...prev, bunnyVideoId: e.target.value }))}
-                    placeholder="Kan tilføjes senere"
+                  <Label>Video</Label>
+                  <VideoUploader
+                    currentVideoId={newLesson.bunnyVideoId || undefined}
+                    onUploadComplete={(videoId) => setNewLesson(prev => ({ ...prev, bunnyVideoId: videoId }))}
                   />
                 </div>
               )}
