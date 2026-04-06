@@ -104,7 +104,7 @@ Plans:
 
 Plans:
 - [x] 07-01-PLAN.md — SavedContent Prisma model + bookmark service + server action
-- [ ] 07-02-PLAN.md — Course metadata extension (chapterCount, totalDurationMinutes) + course page wiring + profile "Gemt" section
+- [x] 07-02-PLAN.md — Course metadata extension (chapterCount, totalDurationMinutes) + course page wiring + profile "Gemt" section
 
 **UI hint**: no
 
