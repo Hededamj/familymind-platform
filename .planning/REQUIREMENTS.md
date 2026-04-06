@@ -7,9 +7,9 @@
 
 ### Lektionskort
 
-- [ ] **CARD-01**: Lektionskort viser video-thumbnail fra Bunny CDN eller fallback-billede
-- [ ] **CARD-02**: Lektionskort viser titel, type-badge (VIDEO/TEXT/PDF/AUDIO) og varighed
-- [ ] **CARD-03**: Lektionskort har bookmark/gem-ikon der toggles on/off
+- [x] **CARD-01**: Lektionskort viser video-thumbnail fra Bunny CDN eller fallback-billede
+- [x] **CARD-02**: Lektionskort viser titel, type-badge (VIDEO/TEXT/PDF/AUDIO) og varighed
+- [x] **CARD-03**: Lektionskort har bookmark/gem-ikon der toggles on/off
 
 ### Kapitel-layout
 
@@ -19,8 +19,8 @@
 
 ### Kursus-oversigt
 
-- [ ] **COURSE-01**: Kursus-siden viser progress-bar med procent completion
-- [ ] **COURSE-02**: Kursus-header viser antal kapitler og total estimeret varighed
+- [x] **COURSE-01**: Kursus-siden viser progress-bar med procent completion
+- [x] **COURSE-02**: Kursus-header viser antal kapitler og total estimeret varighed
 - [ ] **COURSE-03**: Kursus-header viser cover-billede hvis tilgængeligt
 
 ### Filter & Bookmark
@@ -49,14 +49,14 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CARD-01 | Phase 8 | Pending |
-| CARD-02 | Phase 8 | Pending |
-| CARD-03 | Phase 8 | Pending |
+| CARD-01 | Phase 8 | Complete |
+| CARD-02 | Phase 8 | Complete |
+| CARD-03 | Phase 8 | Complete |
 | CHAP-01 | Phase 8 | Pending |
 | CHAP-02 | Phase 8 | Pending |
 | CHAP-03 | Phase 8 | Pending |
-| COURSE-01 | Phase 7 | Pending |
-| COURSE-02 | Phase 7 | Pending |
+| COURSE-01 | Phase 7 | Complete |
+| COURSE-02 | Phase 7 | Complete |
 | COURSE-03 | Phase 9 | Pending |
 | FILTER-01 | Phase 9 | Pending |
 | SAVE-01 | Phase 7 | Complete |

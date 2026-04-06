@@ -118,11 +118,11 @@ Plans:
   3. Each lesson card has a bookmark icon that visually toggles between saved and unsaved state when tapped
   4. Chapters are rendered as named sections, each with a horizontally scrollable row of lesson cards and no visible scrollbar
   5. Lessons with no module are grouped under a section titled "Øvrige lektioner"
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 08-01: LessonCard component (thumbnail, badge, duration, bookmark toggle)
-- [ ] 08-02: ChapterSection component + horizontal scroll layout + course page restructuring
+- [x] 08-01-PLAN.md — LessonCard component (thumbnail, badge, duration, bookmark toggle)
+- [ ] 08-02-PLAN.md — ChapterSection component + horizontal scroll layout + course page restructuring + progress bar
 
 **UI hint**: yes
 
@@ -157,5 +157,5 @@ Phases execute in numeric order: 7 → 8 → 9
 | 5. Dashboard Service Layer | v1.1 | 2/2 | Complete | 2026-04-06 |
 | 6. Dashboard UI Redesign | v1.1 | 2/2 | Complete | 2026-04-06 |
 | 7. Kursus Data Layer + SavedContent | v1.2 | 0/2 | Not started | - |
-| 8. Lektionskort + Kapitel-layout | v1.2 | 0/2 | Not started | - |
+| 8. Lektionskort + Kapitel-layout | v1.2 | 1/2 | In Progress|  |
 | 9. Kursus-header + Filter | v1.2 | 0/2 | Not started | - |
