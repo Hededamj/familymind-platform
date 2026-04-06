@@ -1,71 +1,71 @@
-# Requirements: FamilyMind Personlig Dashboard
+# Requirements: FamilyMind Kursus-visning Redesign
 
-**Defined:** 2026-04-05
-**Core Value:** Forældre skal have en smooth, native-lignende mobiloplevelse der føles personlig
+**Defined:** 2026-04-06
+**Core Value:** Visuelt engagerende kursusvisning der holder brugerne på platformen
 
-## v1.1 Requirements
+## v1.2 Requirements
 
-### Personlig Check-in
+### Lektionskort
 
-- [x] **CHECKIN-01**: Dashboard viser dynamisk check-in prompt baseret på brugerens aktive journey eller primære udfordring
-- [x] **CHECKIN-02**: Brugeren kan skrive en fri-tekst refleksion direkte fra dashboardet
-- [x] **CHECKIN-03**: Check-in prompten skifter afhængigt af dashboard-state (ny bruger, aktiv journey, ingen journey, completed journey)
+- [ ] **CARD-01**: Lektionskort viser video-thumbnail fra Bunny CDN eller fallback-billede
+- [ ] **CARD-02**: Lektionskort viser titel, type-badge (VIDEO/TEXT/PDF/AUDIO) og varighed
+- [ ] **CARD-03**: Lektionskort har bookmark/gem-ikon der toggles on/off
 
-### Din Gode Uge
+### Kapitel-layout
 
-- [x] **WEEK-01**: Dashboard viser "Din gode uge" sektion med de næste dage fra aktiv journey
-- [x] **WEEK-02**: Dagens fokus vises som et stort visuelt indholdskort med titel og beskrivelse
-- [x] **WEEK-03**: Ugeoversigten viser progress (X af Y dage denne uge)
+- [ ] **CHAP-01**: Hvert kapitel vises som en sektion med overskrift og horisontal scroll af lektionskort
+- [ ] **CHAP-02**: Horisontal scroll har usynlig scrollbar og smooth scroll-behavior
+- [ ] **CHAP-03**: Lektioner uden modul grupperes under "Øvrige lektioner"
 
-### Dashboard Kontekst
+### Kursus-oversigt
 
-- [x] **CONTEXT-01**: Velkomst-besked tilpasses baseret på brugerens onboarding-data og journey-status
-- [x] **CONTEXT-02**: Dashboard-beskeder er admin-konfigurerbare pr. state (via eksisterende DashboardMessage model)
+- [ ] **COURSE-01**: Kursus-siden viser progress-bar med procent completion
+- [ ] **COURSE-02**: Kursus-header viser antal kapitler og total estimeret varighed
+- [ ] **COURSE-03**: Kursus-header viser cover-billede hvis tilgængeligt
 
-### Visuelt Redesign
+### Filter & Bookmark
 
-- [x] **VISUAL-01**: Dashboard bruger store indholdskort med afrundede hjørner og illustration/billede
-- [x] **VISUAL-02**: Check-in sektion har visuelt fremhævet container (inspireret af konkurrents gule boks)
-- [x] **VISUAL-03**: Sektioner har tydelige overskrifter og sekundær tekst (f.eks. "Nyt hver mandag")
+- [ ] **FILTER-01**: Content-type filter tabs (Alle, Video, Artikler) filtrerer lektioner
+- [ ] **SAVE-01**: Brugeren kan gemme/bookmark lektioner og se dem under "Gemt" i profilen
 
 ## v2 Requirements
 
-### Avanceret Personalisering
+### Avanceret Kursus-UX
 
-- **PERS-01**: AI-genererede check-in prompts baseret på brugerens historik
-- **PERS-02**: Mikrofon-input til voice-refleksion
-- **PERS-03**: Mood tracking over tid med visualisering
+- **ADV-01**: Video preview on hover/long-press
+- **ADV-02**: Offline download af lektioner
+- **ADV-03**: Autoplay næste lektion
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| AI chat-assistent | For kompleks til denne milestone |
-| Push notifications | Separat projekt |
-| Børns navne/profiler | Privacyhensyn, forældre vil måske ikke dele det |
-| Gamification (streaks) | Modstrid med brandets varme, støttende tilgang |
+| Video player redesign | Eksisterende HLS player virker, separat projekt |
+| Kursus-oprettelse redesign | Admin-side, lav prioritet |
+| Ratings/anmeldelser | For tidligt, for få brugere |
+| Social sharing af lektioner | Ikke relevant endnu |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CHECKIN-01 | Phase 5 | Complete |
-| CHECKIN-02 | Phase 6 | Complete |
-| CHECKIN-03 | Phase 5 | Complete |
-| WEEK-01 | Phase 5 | Complete |
-| WEEK-02 | Phase 6 | Complete |
-| WEEK-03 | Phase 5 | Complete |
-| CONTEXT-01 | Phase 5 | Complete |
-| CONTEXT-02 | Phase 5 | Complete |
-| VISUAL-01 | Phase 6 | Complete |
-| VISUAL-02 | Phase 6 | Complete |
-| VISUAL-03 | Phase 6 | Complete |
+| CARD-01 | — | Pending |
+| CARD-02 | — | Pending |
+| CARD-03 | — | Pending |
+| CHAP-01 | — | Pending |
+| CHAP-02 | — | Pending |
+| CHAP-03 | — | Pending |
+| COURSE-01 | — | Pending |
+| COURSE-02 | — | Pending |
+| COURSE-03 | — | Pending |
+| FILTER-01 | — | Pending |
+| SAVE-01 | — | Pending |
 
 **Coverage:**
-- v1.1 requirements: 11 total
-- Mapped to phases: 11
-- Unmapped: 0
+- v1.2 requirements: 11 total
+- Mapped to phases: 0
+- Unmapped: 11
 
 ---
-*Requirements defined: 2026-04-05*
-*Last updated: 2026-04-05 after roadmap creation*
+*Requirements defined: 2026-04-06*
+*Last updated: 2026-04-06 after initial definition*
