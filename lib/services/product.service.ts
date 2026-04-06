@@ -28,11 +28,18 @@ export async function deleteProduct(id: string) {
 export async function listProducts(filters?: {
   type?: string
   isActive?: boolean
+  search?: string
 }) {
   return prisma.product.findMany({
     where: {
       ...(filters?.type && { type: filters.type as any }),
       ...(filters?.isActive !== undefined && { isActive: filters.isActive }),
+      ...(filters?.search && {
+        OR: [
+          { title: { contains: filters.search, mode: 'insensitive' as const } },
+          { description: { contains: filters.search, mode: 'insensitive' as const } },
+        ],
+      }),
     },
     include: {
       modules: { orderBy: { position: 'asc' } },

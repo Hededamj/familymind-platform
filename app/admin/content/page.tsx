@@ -13,6 +13,8 @@ import {
 } from '@/components/ui/table'
 import { Plus, Video, Headphones, FileText, Type } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { Suspense } from 'react'
+import { AdminSearch } from '@/components/admin/admin-search'
 
 const BUNNY_CDN = process.env.BUNNY_CDN_HOSTNAME ?? ''
 
@@ -45,9 +47,14 @@ function formatDate(date: Date): string {
   }).format(date)
 }
 
-export default async function ContentListPage() {
+export default async function ContentListPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ search?: string }>
+}) {
   await requireAdmin()
-  const contentUnits = await listContentUnits()
+  const { search } = await searchParams
+  const contentUnits = await listContentUnits({ search: search || undefined })
 
   return (
     <div className="space-y-6">
@@ -66,17 +73,25 @@ export default async function ContentListPage() {
         </Button>
       </div>
 
+      <Suspense fallback={null}>
+        <AdminSearch placeholder="Søg efter indhold..." />
+      </Suspense>
+
       {contentUnits.length === 0 ? (
         <div className="rounded-md border p-12 text-center">
           <p className="text-muted-foreground">
-            Intet indhold endnu. Opret dit første indhold for at komme i gang.
+            {search
+              ? `Ingen resultater for '${search}'`
+              : 'Intet indhold endnu. Opret dit første indhold for at komme i gang.'}
           </p>
-          <Button asChild className="mt-4">
-            <Link href="/admin/content/new">
-              <Plus className="mr-2 size-4" />
-              Opret indhold
-            </Link>
-          </Button>
+          {!search && (
+            <Button asChild className="mt-4">
+              <Link href="/admin/content/new">
+                <Plus className="mr-2 size-4" />
+                Opret indhold
+              </Link>
+            </Button>
+          )}
         </div>
       ) : (
         <div className="rounded-md border">

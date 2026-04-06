@@ -13,6 +13,8 @@ import {
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Plus } from 'lucide-react'
+import { Suspense } from 'react'
+import { AdminSearch } from '@/components/admin/admin-search'
 import { ProductActions } from './_components/product-actions'
 
 const productTypeLabels: Record<string, string> = {
@@ -52,14 +54,18 @@ type ProductType = 'SUBSCRIPTION' | 'COURSE' | 'SINGLE' | 'BUNDLE'
 
 function ProductTable({
   products,
+  search,
 }: {
   products: Awaited<ReturnType<typeof listProducts>>
+  search?: string
 }) {
   if (products.length === 0) {
     return (
       <div className="rounded-md border p-12 text-center">
         <p className="text-muted-foreground">
-          Ingen produkter fundet i denne kategori.
+          {search
+            ? `Ingen resultater for '${search}'`
+            : 'Ingen produkter fundet i denne kategori.'}
         </p>
       </div>
     )
@@ -129,11 +135,11 @@ function ProductTable({
 export default async function ProductListPage({
   searchParams,
 }: {
-  searchParams: Promise<{ type?: string }>
+  searchParams: Promise<{ type?: string; search?: string }>
 }) {
   await requireAdmin()
-  const { type } = await searchParams
-  const products = await listProducts()
+  const { type, search } = await searchParams
+  const products = await listProducts({ search: search || undefined })
 
   const filteredProducts = type
     ? products.filter((p) => p.type === type)
@@ -164,6 +170,10 @@ export default async function ProductListPage({
         </Button>
       </div>
 
+      <Suspense fallback={null}>
+        <AdminSearch placeholder="Søg efter produkter..." />
+      </Suspense>
+
       <Tabs defaultValue={type ?? ''}>
         <TabsList>
           {productTypes.map((pt) => (
@@ -182,7 +192,7 @@ export default async function ProductListPage({
         </TabsList>
         {/* All tab */}
         <TabsContent value="">
-          <ProductTable products={products} />
+          <ProductTable products={products} search={search} />
         </TabsContent>
         {/* Filtered tabs */}
         {productTypes
@@ -191,6 +201,7 @@ export default async function ProductListPage({
             <TabsContent key={pt.value} value={pt.value}>
               <ProductTable
                 products={products.filter((p) => p.type === pt.value)}
+                search={search}
               />
             </TabsContent>
           ))}

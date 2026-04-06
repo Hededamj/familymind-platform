@@ -583,6 +583,57 @@ export async function deleteReply(replyId: string) {
   return prisma.discussionReply.delete({ where: { id: replyId } })
 }
 
+/**
+ * Update a post's body text (author only).
+ */
+export async function updatePostBody(postId: string, body: string) {
+  return prisma.discussionPost.update({
+    where: { id: postId },
+    data: { body },
+  })
+}
+
+/**
+ * Update a reply's body text (author only).
+ */
+export async function updateReplyBody(replyId: string, body: string) {
+  return prisma.discussionReply.update({
+    where: { id: replyId },
+    data: { body },
+  })
+}
+
+/**
+ * Get a post by ID with author info (for ownership checks).
+ */
+export async function getPostById(postId: string) {
+  return prisma.discussionPost.findUnique({
+    where: { id: postId },
+    include: {
+      author: { select: { id: true, name: true } },
+      room: { select: { slug: true } },
+    },
+  })
+}
+
+/**
+ * Get a reply by ID with author and post info (for ownership checks).
+ */
+export async function getReplyById(replyId: string) {
+  return prisma.discussionReply.findUnique({
+    where: { id: replyId },
+    include: {
+      author: { select: { id: true, name: true } },
+      post: {
+        select: {
+          slug: true,
+          room: { select: { slug: true } },
+        },
+      },
+    },
+  })
+}
+
 // --- Cohort Bans ---
 
 /**

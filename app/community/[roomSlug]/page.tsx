@@ -7,6 +7,7 @@ import { formatRelativeTime } from '@/lib/format-time'
 import { getRoomBySlug, getRoomFeed, getUserCompletedJourneys } from '@/lib/services/community.service'
 import { AlumniBadge } from '@/app/community/_components/alumni-badge'
 import { RoomPostForm } from '@/app/community/_components/room-post-form'
+import { FeedPostActions } from '@/app/community/_components/feed-post-actions'
 import { RoomJsonLd } from '@/app/community/_components/json-ld'
 import { Breadcrumbs } from '@/app/community/_components/breadcrumbs'
 import { Button } from '@/components/ui/button'
@@ -36,6 +37,7 @@ export default async function RoomFeedPage({ params }: Props) {
   const user = await getCurrentUser()
   const feed = await getRoomFeed(room.id, undefined, user?.id)
   const completedJourneys = user ? await getUserCompletedJourneys(user.id) : []
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'MODERATOR'
 
   const postCount = room._count.posts
 
@@ -91,44 +93,61 @@ export default async function RoomFeedPage({ params }: Props) {
                 post.body.length > 200
                   ? post.body.slice(0, 200) + '...'
                   : post.body
+              const isPostOwner = !!user && post.author.id === user.id
 
               return (
-                <Link
+                <div
                   key={post.id}
-                  href={`/community/${roomSlug}/${post.slug}`}
-                  className="group flex min-h-[44px] flex-col gap-2 rounded-xl border border-border bg-background p-4 transition-colors hover:bg-accent sm:p-5"
+                  className="group relative flex min-h-[44px] flex-col gap-2 rounded-xl border border-border bg-background p-4 transition-colors hover:bg-accent sm:p-5"
                 >
+                  <Link
+                    href={`/community/${roomSlug}/${post.slug}`}
+                    className="absolute inset-0 z-0 rounded-xl"
+                    aria-label={`Gå til indlæg af ${firstName}`}
+                  />
                   {/* Post meta */}
-                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                    <span className="font-medium text-foreground">
-                      {firstName}
-                    </span>
-                    {user && post.author.id === user.id && completedJourneys.map((uj) => (
-                      <AlumniBadge key={uj.journey.id} journeyTitle={uj.journey.title} size="sm" />
-                    ))}
-                    <span aria-hidden="true">&middot;</span>
-                    <time dateTime={post.createdAt.toISOString()}>
-                      {formatRelativeTime(post.createdAt)}
-                    </time>
-                    {post.isPinned && (
-                      <>
-                        <span aria-hidden="true">&middot;</span>
-                        <span className="text-accent-foreground">Fastgjort</span>
-                      </>
+                  <div className="relative z-10 flex items-start justify-between gap-2">
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                      <span className="font-medium text-foreground">
+                        {firstName}
+                      </span>
+                      {user && post.author.id === user.id && completedJourneys.map((uj) => (
+                        <AlumniBadge key={uj.journey.id} journeyTitle={uj.journey.title} size="sm" />
+                      ))}
+                      <span aria-hidden="true">&middot;</span>
+                      <time dateTime={post.createdAt.toISOString()}>
+                        {formatRelativeTime(post.createdAt)}
+                      </time>
+                      {post.isPinned && (
+                        <>
+                          <span aria-hidden="true">&middot;</span>
+                          <span className="text-accent-foreground">Fastgjort</span>
+                        </>
+                      )}
+                    </div>
+                    {user && (isPostOwner || isAdmin) && (
+                      <FeedPostActions
+                        postId={post.id}
+                        postSlug={post.slug ?? undefined}
+                        roomSlug={roomSlug}
+                        isOwner={isPostOwner}
+                        isAdmin={isAdmin}
+                        body={post.body}
+                      />
                     )}
                   </div>
 
                   {/* Body preview */}
-                  <p className="text-sm leading-relaxed text-foreground/90 line-clamp-2">
+                  <p className="relative z-0 text-sm leading-relaxed text-foreground/90 line-clamp-2">
                     {bodyPreview}
                   </p>
 
                   {/* Reply count */}
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <div className="relative z-0 flex items-center gap-1.5 text-xs text-muted-foreground">
                     <MessageCircle className="size-3.5" />
                     {replyCount === 1 ? '1 svar' : `${replyCount} svar`}
                   </div>
-                </Link>
+                </div>
               )
             })}
 

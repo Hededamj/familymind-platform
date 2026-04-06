@@ -12,6 +12,8 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Plus } from 'lucide-react'
+import { Suspense } from 'react'
+import { AdminSearch } from '@/components/admin/admin-search'
 import { JourneyActions } from './_components/journey-actions'
 
 function formatDate(date: Date): string {
@@ -35,9 +37,14 @@ function countTotalDays(
   return phases.reduce((sum, phase) => sum + phase.days.length, 0)
 }
 
-export default async function JourneysListPage() {
+export default async function JourneysListPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ search?: string }>
+}) {
   await requireAdmin()
-  const journeys = await listJourneys()
+  const { search } = await searchParams
+  const journeys = await listJourneys({ search: search || undefined })
 
   return (
     <div className="space-y-6">
@@ -56,17 +63,25 @@ export default async function JourneysListPage() {
         </Button>
       </div>
 
+      <Suspense fallback={null}>
+        <AdminSearch placeholder="Søg efter rejser..." />
+      </Suspense>
+
       {journeys.length === 0 ? (
         <div className="rounded-md border p-12 text-center">
           <p className="text-muted-foreground">
-            Ingen rejser endnu. Opret din første rejse for at komme i gang.
+            {search
+              ? `Ingen resultater for '${search}'`
+              : 'Ingen rejser endnu. Opret din første rejse for at komme i gang.'}
           </p>
-          <Button asChild className="mt-4">
-            <Link href="/admin/journeys/new">
-              <Plus className="mr-2 size-4" />
-              Opret rejse
-            </Link>
-          </Button>
+          {!search && (
+            <Button asChild className="mt-4">
+              <Link href="/admin/journeys/new">
+                <Plus className="mr-2 size-4" />
+                Opret rejse
+              </Link>
+            </Button>
+          )}
         </div>
       ) : (
         <div className="rounded-md border">

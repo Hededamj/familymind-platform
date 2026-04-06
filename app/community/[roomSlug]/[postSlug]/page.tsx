@@ -9,6 +9,7 @@ import { AlumniBadge } from '@/app/community/_components/alumni-badge'
 import { RoomReplyForm } from '@/app/community/_components/room-reply-form'
 import { PostJsonLd } from '@/app/community/_components/json-ld'
 import { Breadcrumbs } from '@/app/community/_components/breadcrumbs'
+import { EditablePost, EditableReply } from '@/app/community/_components/editable-post-body'
 import { getSiteSetting } from '@/lib/services/settings.service'
 import { Button } from '@/components/ui/button'
 
@@ -47,6 +48,8 @@ export default async function SinglePostPage({ params }: Props) {
   const completedJourneys = user ? await getUserCompletedJourneys(user.id) : []
   const authorName = post.author.name?.split(' ')[0] ?? 'Anonym'
   const replyCount = post._count.replies
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'MODERATOR'
+  const isPostOwner = !!user && post.author.id === user.id
 
   return (
     <div className="flex min-h-screen flex-col bg-background px-4 py-6 sm:px-8 sm:py-10">
@@ -79,21 +82,38 @@ export default async function SinglePostPage({ params }: Props) {
           {/* Post body */}
           <div className="rounded-xl border border-border bg-background p-4 sm:p-6">
             {/* Author + timestamp */}
-            <div className="mb-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-              <span className="font-medium text-foreground">{authorName}</span>
-              {user && post.author.id === user.id && completedJourneys.map((uj) => (
-                <AlumniBadge key={uj.journey.id} journeyTitle={uj.journey.title} size="sm" />
-              ))}
-              <span aria-hidden="true">&middot;</span>
-              <time dateTime={post.createdAt.toISOString()}>
-                {formatRelativeTime(post.createdAt)}
-              </time>
+            <div className="mb-3 flex items-start justify-between gap-2">
+              <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                <span className="font-medium text-foreground">{authorName}</span>
+                {user && post.author.id === user.id && completedJourneys.map((uj) => (
+                  <AlumniBadge key={uj.journey.id} journeyTitle={uj.journey.title} size="sm" />
+                ))}
+                <span aria-hidden="true">&middot;</span>
+                <time dateTime={post.createdAt.toISOString()}>
+                  {formatRelativeTime(post.createdAt)}
+                </time>
+              </div>
             </div>
 
-            {/* Body */}
-            <p className="whitespace-pre-wrap break-words hyphens-auto text-sm leading-relaxed text-foreground/90 sm:text-base">
-              {post.body}
-            </p>
+            {/* Body (editable for owner/admin) */}
+            {user && (isPostOwner || isAdmin) ? (
+              <EditablePost
+                postId={post.id}
+                postSlug={postSlug}
+                roomSlug={roomSlug}
+                isOwner={isPostOwner}
+                isAdmin={isAdmin}
+                body={post.body}
+              >
+                <p className="whitespace-pre-wrap break-words hyphens-auto text-sm leading-relaxed text-foreground/90 sm:text-base">
+                  {post.body}
+                </p>
+              </EditablePost>
+            ) : (
+              <p className="whitespace-pre-wrap break-words hyphens-auto text-sm leading-relaxed text-foreground/90 sm:text-base">
+                {post.body}
+              </p>
+            )}
 
             {/* Reply count */}
             <div className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -112,6 +132,7 @@ export default async function SinglePostPage({ params }: Props) {
             <div className="flex flex-col gap-3">
               {post.replies.map((reply) => {
                 const replyAuthor = reply.author.name?.split(' ')[0] ?? 'Anonym'
+                const isReplyOwner = !!user && reply.author.id === user.id
                 return (
                   <div
                     key={reply.id}
@@ -129,9 +150,24 @@ export default async function SinglePostPage({ params }: Props) {
                         {formatRelativeTime(reply.createdAt)}
                       </time>
                     </div>
-                    <p className="whitespace-pre-wrap break-words hyphens-auto text-sm leading-relaxed text-foreground/90">
-                      {reply.body}
-                    </p>
+                    {user && (isReplyOwner || isAdmin) && post.slug ? (
+                      <EditableReply
+                        replyId={reply.id}
+                        roomSlug={roomSlug}
+                        postSlug={post.slug}
+                        isOwner={isReplyOwner}
+                        isAdmin={isAdmin}
+                        body={reply.body}
+                      >
+                        <p className="whitespace-pre-wrap break-words hyphens-auto text-sm leading-relaxed text-foreground/90">
+                          {reply.body}
+                        </p>
+                      </EditableReply>
+                    ) : (
+                      <p className="whitespace-pre-wrap break-words hyphens-auto text-sm leading-relaxed text-foreground/90">
+                        {reply.body}
+                      </p>
+                    )}
                   </div>
                 )
               })}

@@ -35,9 +35,17 @@ export async function deleteJourney(id: string) {
   return prisma.journey.delete({ where: { id } })
 }
 
-export async function listJourneys(filters?: { isActive?: boolean }) {
+export async function listJourneys(filters?: { isActive?: boolean; search?: string }) {
   return prisma.journey.findMany({
-    where: filters?.isActive !== undefined ? { isActive: filters.isActive } : undefined,
+    where: {
+      ...(filters?.isActive !== undefined && { isActive: filters.isActive }),
+      ...(filters?.search && {
+        OR: [
+          { title: { contains: filters.search, mode: 'insensitive' as const } },
+          { description: { contains: filters.search, mode: 'insensitive' as const } },
+        ],
+      }),
+    },
     include: {
       phases: {
         include: { days: true },

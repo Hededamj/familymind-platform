@@ -6,7 +6,8 @@ import { ProductCard } from './_components/product-card'
 import { BundleCard } from './_components/bundle-card'
 import { JourneyCard } from './_components/journey-card'
 import { BrowseFilters } from './_components/browse-filters'
-import { Compass } from 'lucide-react'
+import { BrowseSearch } from './_components/browse-search'
+import { Compass, SearchX } from 'lucide-react'
 
 export async function generateMetadata() {
   const tenant = await getTenantConfig()
@@ -19,13 +20,13 @@ export async function generateMetadata() {
 export default async function BrowsePage({
   searchParams,
 }: {
-  searchParams: Promise<{ type?: string }>
+  searchParams: Promise<{ type?: string; search?: string }>
 }) {
-  const { type } = await searchParams
+  const { type, search } = await searchParams
 
   const [products, journeys] = await Promise.all([
-    listProducts({ isActive: true }),
-    listJourneys({ isActive: true }),
+    listProducts({ isActive: true, search }),
+    listJourneys({ isActive: true, search }),
   ])
 
   const bundles = products.filter(p => p.type === 'BUNDLE')
@@ -54,6 +55,12 @@ export default async function BrowsePage({
           </p>
         </div>
 
+        <div className="mb-6 flex justify-center">
+          <Suspense fallback={null}>
+            <BrowseSearch />
+          </Suspense>
+        </div>
+
         <div className="mb-8 flex justify-center">
           <Suspense fallback={null}>
             <BrowseFilters />
@@ -62,8 +69,19 @@ export default async function BrowsePage({
 
         {isEmpty ? (
           <div className="mx-auto max-w-sm rounded-2xl border border-border p-12 text-center">
-            <Compass className="mx-auto mb-4 size-10 text-muted-foreground/40" />
-            <p className="text-muted-foreground">Ingen resultater fundet.</p>
+            {search ? (
+              <>
+                <SearchX className="mx-auto mb-4 size-10 text-muted-foreground/40" />
+                <p className="text-muted-foreground">
+                  Ingen resultater for &lsquo;{search}&rsquo;. Prøv et andet søgeord.
+                </p>
+              </>
+            ) : (
+              <>
+                <Compass className="mx-auto mb-4 size-10 text-muted-foreground/40" />
+                <p className="text-muted-foreground">Ingen resultater fundet.</p>
+              </>
+            )}
           </div>
         ) : (
           <div className="space-y-12">

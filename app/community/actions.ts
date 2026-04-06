@@ -79,6 +79,82 @@ export async function deleteRoomPostAction(postId: string, roomSlug: string) {
   return { success: true }
 }
 
+export async function updateCommunityPostAction(
+  postId: string,
+  body: string,
+  roomSlug: string,
+  postSlug?: string
+) {
+  z.string().uuid().parse(postId)
+  slugSchema.parse(roomSlug)
+  if (postSlug) slugSchema.parse(postSlug)
+  const user = await requireAuth()
+
+  const post = await communityService.getPostById(postId)
+  if (!post) return { error: 'Indlæg ikke fundet' }
+  if (post.author.id !== user.id) {
+    return { error: 'Ikke autoriseret' }
+  }
+
+  const trimmed = body.trim()
+  if (!trimmed) return { error: 'Indlægget må ikke være tomt' }
+  if (trimmed.length > 5000) return { error: 'Indlægget er for langt (maks 5000 tegn)' }
+
+  await communityService.updatePostBody(postId, trimmed)
+  revalidatePath(`/community/${roomSlug}`)
+  if (postSlug) revalidatePath(`/community/${roomSlug}/${postSlug}`)
+  return { success: true }
+}
+
+export async function updateCommunityReplyAction(
+  replyId: string,
+  body: string,
+  roomSlug: string,
+  postSlug: string
+) {
+  z.string().uuid().parse(replyId)
+  slugSchema.parse(roomSlug)
+  slugSchema.parse(postSlug)
+  const user = await requireAuth()
+
+  const reply = await communityService.getReplyById(replyId)
+  if (!reply) return { error: 'Svar ikke fundet' }
+  if (reply.author.id !== user.id) {
+    return { error: 'Ikke autoriseret' }
+  }
+
+  const trimmed = body.trim()
+  if (!trimmed) return { error: 'Svaret må ikke være tomt' }
+  if (trimmed.length > 2000) return { error: 'Svaret er for langt (maks 2000 tegn)' }
+
+  await communityService.updateReplyBody(replyId, trimmed)
+  revalidatePath(`/community/${roomSlug}`)
+  revalidatePath(`/community/${roomSlug}/${postSlug}`)
+  return { success: true }
+}
+
+export async function deleteCommunityReplyAction(
+  replyId: string,
+  roomSlug: string,
+  postSlug: string
+) {
+  z.string().uuid().parse(replyId)
+  slugSchema.parse(roomSlug)
+  slugSchema.parse(postSlug)
+  const user = await requireAuth()
+
+  const reply = await communityService.getReplyById(replyId)
+  if (!reply) return { error: 'Svar ikke fundet' }
+  if (reply.author.id !== user.id && user.role !== 'ADMIN' && user.role !== 'MODERATOR') {
+    return { error: 'Ikke autoriseret' }
+  }
+
+  await communityService.deleteReply(replyId)
+  revalidatePath(`/community/${roomSlug}`)
+  revalidatePath(`/community/${roomSlug}/${postSlug}`)
+  return { success: true }
+}
+
 export async function reportRoomContentAction(
   reason: string,
   roomSlug: string,

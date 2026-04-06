@@ -4,6 +4,7 @@ import { getTenantConfig } from '@/lib/services/tenant.service'
 import { ArrowLeft } from 'lucide-react'
 import { AdminNav } from './_components/admin-nav'
 import { AdminMobileNav } from './_components/admin-mobile-nav'
+import { AdminBreadcrumbs } from '@/components/admin/admin-breadcrumbs'
 
 export default async function AdminLayout({
   children,
@@ -70,7 +71,10 @@ export default async function AdminLayout({
 
       {/* Main content */}
       <main className="flex-1 overflow-y-auto bg-background">
-        <div className="p-8">{children}</div>
+        <div className="p-8">
+          <AdminBreadcrumbs />
+          {children}
+        </div>
       </main>
     </div>
   )
