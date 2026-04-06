@@ -208,7 +208,7 @@ export function AppSidebar({ brandName, userName, userEmail, userRole }: Props) 
                   Notifikationer
                 </Link>
                 <Link
-                  href="/dashboard/subscription"
+                  href="/dashboard/settings"
                   className="flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--foreground)] hover:bg-[var(--color-sand)] transition-colors"
                 >
                   <CreditCard className="size-4 text-[var(--foreground)]/40" />
