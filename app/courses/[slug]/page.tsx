@@ -1,9 +1,13 @@
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { getProduct } from '@/lib/services/product.service'
+import { getCurrentUser } from '@/lib/auth'
+import { getUserEntitlements } from '@/lib/services/entitlement.service'
+import { getCourseProgress } from '@/lib/services/progress.service'
 import { Button } from '@/components/ui/button'
-import { Check } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { Check, PlayCircle, FileText, Headphones, Type, CheckCircle } from 'lucide-react'
 
 type LandingPageConfig = {
   subtitle?: string
@@ -12,6 +16,13 @@ type LandingPageConfig = {
   faq?: Array<{ question: string; answer: string }>
   ctaText?: string
   ctaUrl?: string
+}
+
+const mediaTypeIcons: Record<string, typeof PlayCircle> = {
+  VIDEO: PlayCircle,
+  PDF: FileText,
+  AUDIO: Headphones,
+  TEXT: Type,
 }
 
 export default async function CourseLandingPage({
@@ -26,6 +37,110 @@ export default async function CourseLandingPage({
     notFound()
   }
 
+  // Tjek om brugeren har adgang
+  const user = await getCurrentUser()
+  let hasAccess = false
+  let courseProgress: Awaited<ReturnType<typeof getCourseProgress>> | null = null
+
+  if (user) {
+    const entitlements = await getUserEntitlements(user.id)
+    hasAccess = entitlements.some((e) => e.productId === product.id)
+    if (hasAccess) {
+      courseProgress = await getCourseProgress(user.id, product.id)
+    }
+  }
+
+  // Brugeren har adgang — vis kursusindhold med lektioner
+  if (hasAccess && courseProgress) {
+    const progressLessons = courseProgress.lessons
+    const completedIds = new Set(
+      progressLessons.filter((l) => l.completed).map((l) => l.contentUnitId)
+    )
+    const lessons = product.courseLessons
+      ?.sort((a: any, b: any) => a.position - b.position) ?? []
+
+    const productSlug = product!.slug
+
+    function LessonRow({ lesson }: { lesson: any }) {
+      const isCompleted = completedIds.has(lesson.contentUnit.id)
+      const Icon = mediaTypeIcons[lesson.contentUnit.mediaType] ?? PlayCircle
+      const typeLabel = lesson.contentUnit.mediaType === 'VIDEO' ? 'Video'
+        : lesson.contentUnit.mediaType === 'PDF' ? 'PDF'
+        : lesson.contentUnit.mediaType === 'AUDIO' ? 'Lyd' : 'Tekst'
+      return (
+        <Link
+          key={lesson.id}
+          href={`/content/${lesson.contentUnit.slug}?course=${productSlug}`}
+          className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-muted/30"
+        >
+          {isCompleted ? (
+            <CheckCircle className="size-5 text-green-600 shrink-0" />
+          ) : (
+            <Icon className="size-5 text-muted-foreground shrink-0" />
+          )}
+          <span className={`text-sm ${isCompleted ? 'text-muted-foreground' : 'font-medium'}`}>
+            {lesson.contentUnit.title}
+          </span>
+          <Badge variant="secondary" className="ml-auto text-xs">
+            {typeLabel}
+          </Badge>
+        </Link>
+      )
+    }
+
+    return (
+      <div className="px-4 py-6 sm:px-8 sm:py-8">
+        <div className="mx-auto w-full max-w-3xl">
+          <Link
+            href="/dashboard/courses"
+            className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+          >
+            ← Mine forløb
+          </Link>
+
+          <h1 className="mb-2 font-serif text-2xl sm:text-3xl">{product.title}</h1>
+          {product.description && (
+            <p className="mb-6 text-muted-foreground">{product.description}</p>
+          )}
+
+          <div className="mb-6 text-sm text-muted-foreground">
+            {courseProgress.completedLessons} af {courseProgress.totalLessons} lektioner gennemført
+          </div>
+
+          {product.modules && product.modules.length > 0 ? (
+            <div className="space-y-6">
+              {product.modules.sort((a: any, b: any) => a.position - b.position).map((module: any, i: number) => {
+                const moduleLessons = lessons.filter((l: any) => l.moduleId === module.id)
+                return (
+                  <div key={module.id} className="rounded-xl border">
+                    <div className="border-b px-5 py-4">
+                      <h2 className="font-medium">
+                        <span className="mr-2 text-muted-foreground">{i + 1}.</span>
+                        {module.title}
+                      </h2>
+                    </div>
+                    <div className="divide-y">
+                      {moduleLessons.map((lesson: any) => (
+                        <LessonRow key={lesson.id} lesson={lesson} />
+                      ))}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <div className="rounded-xl border divide-y">
+              {lessons.map((lesson: any) => (
+                <LessonRow key={lesson.id} lesson={lesson} />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  // Brugeren har IKKE adgang — vis landingsside
   const lp = (product.landingPage as LandingPageConfig) || {}
   const rawCtaUrl = lp.ctaUrl || ''
   const ctaUrl = rawCtaUrl.startsWith('/') ? rawCtaUrl : `/products/${product.slug}`
