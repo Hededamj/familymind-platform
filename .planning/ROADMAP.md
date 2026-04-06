@@ -87,7 +87,7 @@ Plans:
 
 </details>
 
-### 🚧 v1.2 Kursus-visning Redesign (In Progress)
+### v1.2 Kursus-visning Redesign (In Progress)
 
 **Milestone Goal:** Redesign kursus-siden med visuelt rige lektionskort, kapitel-sektioner med horisontal scroll, progress-tracking og bookmark-funktionalitet.
 
@@ -100,11 +100,11 @@ Plans:
   2. A user's bookmarked lessons appear under "Gemt" in their profile
   3. The course page receives a pre-computed completion percentage (0-100) without client-side calculation
   4. The course page receives total estimated duration (sum of durationMinutes across all lessons) and chapter count as ready-to-render values
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 07-01: SavedContent Prisma model + bookmark service (create, delete, list)
-- [ ] 07-02: Course metadata service (completion %, total duration, chapter count) + data wiring into course page
+- [ ] 07-01-PLAN.md — SavedContent Prisma model + bookmark service + server action
+- [ ] 07-02-PLAN.md — Course metadata extension (chapterCount, totalDurationMinutes) + course page wiring + profile "Gemt" section
 
 **UI hint**: no
 
