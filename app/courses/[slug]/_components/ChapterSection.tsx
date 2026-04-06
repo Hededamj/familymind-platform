@@ -18,9 +18,9 @@ export function ChapterSection({ title, lessons, savedLessonIds, courseSlug }: C
   if (lessons.length === 0) return null
 
   return (
-    <section className="space-y-3">
-      <h2 className="font-medium text-base">{title}</h2>
-      <div className="flex gap-3 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <section className="space-y-2">
+      <h2 className="text-sm font-semibold text-foreground/80">{title}</h2>
+      <div className="-mx-4 flex gap-2.5 overflow-x-auto scroll-smooth px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {lessons.map((lesson) => (
           <LessonCard
             key={lesson.id}

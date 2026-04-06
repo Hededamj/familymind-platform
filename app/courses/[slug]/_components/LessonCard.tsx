@@ -4,7 +4,6 @@ import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Bookmark, PlayCircle } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
 import { toggleBookmarkAction } from '@/app/actions/savedContent'
 
 interface LessonCardProps {
@@ -42,46 +41,46 @@ export function LessonCard({ lesson, initialSaved, courseSlug }: LessonCardProps
   return (
     <Link
       href={`/content/${lesson.slug}?course=${courseSlug}`}
-      className="relative flex w-[160px] shrink-0 flex-col overflow-hidden rounded-2xl border bg-white shadow-sm"
+      className="group relative flex w-[140px] shrink-0 flex-col overflow-hidden rounded-xl border border-border/60 bg-white shadow-sm transition-shadow hover:shadow-md"
     >
-      {/* Thumbnail area */}
-      <div className="relative aspect-video w-full bg-[var(--color-sand)]">
+      {/* Thumbnail area — compact */}
+      <div className="relative h-20 w-full bg-[var(--color-sand)]">
         {lesson.thumbnailUrl ? (
           <Image
             src={lesson.thumbnailUrl}
             alt={lesson.title}
             fill
             className="object-cover"
-            sizes="160px"
+            sizes="140px"
           />
         ) : (
-          <div className="flex h-full items-center justify-center bg-[var(--color-sand)]">
-            <PlayCircle className="size-8 text-muted-foreground/40" />
+          <div className="flex h-full items-center justify-center">
+            <PlayCircle className="size-6 text-muted-foreground/30" />
           </div>
         )}
 
-        {/* Bookmark button */}
+        {/* Bookmark button — subtle */}
         <button
           onClick={handleBookmark}
-          aria-label={isSaved ? 'Fjern bogmaerke' : 'Gem lektion'}
-          className="absolute right-1 top-1 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-white/80 backdrop-blur-sm"
+          aria-label={isSaved ? 'Fjern bogmærke' : 'Gem lektion'}
+          className="absolute right-1.5 top-1.5 flex size-7 items-center justify-center rounded-full bg-white/70 backdrop-blur-sm transition-colors hover:bg-white"
         >
           <Bookmark
-            className={`size-5 ${isSaved ? 'fill-current text-[var(--color-coral)]' : 'text-muted-foreground'}`}
+            className={`size-3.5 ${isSaved ? 'fill-current text-[var(--color-coral)]' : 'text-muted-foreground/60'}`}
           />
         </button>
       </div>
 
-      {/* Card body */}
-      <div className="flex flex-1 flex-col gap-1 p-3">
-        <p className="line-clamp-2 text-sm font-medium leading-snug">{lesson.title}</p>
+      {/* Card body — tight */}
+      <div className="flex flex-1 flex-col gap-1 px-2.5 py-2">
+        <p className="line-clamp-2 text-xs font-medium leading-snug">{lesson.title}</p>
 
-        <div className="mt-auto flex items-center gap-2">
-          <Badge variant="secondary" className="text-xs">
+        <div className="mt-auto flex items-center gap-1.5 pt-1">
+          <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
             {typeLabel}
-          </Badge>
-          {lesson.durationMinutes && (
-            <span className="text-xs text-muted-foreground">{lesson.durationMinutes} min</span>
+          </span>
+          {lesson.durationMinutes != null && lesson.durationMinutes > 0 && (
+            <span className="text-[10px] text-muted-foreground">{lesson.durationMinutes} min</span>
           )}
         </div>
       </div>

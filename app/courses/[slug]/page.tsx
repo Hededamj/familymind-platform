@@ -90,7 +90,7 @@ export default async function CourseLandingPage({
             </div>
           </div>
 
-          <div className="space-y-8">
+          <div className="space-y-6">
             {/* Module-based chapters */}
             {product.modules && product.modules.length > 0 && (
               <>
