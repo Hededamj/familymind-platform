@@ -134,6 +134,8 @@ export async function POST(req: Request) {
             paidCurrency,
           }, tx)
           for (const item of product.bundleItems) {
+            // Skip direct ContentUnit-references — access granted via canAccessContent
+            if (!item.includedProductId) continue
             await createEntitlement({
               userId,
               productId: item.includedProductId,
