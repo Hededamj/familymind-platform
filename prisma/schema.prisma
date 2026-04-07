@@ -150,6 +150,8 @@ model User {
   savedContent       SavedContent[]
 
   @@index([lastActiveAt])
+  @@index([organizationId, createdAt])
+  @@index([organizationId, lastActiveAt])
 }
 
 model Organization {
@@ -310,6 +312,7 @@ model CourseLesson {
   module      CourseModule? @relation(fields: [moduleId], references: [id], onDelete: SetNull)
 
   @@unique([productId, contentUnitId])
+  @@index([productId, position])
 }
 
 model CourseModule {
@@ -359,6 +362,9 @@ model Entitlement {
 
   @@index([userId, status])
   @@index([stripeSubscriptionId])
+  @@index([organizationId, status])
+  @@index([productId])
+  @@index([status, cancelledAt])
 }
 
 model DiscountCode {
@@ -438,6 +444,8 @@ model JourneyPhase {
 
   journey Journey      @relation(fields: [journeyId], references: [id], onDelete: Cascade)
   days    JourneyDay[]
+
+  @@index([journeyId, position])
 }
 
 model JourneyDay {
@@ -453,6 +461,8 @@ model JourneyDay {
   currentForJourneys UserJourney[]
   discussionPrompts  DiscussionPrompt[]
   discussionPosts    DiscussionPost[]
+
+  @@index([phaseId, position])
 }
 
 model JourneyDayContent {
@@ -463,6 +473,8 @@ model JourneyDayContent {
 
   day         JourneyDay  @relation(fields: [dayId], references: [id], onDelete: Cascade)
   contentUnit ContentUnit @relation(fields: [contentUnitId], references: [id], onDelete: Cascade)
+
+  @@index([dayId, position])
 }
 
 model JourneyDayAction {
@@ -472,6 +484,8 @@ model JourneyDayAction {
   reflectionPrompt String? // "Hvordan gik det?"
 
   day JourneyDay @relation(fields: [dayId], references: [id], onDelete: Cascade)
+
+  @@index([dayId])
 }
 
 model UserJourney {
@@ -489,6 +503,7 @@ model UserJourney {
   checkIns   UserDayCheckIn[]
 
   @@index([userId, status])
+  @@index([userId, completedAt])
 }
 
 model UserDayCheckIn {

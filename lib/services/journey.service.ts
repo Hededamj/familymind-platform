@@ -217,25 +217,46 @@ export async function startJourney(userId: string, journeyId: string) {
 export const getUserActiveJourney = cache(async (userId: string) => {
   return prisma.userJourney.findFirst({
     where: { userId, status: 'ACTIVE' },
-    include: {
+    select: {
+      id: true,
+      userId: true,
+      journeyId: true,
+      currentDayId: true,
+      status: true,
+      startedAt: true,
+      completedAt: true,
       journey: {
-        include: {
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          description: true,
+          coverImageUrl: true,
           phases: {
-            include: {
-              days: { orderBy: { position: 'asc' } },
+            select: {
+              id: true,
+              title: true,
+              position: true,
+              days: {
+                select: { id: true, title: true, position: true },
+                orderBy: { position: 'asc' },
+              },
             },
             orderBy: { position: 'asc' },
           },
         },
       },
       currentDay: {
-        include: {
-          contents: { include: { contentUnit: true }, orderBy: { position: 'asc' } },
-          actions: true,
-          phase: true,
+        select: {
+          id: true,
+          title: true,
+          position: true,
+          phase: { select: { id: true, title: true } },
         },
       },
-      checkIns: true,
+      checkIns: {
+        select: { dayId: true },
+      },
     },
   })
 })
