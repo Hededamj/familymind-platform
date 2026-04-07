@@ -6,9 +6,26 @@ import { getCurrentUser } from '@/lib/auth'
 import { getUserEntitlements } from '@/lib/services/entitlement.service'
 import { getCourseProgress } from '@/lib/services/progress.service'
 import { getSavedLessons } from '@/lib/services/savedContent.service'
+import { getThumbnailUrl } from '@/lib/bunny'
 import { Button } from '@/components/ui/button'
 import { Check } from 'lucide-react'
 import { ChapterSection } from './_components/ChapterSection'
+
+function resolveThumbnail(contentUnit: any): string | null {
+  // Sanitize stored URL (some have stray \n from import bug)
+  if (contentUnit.thumbnailUrl) {
+    return contentUnit.thumbnailUrl.replace(/\s+/g, '')
+  }
+  // Auto-generate from Bunny video ID
+  if (contentUnit.bunnyVideoId) {
+    try {
+      return getThumbnailUrl(contentUnit.bunnyVideoId)
+    } catch {
+      return null
+    }
+  }
+  return null
+}
 
 type LandingPageConfig = {
   subtitle?: string
@@ -116,7 +133,7 @@ export default async function CourseLandingPage({
                       title: l.contentUnit.title,
                       mediaType: l.contentUnit.mediaType,
                       durationMinutes: l.contentUnit.durationMinutes,
-                      thumbnailUrl: l.contentUnit.thumbnailUrl,
+                      thumbnailUrl: resolveThumbnail(l.contentUnit),
                     }))
                   return (
                     <ChapterSection
