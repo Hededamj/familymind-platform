@@ -34,19 +34,6 @@ enum Difficulty {
   ADVANCED
 }
 
-enum AccessLevel {
-  FREE
-  SUBSCRIPTION
-  PURCHASE
-}
-
-enum ProductType {
-  SUBSCRIPTION
-  COURSE
-  SINGLE
-  BUNDLE
-}
-
 enum EntitlementSource {
   PURCHASE
   SUBSCRIPTION
@@ -249,9 +236,7 @@ model ContentUnit {
   difficulty      Difficulty  @default(INTRODUCTORY)
   ageMin          Int? // months
   ageMax          Int? // months
-  isStandalone    Boolean     @default(false)
   isFree          Boolean     @default(false)
-  accessLevel     AccessLevel @default(FREE)
   bodyHtml        String?     // Rich text artikelindhold (HTML) — bruges når mediaType=TEXT
   publishedAt     DateTime?
   createdAt       DateTime    @default(now())
@@ -262,7 +247,6 @@ model ContentUnit {
   journeyDayContents JourneyDayContent[]
   userProgress       UserContentProgress[]
   savedContent       SavedContent[]
-  bundledIn          BundleItem[]        @relation("IncludedContentUnit")
 }
 
 model ContentTag {
@@ -285,36 +269,66 @@ model ContentUnitTag {
   @@id([contentUnitId, tagId])
 }
 
-model Product {
-  id               String      @id @default(uuid()) @db.Uuid
-  title            String
-  description      String?
-  slug             String      @unique
-  type             ProductType
-  priceAmountCents Int
-  priceCurrency    String      @default("DKK")
-  stripeProductId  String?
-  stripePriceId    String?
-  isActive         Boolean     @default(true)
-  coverImageUrl    String?
-  thumbnailUrl     String?
-  landingPage      Json?
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
+model Course {
+  id              String         @id @default(uuid()) @db.Uuid
+  title           String
+  description     String?
+  slug            String         @unique
+  coverImageUrl   String?
+  landingPage     Json?
+  isActive        Boolean        @default(true)
+  stripeProductId String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
 
-  courseLessons     CourseLesson[]
-  modules           CourseModule[]
-  bundleItems       BundleItem[]   @relation("BundleProduct")
-  includedInBundles BundleItem[]   @relation("IncludedProduct")
-  entitlements      Entitlement[]
-  discountCodes     DiscountCode[]
-  journeys          Journey[]
-  priceVariants     PriceVariant[]
+  modules       CourseModule[]
+  lessons       CourseLesson[]
+  priceVariants PriceVariant[]
+  entitlements  Entitlement[]
+  bundles       BundleCourse[]
+  journeys      Journey[]
+  discountCodes DiscountCode[]
+
+  @@index([isActive])
+}
+
+model Bundle {
+  id              String         @id @default(uuid()) @db.Uuid
+  title           String
+  description     String?
+  slug            String         @unique
+  coverImageUrl   String?
+  landingPage     Json?
+  isActive        Boolean        @default(true)
+  stripeProductId String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  courses       BundleCourse[]
+  priceVariants PriceVariant[]
+  entitlements  Entitlement[]
+  discountCodes DiscountCode[]
+
+  @@index([isActive])
+}
+
+model BundleCourse {
+  id       String @id @default(uuid()) @db.Uuid
+  bundleId String @db.Uuid
+  courseId String @db.Uuid
+  position Int    @default(0)
+
+  bundle Bundle @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([bundleId, courseId])
+  @@index([bundleId, position])
 }
 
 model PriceVariant {
   id              String           @id @default(uuid()) @db.Uuid
-  productId       String           @db.Uuid
+  courseId        String?          @db.Uuid
+  bundleId        String?          @db.Uuid
   label           String
   description     String?
   amountCents     Int
@@ -330,82 +344,72 @@ model PriceVariant {
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 
-  product      Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  course       Course?       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  bundle       Bundle?       @relation(fields: [bundleId], references: [id], onDelete: Cascade)
   entitlements Entitlement[]
 
-  @@index([productId, position])
-  @@index([productId, isActive])
+  @@index([courseId, position])
+  @@index([bundleId, position])
 }
 
 model CourseLesson {
-  id            String  @id @default(uuid()) @db.Uuid
-  productId     String  @db.Uuid
-  contentUnitId String  @db.Uuid
-  moduleId      String? @db.Uuid
-  position      Int
+  id             String  @id @default(uuid()) @db.Uuid
+  courseId       String  @db.Uuid
+  contentUnitId  String  @db.Uuid
+  moduleId       String? @db.Uuid
+  position       Int
+  isFreePreview  Boolean @default(false)
 
-  product     Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  course      Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
   contentUnit ContentUnit   @relation(fields: [contentUnitId], references: [id], onDelete: Cascade)
   module      CourseModule? @relation(fields: [moduleId], references: [id], onDelete: SetNull)
 
-  @@unique([productId, contentUnitId])
-  @@index([productId, position])
+  @@unique([courseId, contentUnitId])
+  @@index([courseId, position])
 }
 
 model CourseModule {
   id          String  @id @default(uuid()) @db.Uuid
-  productId   String  @db.Uuid
+  courseId    String  @db.Uuid
   title       String
   description String?
   position    Int
 
-  product Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  course  Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
   lessons CourseLesson[]
 
-  @@index([productId])
-}
-
-model BundleItem {
-  id                    String @id @default(uuid()) @db.Uuid
-  bundleProductId       String @db.Uuid
-  includedProductId     String? @db.Uuid
-  includedContentUnitId String? @db.Uuid
-  position              Int    @default(0)
-
-  bundle              Product      @relation("BundleProduct", fields: [bundleProductId], references: [id], onDelete: Cascade)
-  includedProduct     Product?     @relation("IncludedProduct", fields: [includedProductId], references: [id], onDelete: Cascade)
-  includedContentUnit ContentUnit? @relation("IncludedContentUnit", fields: [includedContentUnitId], references: [id], onDelete: Cascade)
-
-  @@unique([bundleProductId, includedProductId])
-  @@unique([bundleProductId, includedContentUnitId])
+  @@index([courseId])
 }
 
 model Entitlement {
   id                      String            @id @default(uuid()) @db.Uuid
   userId                  String            @db.Uuid
   organizationId          String?           @db.Uuid
-  productId               String            @db.Uuid
+  courseId                String?           @db.Uuid
+  bundleId                String?           @db.Uuid
   priceVariantId          String?           @db.Uuid
   source                  EntitlementSource
   status                  EntitlementStatus @default(ACTIVE)
   stripeSubscriptionId    String?
   stripeCheckoutSessionId String?           @unique
-  paidAmountCents         Int?              // Faktisk betalt beløb (efter rabat), sat fra Stripe webhook
-  paidCurrency            String?           // Valuta, f.eks. "DKK"
+  paidAmountCents         Int?
+  paidCurrency            String?
   expiresAt               DateTime?
-  cancelledAt             DateTime?         // Sat når abonnement opsiges — bruges til churn-beregning
+  cancelledAt             DateTime?
   createdAt               DateTime          @default(now())
   updatedAt               DateTime          @default(now()) @updatedAt
 
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   organization Organization? @relation(fields: [organizationId], references: [id])
-  product      Product       @relation(fields: [productId], references: [id])
+  course       Course?       @relation(fields: [courseId], references: [id])
+  bundle       Bundle?       @relation(fields: [bundleId], references: [id])
   priceVariant PriceVariant? @relation(fields: [priceVariantId], references: [id])
 
   @@index([userId, status])
+  @@index([userId, status, courseId])
+  @@index([userId, status, bundleId])
   @@index([stripeSubscriptionId])
   @@index([organizationId, status])
-  @@index([productId])
   @@index([status, cancelledAt])
 }
 
@@ -413,18 +417,20 @@ model DiscountCode {
   id                    String       @id @default(uuid()) @db.Uuid
   code                  String       @unique
   type                  DiscountType
-  value                 Int // percentage or cents
+  value                 Int
   maxUses               Int?
   currentUses           Int          @default(0)
   validFrom             DateTime     @default(now())
   validUntil            DateTime?
-  applicableProductId   String?      @db.Uuid
+  applicableCourseId    String?      @db.Uuid
+  applicableBundleId    String?      @db.Uuid
   isActive              Boolean      @default(true)
-  stripeCouponId        String?      // Stripe coupon ID
+  stripeCouponId        String?
   duration              DiscountDuration @default(once)
-  durationInMonths      Int?         // Only when duration = "repeating"
+  durationInMonths      Int?
 
-  applicableProduct Product? @relation(fields: [applicableProductId], references: [id])
+  applicableCourse Course? @relation(fields: [applicableCourseId], references: [id])
+  applicableBundle Bundle? @relation(fields: [applicableBundleId], references: [id])
 }
 
 model UserContentProgress {
@@ -467,12 +473,12 @@ model Journey {
   targetAgeMax  Int? // months
   estimatedDays Int?
   isActive      Boolean  @default(true)
-  productId     String?  @db.Uuid
+  courseId      String?  @db.Uuid
   coverImageUrl String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  product      Product?       @relation(fields: [productId], references: [id], onDelete: SetNull)
+  course       Course?        @relation(fields: [courseId], references: [id], onDelete: SetNull)
   phases       JourneyPhase[]
   userJourneys UserJourney[]
   cohorts      Cohort[]
