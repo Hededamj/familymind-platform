@@ -23,15 +23,22 @@ export default async function SubscribePage() {
   ])
 
   let hasSubscription = false
+  let currentVariantLabel: string | null = null
   if (user) {
     const entitlements = await getUserEntitlements(user.id)
-    hasSubscription = entitlements.some(
-      (e) => e.product.type === 'SUBSCRIPTION'
-    )
+    const subEnt = entitlements.find((e) => e.product.type === 'SUBSCRIPTION')
+    hasSubscription = !!subEnt
+    currentVariantLabel = subEnt?.priceVariant?.label ?? null
   }
 
   const subscriptionProduct = await prisma.product.findFirst({
     where: { type: 'SUBSCRIPTION', isActive: true },
+    include: {
+      priceVariants: {
+        where: { isActive: true },
+        orderBy: { position: 'asc' },
+      },
+    },
   })
 
   // Use default benefits if tenant has none or too few
@@ -89,6 +96,11 @@ export default async function SubscribePage() {
               <p className="mb-4 text-sm font-medium text-success">
                 Du er allerede abonnent
               </p>
+              {currentVariantLabel && (
+                <p className="mb-4 text-sm text-muted-foreground">
+                  Du har: {currentVariantLabel}
+                </p>
+              )}
               <Button asChild variant="outline" className="rounded-xl">
                 <Link href="/dashboard/settings">
                   Mit abonnement
@@ -96,7 +108,21 @@ export default async function SubscribePage() {
               </Button>
             </div>
           ) : user && subscriptionProduct ? (
-            <SubscribeCTA productId={subscriptionProduct.id} />
+            <SubscribeCTA
+              productId={subscriptionProduct.id}
+              variants={subscriptionProduct.priceVariants.map((v) => ({
+                id: v.id,
+                label: v.label,
+                description: v.description,
+                amountCents: v.amountCents,
+                currency: v.currency,
+                billingType: v.billingType,
+                interval: v.interval,
+                intervalCount: v.intervalCount,
+                trialDays: v.trialDays,
+                isHighlighted: v.isHighlighted,
+              }))}
+            />
           ) : !user ? (
             <Button asChild className="w-full rounded-xl" size="lg">
               <Link href="/login?redirect=/subscribe">
