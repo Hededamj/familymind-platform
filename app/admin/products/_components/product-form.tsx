@@ -778,7 +778,13 @@ export function ProductForm({
                 }
                 placeholder="F.eks. 149"
                 required
+                disabled={(initialData?.priceVariants?.length ?? 0) > 0}
               />
+              {(initialData?.priceVariants?.length ?? 0) > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  Pris styres af prisvarianter nedenfor. Slet alle varianter for at bruge enkelt-pris.
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="currency">Valuta</Label>

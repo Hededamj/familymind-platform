@@ -76,10 +76,13 @@ export default async function SubscribePage() {
 
         {/* Price card */}
         <div className="rounded-2xl border border-border bg-white p-8 shadow-sm">
-          <div className="mb-6 text-center">
-            <span className="font-serif text-5xl">{tenant.subscriptionPriceDisplay || '149 kr'}</span>
-            <span className="text-muted-foreground"> {tenant.subscriptionPeriodDisplay || '/måned'}</span>
-          </div>
+          {/* Vis kun standard-pris hvis der ikke er varianter — ellers viser varianterne prisen */}
+          {(!subscriptionProduct?.priceVariants?.length) && (
+            <div className="mb-6 text-center">
+              <span className="font-serif text-5xl">{tenant.subscriptionPriceDisplay || '149 kr'}</span>
+              <span className="text-muted-foreground"> {tenant.subscriptionPeriodDisplay || '/måned'}</span>
+            </div>
+          )}
 
           <ul className="mb-8 space-y-3">
             {benefits.map((benefit) => (
