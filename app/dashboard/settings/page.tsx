@@ -81,10 +81,22 @@ export default async function SettingsPage() {
                     {subscriptionEntitlement.product.title}
                   </span>
                 </div>
+                {subscriptionEntitlement.priceVariant && (
+                  <p className="text-sm">
+                    <span className="text-muted-foreground">Du har: </span>
+                    <span className="font-medium">
+                      {subscriptionEntitlement.priceVariant.label}
+                    </span>
+                  </p>
+                )}
                 <p className="text-sm text-muted-foreground">
                   Dit abonnement giver fuld adgang til alt indhold og alle forløb.
                 </p>
-                <ManageSubscriptionButton />
+                {/* Manage button only for recurring billing — hide for lifetime/one-time */}
+                {(!subscriptionEntitlement.priceVariant ||
+                  subscriptionEntitlement.priceVariant.billingType === 'recurring') && (
+                  <ManageSubscriptionButton />
+                )}
               </div>
             ) : (
               <div className="space-y-4">
