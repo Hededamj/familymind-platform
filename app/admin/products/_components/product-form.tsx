@@ -41,6 +41,8 @@ import {
   reorderLessonsAction,
   addBundleItemAction,
   removeBundleItemAction,
+  addContentUnitToBundleAction,
+  removeContentUnitFromBundleAction,
   syncToStripeAction,
   createModuleAction,
   updateModuleAction,
@@ -100,12 +102,18 @@ type CourseLesson = {
 
 type BundleItem = {
   id: string
-  includedProductId: string
+  includedProductId: string | null
+  includedContentUnitId: string | null
   includedProduct: {
     id: string
     title: string
     type: string
-  }
+  } | null
+  includedContentUnit: {
+    id: string
+    title: string
+    mediaType: string
+  } | null
 }
 
 type ProductFormData = {
@@ -165,6 +173,7 @@ export function ProductForm({
   const slugManuallyEdited = useRef(false)
   const [showLessonDialog, setShowLessonDialog] = useState(false)
   const [showBundleDialog, setShowBundleDialog] = useState(false)
+  const [showBundleLessonDialog, setShowBundleLessonDialog] = useState(false)
   const [lessons, setLessons] = useState<CourseLesson[]>(
     initialData?.courseLessons ?? []
   )
@@ -391,11 +400,13 @@ export function ProductForm({
             {
               id: crypto.randomUUID(),
               includedProductId: product.id,
+              includedContentUnitId: null,
               includedProduct: {
                 id: product.id,
                 title: product.title,
                 type: product.type,
               },
+              includedContentUnit: null,
             },
           ])
         }
@@ -419,6 +430,51 @@ export function ProductForm({
         toast.success('Produkt fjernet fra pakke')
       } catch {
         toast.error('Kunne ikke fjerne produkt fra pakke')
+      }
+    })
+  }
+
+  async function handleAddBundleLesson(contentUnitId: string) {
+    if (!initialData) return
+    startTransition(async () => {
+      try {
+        await addContentUnitToBundleAction(initialData.id, contentUnitId)
+        const unit = availableContentUnits.find((u) => u.id === contentUnitId)
+        if (unit) {
+          setBundleItems((prev) => [
+            ...prev,
+            {
+              id: crypto.randomUUID(),
+              includedProductId: null,
+              includedContentUnitId: unit.id,
+              includedProduct: null,
+              includedContentUnit: {
+                id: unit.id,
+                title: unit.title,
+                mediaType: unit.mediaType,
+              },
+            },
+          ])
+        }
+        setShowBundleLessonDialog(false)
+        toast.success('Lektion tilføjet til pakke')
+      } catch {
+        toast.error('Kunne ikke tilføje lektion til pakke')
+      }
+    })
+  }
+
+  async function handleRemoveBundleLesson(contentUnitId: string) {
+    if (!initialData) return
+    startTransition(async () => {
+      try {
+        await removeContentUnitFromBundleAction(initialData.id, contentUnitId)
+        setBundleItems((prev) =>
+          prev.filter((item) => item.includedContentUnitId !== contentUnitId)
+        )
+        toast.success('Lektion fjernet fra pakke')
+      } catch {
+        toast.error('Kunne ikke fjerne lektion fra pakke')
       }
     })
   }
@@ -595,6 +651,11 @@ export function ProductForm({
   const availableBundleProducts = availableProducts.filter(
     (product) =>
       !bundleItems.some((item) => item.includedProductId === product.id)
+  )
+
+  // Lessons (ContentUnits) not yet added to bundle
+  const availableBundleLessons = availableContentUnits.filter(
+    (unit) => !bundleItems.some((item) => item.includedContentUnitId === unit.id)
   )
 
   // For SINGLE type: the linked content unit (first lesson)
@@ -1028,62 +1089,109 @@ export function ProductForm({
         </Card>
       )}
 
-      {/* Bundle Items (only for BUNDLE type in edit mode) */}
-      {formData.type === 'BUNDLE' && mode === 'edit' && initialData && (
+      {/* Bundle Items (BUNDLE or SUBSCRIPTION in edit mode) */}
+      {(formData.type === 'BUNDLE' || formData.type === 'SUBSCRIPTION') && mode === 'edit' && initialData && (
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>Pakkeindhold</CardTitle>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={() => setShowBundleDialog(true)}
-                disabled={isPending || availableBundleProducts.length === 0}
-              >
-                <Plus className="mr-2 size-4" />
-                Tilføj produkt
-              </Button>
+            <div className="flex items-center justify-between gap-2">
+              <CardTitle>Indhold i pakken</CardTitle>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setShowBundleDialog(true)}
+                  disabled={isPending || availableBundleProducts.length === 0}
+                >
+                  <Plus className="mr-2 size-4" />
+                  Tilføj produkt
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setShowBundleLessonDialog(true)}
+                  disabled={isPending || availableBundleLessons.length === 0}
+                >
+                  <Plus className="mr-2 size-4" />
+                  Tilføj lektion
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
             {bundleItems.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                Ingen produkter tilfojet endnu. Tilføj produkter til denne
-                pakke.
+                Intet indhold tilføjet endnu. Tilføj produkter eller lektioner til denne pakke.
               </p>
             ) : (
               <div className="space-y-2">
-                {bundleItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex items-center gap-3 rounded-md border p-3"
-                  >
-                    <Package className="size-4 shrink-0 text-muted-foreground" />
-                    <div className="flex-1">
-                      <div className="text-sm font-medium">
-                        {item.includedProduct.title}
+                {bundleItems.map((item) => {
+                  if (item.includedProduct) {
+                    return (
+                      <div
+                        key={item.id}
+                        className="flex items-center gap-3 rounded-md border p-3"
+                      >
+                        <Package className="size-4 shrink-0 text-muted-foreground" />
+                        <div className="flex-1">
+                          <div className="text-sm font-medium">
+                            {item.includedProduct.title}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {productTypeLabels[item.includedProduct.type] ??
+                              item.includedProduct.type}
+                          </div>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="size-8 p-0 text-destructive hover:text-destructive"
+                          onClick={() =>
+                            handleRemoveBundleItem(item.includedProduct!.id)
+                          }
+                          disabled={isPending}
+                        >
+                          <X className="size-4" />
+                          <span className="sr-only">Fjern</span>
+                        </Button>
                       </div>
-                      <div className="text-xs text-muted-foreground">
-                        {productTypeLabels[item.includedProduct.type] ??
-                          item.includedProduct.type}
+                    )
+                  }
+                  if (item.includedContentUnit) {
+                    return (
+                      <div
+                        key={item.id}
+                        className="flex items-center gap-3 rounded-md border p-3"
+                      >
+                        <Info className="size-4 shrink-0 text-muted-foreground" />
+                        <div className="flex-1">
+                          <div className="text-sm font-medium">
+                            {item.includedContentUnit.title}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            Lektion · {mediaTypeLabels[item.includedContentUnit.mediaType] ?? item.includedContentUnit.mediaType}
+                          </div>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="size-8 p-0 text-destructive hover:text-destructive"
+                          onClick={() =>
+                            handleRemoveBundleLesson(item.includedContentUnit!.id)
+                          }
+                          disabled={isPending}
+                        >
+                          <X className="size-4" />
+                          <span className="sr-only">Fjern</span>
+                        </Button>
                       </div>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="size-8 p-0 text-destructive hover:text-destructive"
-                      onClick={() =>
-                        handleRemoveBundleItem(item.includedProductId)
-                      }
-                      disabled={isPending}
-                    >
-                      <X className="size-4" />
-                      <span className="sr-only">Fjern</span>
-                    </Button>
-                  </div>
-                ))}
+                    )
+                  }
+                  return null
+                })}
               </div>
             )}
           </CardContent>
@@ -1489,6 +1597,43 @@ export function ProductForm({
                       </div>
                       <div className="text-xs text-muted-foreground">
                         {productTypeLabels[product.type] ?? product.type}
+                      </div>
+                    </div>
+                    <Plus className="size-4 text-muted-foreground" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Bundle Lesson Dialog */}
+      <Dialog open={showBundleLessonDialog} onOpenChange={setShowBundleLessonDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Tilføj lektion til pakke</DialogTitle>
+          </DialogHeader>
+          <div className="max-h-[400px] overflow-y-auto">
+            {availableBundleLessons.length === 0 ? (
+              <p className="py-4 text-center text-sm text-muted-foreground">
+                Ingen tilgængelige lektioner at tilføje.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {availableBundleLessons.map((unit) => (
+                  <button
+                    key={unit.id}
+                    type="button"
+                    className="flex w-full items-center gap-3 rounded-md border p-3 text-left transition-colors hover:bg-accent"
+                    onClick={() => handleAddBundleLesson(unit.id)}
+                    disabled={isPending}
+                  >
+                    <Info className="size-4 shrink-0 text-muted-foreground" />
+                    <div className="flex-1">
+                      <div className="text-sm font-medium">{unit.title}</div>
+                      <div className="text-xs text-muted-foreground">
+                        Lektion · {mediaTypeLabels[unit.mediaType] ?? unit.mediaType}
                       </div>
                     </div>
                     <Plus className="size-4 text-muted-foreground" />

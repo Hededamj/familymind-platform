@@ -266,23 +266,26 @@ export default async function ProductDetailPage({
 
             <div className="rounded-2xl border border-border bg-white">
               <ul className="divide-y divide-border">
-                {product.bundleItems.map((item) => (
-                  <li key={item.id} className="flex items-center gap-3 px-5 py-4">
-                    <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-sand">
-                      <Package className="size-4 text-muted-foreground" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">
-                        {item.includedProduct.title}
-                      </p>
-                      {item.includedProduct.description && (
-                        <p className="text-xs text-muted-foreground line-clamp-1">
-                          {item.includedProduct.description}
-                        </p>
-                      )}
-                    </div>
-                  </li>
-                ))}
+                {product.bundleItems.map((item) => {
+                  const title = item.includedProduct?.title ?? item.includedContentUnit?.title
+                  const description = item.includedProduct?.description ?? item.includedContentUnit?.description
+                  if (!title) return null
+                  return (
+                    <li key={item.id} className="flex items-center gap-3 px-5 py-4">
+                      <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-sand">
+                        <Package className="size-4 text-muted-foreground" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">{title}</p>
+                        {description && (
+                          <p className="text-xs text-muted-foreground line-clamp-1">
+                            {description}
+                          </p>
+                        )}
+                      </div>
+                    </li>
+                  )
+                })}
               </ul>
             </div>
           </div>

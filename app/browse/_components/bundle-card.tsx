@@ -19,7 +19,11 @@ type BundleProduct = {
       id: string
       title: string
       type: string
-    }
+    } | null
+    includedContentUnit?: {
+      id: string
+      title: string
+    } | null
   }>
 }
 
@@ -67,11 +71,15 @@ export function BundleCard({ product }: { product: BundleProduct }) {
         )}
         {product.bundleItems && product.bundleItems.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">
-            {product.bundleItems.map(item => (
-              <Badge key={item.id} variant="outline" className="rounded-full text-xs">
-                {item.includedProduct.title}
-              </Badge>
-            ))}
+            {product.bundleItems.map(item => {
+              const label = item.includedProduct?.title ?? item.includedContentUnit?.title
+              if (!label) return null
+              return (
+                <Badge key={item.id} variant="outline" className="rounded-full text-xs">
+                  {label}
+                </Badge>
+              )
+            })}
           </div>
         )}
         <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
