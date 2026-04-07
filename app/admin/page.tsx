@@ -45,7 +45,7 @@ export default async function AdminPage() {
 
   const stats = [
     { label: 'Brugere', value: userCount, href: '/admin/users', icon: Users },
-    { label: 'Produkter', value: productCount, href: '/admin/products', icon: Package },
+    { label: 'Kurser', value: productCount, href: '/admin/courses', icon: Package },
     { label: 'Forløb', value: journeyCount, href: '/admin/journeys', icon: Map },
     { label: 'Kohorter', value: cohortCount, href: '/admin/cohorts', icon: UsersRound },
     { label: 'Rum', value: roomCount, href: '/admin/community/rooms', icon: MessageSquare },
@@ -126,7 +126,7 @@ export default async function AdminPage() {
           <CardContent>
             <div className="grid gap-2 sm:grid-cols-2">
               {[
-                { href: '/admin/products/new', label: 'Nyt produkt' },
+                { href: '/admin/courses/new', label: 'Nyt kursus' },
                 { href: '/admin/journeys/new', label: 'Nyt forløb' },
                 { href: '/admin/content/new', label: 'Ny lektion' },
                 { href: '/admin/community/rooms/new', label: 'Nyt rum' },

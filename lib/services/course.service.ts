@@ -31,11 +31,21 @@ export async function deleteCourse(id: string) {
   })
 }
 
-export async function listCourses(filters?: { isActive?: boolean }) {
+export async function listCourses(filters?: { isActive?: boolean; search?: string }) {
   return prisma.course.findMany({
-    where: filters,
+    where: {
+      ...(filters?.isActive !== undefined ? { isActive: filters.isActive } : {}),
+      ...(filters?.search
+        ? {
+            OR: [
+              { title: { contains: filters.search, mode: 'insensitive' } },
+              { slug: { contains: filters.search, mode: 'insensitive' } },
+            ],
+          }
+        : {}),
+    },
     orderBy: { createdAt: 'desc' },
-    include: { priceVariants: true },
+    include: { priceVariants: true, lessons: { select: { id: true } } },
   })
 }
 
