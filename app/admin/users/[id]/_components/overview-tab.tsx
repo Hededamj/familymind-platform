@@ -78,15 +78,8 @@ export function OverviewTab({
             {activeSubscription ? (
               <div>
                 <CardTitle className="text-lg">
-                  {activeSubscription.product.title}
+                  {activeSubscription.course?.title ?? activeSubscription.bundle?.title ?? '—'}
                 </CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  DKK{' '}
-                  {(activeSubscription.product.priceAmountCents / 100).toFixed(
-                    0
-                  )}
-                  /md
-                </p>
                 <p className="text-sm text-muted-foreground">
                   Siden {formatDate(activeSubscription.createdAt)}
                 </p>

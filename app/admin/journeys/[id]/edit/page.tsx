@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import { requireAdmin } from '@/lib/auth'
 import { getJourneyById } from '@/lib/services/journey.service'
 import { listContentUnits } from '@/lib/services/content.service'
-import { listProducts } from '@/lib/services/product.service'
+import { listCourses } from '@/lib/services/course.service'
 import { JourneyEditor } from './_components/journey-editor'
 
 export default async function EditJourneyPage({
@@ -16,7 +16,7 @@ export default async function EditJourneyPage({
   const [journey, contentUnits, courses] = await Promise.all([
     getJourneyById(id),
     listContentUnits({ published: true }),
-    listProducts({ type: 'COURSE', isActive: true }),
+    listCourses({ isActive: true }),
   ])
 
   if (!journey) {

@@ -59,9 +59,8 @@ export async function getOverviewStats(orgId: string, period: Period) {
   // MRR
   const subscriptionEntitlements = await prisma.entitlement.findMany({
     where: { user: orgFilter, status: 'ACTIVE', stripeSubscriptionId: { not: null } },
-    include: { product: { select: { priceAmountCents: true } } },
   })
-  const mrr = subscriptionEntitlements.reduce((sum, e) => sum + (e.paidAmountCents ?? e.product.priceAmountCents), 0)
+  const mrr = subscriptionEntitlements.reduce((sum, e) => sum + (e.paidAmountCents ?? 0), 0)
 
   // Onboarding rate
   const [newSignups, onboarded] = await Promise.all([
@@ -342,17 +341,21 @@ export async function getConversionStats(orgId: string, period: Period) {
 
 // ─── Economy ─────────────────────────────────────────
 
-export async function getEconomyStats(orgId: string, period: Period) {
-  const since = periodToDate(period)
-  const now = new Date()
-  const orgFilter = { organizationId: orgId }
+export async function getEconomyStats(_orgId: string, _period: Period) {
+  // TODO PR 2/3: re-implementér economy-tab oven på Course/Bundle + PriceVariant
+  return {
+    mrr: { current: 0, new: 0, lost: 0, net: 0 },
+    mrrTrend: [] as Array<{ week: string; total: number }>,
+    revenuePerProduct: [] as Array<{ title: string; revenue: number }>,
+    keyMetrics: { avgLtv: 0, medianLifetimeDays: null as number | null, revenuePerUser: 0 },
+  }
+}
 
-  // Current MRR
-  const activeSubscriptions = await prisma.entitlement.findMany({
-    where: { user: orgFilter, status: 'ACTIVE', stripeSubscriptionId: { not: null } },
-    include: { product: { select: { priceAmountCents: true, title: true } } },
-  })
-  const mrr = activeSubscriptions.reduce((sum, e) => sum + (e.paidAmountCents ?? e.product.priceAmountCents), 0)
+/* LEGACY DISABLED — PR 2/3 will reimplement
+async function _disabledLegacy() {
+  const since = new Date()
+  const now = new Date()
+  const orgFilter = {}
 
   // New MRR (new subscriptions in period)
   const newSubscriptions = await prisma.entitlement.findMany({
@@ -462,6 +465,7 @@ export async function getEconomyStats(orgId: string, period: Period) {
     },
   }
 }
+*/
 
 // ─── Behavior ────────────────────────────────────────
 

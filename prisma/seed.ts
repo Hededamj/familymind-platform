@@ -430,44 +430,7 @@ async function main() {
     })
   }
 
-  // -- Default modules for existing courses --
-  const courses = await prisma.product.findMany({
-    where: { type: 'COURSE' },
-    include: { courseLessons: true, modules: true },
-  })
-
-  for (const course of courses) {
-    if (course.modules.length === 0 && course.courseLessons.length > 0) {
-      const defaultModule = await prisma.courseModule.create({
-        data: {
-          productId: course.id,
-          title: 'Indhold',
-          position: 1,
-        },
-      })
-      // Assign all existing lessons to the default module
-      await prisma.courseLesson.updateMany({
-        where: { productId: course.id },
-        data: { moduleId: defaultModule.id },
-      })
-      console.log(`  Created default module for course "${course.title}"`)
-    }
-  }
-
-  // -- Link journey to course if both exist --
-  const testJourney = await prisma.journey.findUnique({ where: { slug: 'bedre-sovnrutiner' } })
-  if (testJourney && !testJourney.productId) {
-    const sleepCourse = await prisma.product.findFirst({
-      where: { type: 'COURSE', title: { contains: 'søvn', mode: 'insensitive' } },
-    })
-    if (sleepCourse) {
-      await prisma.journey.update({
-        where: { id: testJourney.id },
-        data: { productId: sleepCourse.id },
-      })
-      console.log(`  Linked journey "${testJourney.title}" to course "${sleepCourse.title}"`)
-    }
-  }
+  // -- PR1 STUB: course/module seeding skal re-implementeres i PR 2 --
 
   // -- Journey email templates --
   await prisma.emailTemplate.upsert({

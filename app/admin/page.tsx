@@ -31,7 +31,7 @@ export default async function AdminPage() {
     recentUsers,
   ] = await Promise.all([
     prisma.user.count(),
-    prisma.product.count({ where: { isActive: true } }),
+    prisma.course.count({ where: { isActive: true } }),
     prisma.journey.count({ where: { isActive: true } }),
     prisma.cohort.count(),
     prisma.communityRoom.count({ where: { isArchived: false } }),

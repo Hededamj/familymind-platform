@@ -50,7 +50,6 @@ export async function deleteContentUnit(id: string) {
 
 export async function listContentUnits(filters?: {
   mediaType?: string
-  accessLevel?: string
   tagSlug?: string
   published?: boolean
   search?: string
@@ -58,7 +57,6 @@ export async function listContentUnits(filters?: {
   return prisma.contentUnit.findMany({
     where: {
       ...(filters?.mediaType && { mediaType: filters.mediaType as any }),
-      ...(filters?.accessLevel && { accessLevel: filters.accessLevel as any }),
       ...(filters?.tagSlug && {
         tags: { some: { tag: { slug: filters.tagSlug } } },
       }),

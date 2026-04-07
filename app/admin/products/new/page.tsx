@@ -1,18 +1,8 @@
-import { requireAdmin } from '@/lib/auth'
-import { ProductForm } from '../_components/product-form'
-
-export default async function NewProductPage() {
-  await requireAdmin()
-
+export default function Page() {
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Opret produkt</h1>
-        <p className="text-muted-foreground">
-          Tilføj et nyt produkt til platformen
-        </p>
-      </div>
-      <ProductForm mode="create" />
+    <div className="p-8 text-center text-muted-foreground">
+      <p>Under ombygning</p>
+      <p className="text-xs mt-2">Denne side er midlertidigt ude af drift mens vi opgraderer til Kurser og Bundler.</p>
     </div>
   )
 }

@@ -12,9 +12,8 @@ export default async function SettingsPage() {
   const user = await requireAuth()
   const entitlements = await getUserEntitlements(user.id)
 
-  const subscriptionEntitlement = entitlements.find(
-    (e) => e.product.type === 'SUBSCRIPTION'
-  )
+  // PR1 stub: viser bare antal aktive entitlements
+  const activeCount = entitlements.length
 
   return (
     <div className="px-4 py-8 sm:px-8">
@@ -71,32 +70,17 @@ export default async function SettingsPage() {
             <h2 className="font-serif text-lg">Dit abonnement</h2>
           </div>
           <div className="rounded-2xl border border-border bg-white p-6">
-            {subscriptionEntitlement ? (
+            {activeCount > 0 ? (
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <Badge className="rounded-full bg-success/10 text-success hover:bg-success/10">
                     Aktivt
                   </Badge>
                   <span className="text-sm text-muted-foreground">
-                    {subscriptionEntitlement.product.title}
+                    Aktive abonnementer: {activeCount}
                   </span>
                 </div>
-                {subscriptionEntitlement.priceVariant && (
-                  <p className="text-sm">
-                    <span className="text-muted-foreground">Du har: </span>
-                    <span className="font-medium">
-                      {subscriptionEntitlement.priceVariant.label}
-                    </span>
-                  </p>
-                )}
-                <p className="text-sm text-muted-foreground">
-                  Dit abonnement giver fuld adgang til alt indhold og alle forløb.
-                </p>
-                {/* Manage button only for recurring billing — hide for lifetime/one-time */}
-                {(!subscriptionEntitlement.priceVariant ||
-                  subscriptionEntitlement.priceVariant.billingType === 'recurring') && (
-                  <ManageSubscriptionButton />
-                )}
+                <ManageSubscriptionButton />
               </div>
             ) : (
               <div className="space-y-4">

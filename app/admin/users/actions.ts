@@ -59,13 +59,10 @@ export async function grantAccessAction(
   const { createEntitlement } = await import(
     '@/lib/services/entitlement.service'
   )
-  const result = await createEntitlement({
-    userId: validated.userId,
-    productId: validated.productId,
-    source: 'GIFT',
-  })
-  revalidatePath(`/admin/users/${validated.userId}`)
-  return result
+  // STUB PR2: grantAccess skal støtte courseId/bundleId.
+  void validated
+  void createEntitlement
+  throw new Error('Under ombygning')
 }
 
 export async function revokeEntitlementAction(
@@ -85,12 +82,8 @@ export async function revokeEntitlementAction(
 
 export async function getProductsAction() {
   await requireAdmin()
-  const { prisma } = await import('@/lib/prisma')
-  return prisma.product.findMany({
-    where: { isActive: true },
-    select: { id: true, title: true, type: true },
-    orderBy: { title: 'asc' },
-  })
+  // STUB PR2 — returnerer tom liste indtil grantAccess re-implementeres
+  return [] as Array<{ id: string; title: string; type: string }>
 }
 
 export async function bulkEmailAction(

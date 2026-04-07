@@ -145,8 +145,11 @@ export async function getRecommendations(userId: string) {
   const journeyIds = matchingRules
     .filter((r) => r.targetType === 'JOURNEY')
     .map((r) => r.targetId)
-  const productIds = matchingRules
-    .filter((r) => r.targetType === 'PRODUCT')
+  const courseIds = matchingRules
+    .filter((r) => r.targetType === 'COURSE')
+    .map((r) => r.targetId)
+  const bundleIds = matchingRules
+    .filter((r) => r.targetType === 'BUNDLE')
     .map((r) => r.targetId)
   const roomIds = matchingRules
     .filter((r) => r.targetType === 'ROOM')
@@ -162,12 +165,15 @@ export async function getRecommendations(userId: string) {
   const completedJourneyIds = new Set(completedJourneys.map((uj) => uj.journeyId))
   const eligibleJourneyIds = journeyIds.filter((id) => !completedJourneyIds.has(id))
 
-  const [journeys, products, rooms] = await Promise.all([
+  const [journeys, courses, bundles, rooms] = await Promise.all([
     eligibleJourneyIds.length > 0
       ? prisma.journey.findMany({ where: { id: { in: eligibleJourneyIds }, isActive: true } })
       : Promise.resolve([]),
-    productIds.length > 0
-      ? prisma.product.findMany({ where: { id: { in: productIds }, isActive: true } })
+    courseIds.length > 0
+      ? prisma.course.findMany({ where: { id: { in: courseIds }, isActive: true } })
+      : Promise.resolve([]),
+    bundleIds.length > 0
+      ? prisma.bundle.findMany({ where: { id: { in: bundleIds }, isActive: true } })
       : Promise.resolve([]),
     roomIds.length > 0
       ? prisma.communityRoom.findMany({ where: { id: { in: roomIds }, isArchived: false } })
@@ -175,7 +181,8 @@ export async function getRecommendations(userId: string) {
   ])
 
   const journeyMap = new Map(journeys.map((j) => [j.id, j] as const))
-  const productMap = new Map(products.map((p) => [p.id, p] as const))
+  const courseMap = new Map(courses.map((c) => [c.id, c] as const))
+  const bundleMap = new Map(bundles.map((b) => [b.id, b] as const))
   const roomMap = new Map(rooms.map((r) => [r.id, r] as const))
 
   // Build recommendations from matched data
@@ -201,15 +208,27 @@ export async function getRecommendations(userId: string) {
           priority: rule.priority,
         })
       }
-    } else if (rule.targetType === 'PRODUCT') {
-      const product = productMap.get(rule.targetId)
-      if (product) {
+    } else if (rule.targetType === 'COURSE') {
+      const course = courseMap.get(rule.targetId)
+      if (course) {
         recommendations.push({
-          type: 'PRODUCT',
-          id: product.id,
-          title: product.title,
-          description: product.description,
-          slug: product.slug,
+          type: 'COURSE',
+          id: course.id,
+          title: course.title,
+          description: course.description,
+          slug: course.slug,
+          priority: rule.priority,
+        })
+      }
+    } else if (rule.targetType === 'BUNDLE') {
+      const bundle = bundleMap.get(rule.targetId)
+      if (bundle) {
+        recommendations.push({
+          type: 'BUNDLE',
+          id: bundle.id,
+          title: bundle.title,
+          description: bundle.description,
+          slug: bundle.slug,
           priority: rule.priority,
         })
       }

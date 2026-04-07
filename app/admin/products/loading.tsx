@@ -1,27 +1,8 @@
-import { Skeleton } from "@/components/ui/skeleton"
-
-export default function Loading() {
+export default function Page() {
   return (
-    <div className="space-y-6">
-      {/* Header with button */}
-      <div className="flex items-center justify-between">
-        <div>
-          <Skeleton className="h-9 w-32" />
-          <Skeleton className="mt-1 h-5 w-64" />
-        </div>
-        <Skeleton className="h-10 w-36 rounded-md" />
-      </div>
-
-      {/* Tabs */}
-      <Skeleton className="h-10 w-96 rounded-lg" />
-
-      {/* Table */}
-      <div className="rounded-md border">
-        <Skeleton className="h-10 w-full" />
-        {Array.from({ length: 6 }).map((_, i) => (
-          <Skeleton key={i} className="h-14 w-full border-t" />
-        ))}
-      </div>
+    <div className="p-8 text-center text-muted-foreground">
+      <p>Under ombygning</p>
+      <p className="text-xs mt-2">Denne side er midlertidigt ude af drift mens vi opgraderer til Kurser og Bundler.</p>
     </div>
   )
 }

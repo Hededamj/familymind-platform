@@ -4,7 +4,7 @@ import { checkAndNotifyMilestones } from './engagement.service'
 export async function markContentStarted(userId: string, contentUnitId: string) {
   return prisma.userContentProgress.upsert({
     where: { userId_contentUnitId: { userId, contentUnitId } },
-    update: {}, // Don't update if already exists
+    update: {},
     create: { userId, contentUnitId },
   })
 }
@@ -15,10 +15,7 @@ export async function markContentCompleted(userId: string, contentUnitId: string
     update: { completedAt: new Date() },
     create: { userId, contentUnitId, completedAt: new Date() },
   })
-
-  // Check milestones after content completion (non-blocking)
   checkAndNotifyMilestones(userId).catch(console.error)
-
   return result
 }
 
@@ -28,20 +25,18 @@ export async function getContentProgress(userId: string, contentUnitId: string) 
   })
 }
 
-export async function getCourseProgress(userId: string, productId: string) {
+export async function getCourseProgress(userId: string, courseId: string) {
   const [lessons, moduleCount] = await Promise.all([
     prisma.courseLesson.findMany({
-      where: { productId },
+      where: { courseId },
       include: {
         contentUnit: {
-          include: {
-            userProgress: { where: { userId } },
-          },
+          include: { userProgress: { where: { userId } } },
         },
       },
       orderBy: { position: 'asc' },
     }),
-    prisma.courseModule.count({ where: { productId } }),
+    prisma.courseModule.count({ where: { courseId } }),
   ])
 
   const totalLessons = lessons.length
@@ -49,11 +44,8 @@ export async function getCourseProgress(userId: string, productId: string) {
     (l) => l.contentUnit.userProgress[0]?.completedAt
   ).length
   const percentComplete =
-    totalLessons > 0
-      ? Math.round((completedLessons / totalLessons) * 100)
-      : 0
+    totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0
 
-  const chapterCount = moduleCount
   const totalDurationMinutes = lessons.reduce(
     (sum, l) => sum + (l.contentUnit.durationMinutes ?? 0),
     0
@@ -63,7 +55,7 @@ export async function getCourseProgress(userId: string, productId: string) {
     totalLessons,
     completedLessons,
     percentComplete,
-    chapterCount,
+    chapterCount: moduleCount,
     totalDurationMinutes,
     lessons: lessons.map((l) => ({
       id: l.id,
@@ -78,71 +70,23 @@ export async function getCourseProgress(userId: string, productId: string) {
 }
 
 export async function getUserInProgressCourses(userId: string) {
-  // Find courses where user has an active entitlement
   const entitlements = await prisma.entitlement.findMany({
-    where: { userId, status: 'ACTIVE', product: { type: 'COURSE' } },
-    include: { product: true },
+    where: { userId, status: 'ACTIVE', courseId: { not: null } },
+    include: { course: true },
   })
 
-  if (entitlements.length === 0) return []
-
-  const courseProductIds = entitlements.map((e) => e.product.id)
-
-  // Batch-fetch all lessons with user progress for all courses in one query
-  const allLessons = await prisma.courseLesson.findMany({
-    where: { productId: { in: courseProductIds } },
-    include: {
-      contentUnit: {
-        include: {
-          userProgress: { where: { userId } },
-        },
-      },
-    },
-    orderBy: { position: 'asc' },
-  })
-
-  // Group lessons by productId and compute progress in-memory
-  const lessonsByProduct = new Map<string, typeof allLessons>()
-  for (const lesson of allLessons) {
-    const existing = lessonsByProduct.get(lesson.productId) ?? []
-    existing.push(lesson)
-    lessonsByProduct.set(lesson.productId, existing)
-  }
-
-  const courses: (Awaited<ReturnType<typeof getCourseProgress>> & { product: typeof entitlements[number]['product'] })[] = []
+  const result: Array<
+    Awaited<ReturnType<typeof getCourseProgress>> & {
+      course: NonNullable<(typeof entitlements)[number]['course']>
+    }
+  > = []
 
   for (const ent of entitlements) {
-    const lessons = lessonsByProduct.get(ent.product.id) ?? []
-    if (lessons.length === 0) continue
-
-    const totalLessons = lessons.length
-    const completedLessons = lessons.filter(
-      (l) => l.contentUnit.userProgress[0]?.completedAt
-    ).length
-    const percentComplete = Math.round((completedLessons / totalLessons) * 100)
-    const totalDurationMinutes = lessons.reduce(
-      (sum, l) => sum + (l.contentUnit.durationMinutes ?? 0),
-      0
-    )
-
-    courses.push({
-      product: ent.product,
-      totalLessons,
-      completedLessons,
-      percentComplete,
-      chapterCount: 0,
-      totalDurationMinutes,
-      lessons: lessons.map((l) => ({
-        id: l.id,
-        contentUnitId: l.contentUnit.id,
-        title: l.contentUnit.title,
-        slug: l.contentUnit.slug,
-        position: l.position,
-        started: !!l.contentUnit.userProgress[0],
-        completed: !!l.contentUnit.userProgress[0]?.completedAt,
-      })),
-    })
+    if (!ent.course) continue
+    const progress = await getCourseProgress(userId, ent.course.id)
+    if (progress.totalLessons === 0) continue
+    result.push({ ...progress, course: ent.course })
   }
 
-  return courses
+  return result
 }

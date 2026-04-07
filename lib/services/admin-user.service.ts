@@ -203,7 +203,7 @@ export async function getUserDetail(userId: string) {
     include: {
       tags: { include: { tag: true } },
       entitlements: {
-        include: { product: true },
+        include: { course: true, bundle: true },
         orderBy: { createdAt: 'desc' },
       },
       userJourneys: {

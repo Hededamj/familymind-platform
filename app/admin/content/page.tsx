@@ -141,9 +141,7 @@ export default async function ContentListPage({
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline">
-                      {accessLevelLabels[unit.accessLevel] ?? unit.accessLevel}
-                    </Badge>
+                    <Badge variant="outline">—</Badge>
                   </TableCell>
                   <TableCell>
                     {unit.publishedAt ? (
