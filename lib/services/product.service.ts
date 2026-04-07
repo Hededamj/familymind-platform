@@ -56,7 +56,7 @@ export async function listProducts(filters?: {
         orderBy: { position: 'asc' },
       },
       bundleItems: {
-        include: { includedProduct: true },
+        include: { includedProduct: true, includedContentUnit: true },
         orderBy: { position: 'asc' },
       },
       journeys: { where: { isActive: true }, select: { id: true, slug: true, title: true } },
@@ -76,7 +76,7 @@ export async function getProduct(slug: string) {
         orderBy: { position: 'asc' },
       },
       bundleItems: {
-        include: { includedProduct: true },
+        include: { includedProduct: true, includedContentUnit: true },
         orderBy: { position: 'asc' },
       },
       journeys: { where: { isActive: true }, select: { id: true, slug: true, title: true } },
@@ -95,7 +95,7 @@ export async function getProductById(id: string) {
         orderBy: { position: 'asc' },
       },
       bundleItems: {
-        include: { includedProduct: true },
+        include: { includedProduct: true, includedContentUnit: true },
         orderBy: { position: 'asc' },
       },
       journeys: { where: { isActive: true }, select: { id: true, slug: true, title: true } },
@@ -154,6 +154,42 @@ export async function removeProductFromBundle(
 ) {
   return prisma.bundleItem.deleteMany({
     where: { bundleProductId, includedProductId },
+  })
+}
+
+export async function addContentUnitToBundle(
+  bundleProductId: string,
+  contentUnitId: string
+) {
+  // Verify bundle product is BUNDLE or SUBSCRIPTION
+  const bundle = await prisma.product.findUnique({
+    where: { id: bundleProductId },
+    select: { type: true },
+  })
+  if (!bundle) throw new Error('Pakke ikke fundet')
+  if (bundle.type !== 'BUNDLE' && bundle.type !== 'SUBSCRIPTION') {
+    throw new Error('Kun BUNDLE eller SUBSCRIPTION-produkter kan indeholde lektioner')
+  }
+  // Idempotent upsert
+  const existing = await prisma.bundleItem.findFirst({
+    where: { bundleProductId, includedContentUnitId: contentUnitId },
+  })
+  if (existing) return existing
+  return prisma.bundleItem.create({
+    data: {
+      bundleProductId,
+      includedContentUnitId: contentUnitId,
+      includedProductId: null,
+    },
+  })
+}
+
+export async function removeContentUnitFromBundle(
+  bundleProductId: string,
+  contentUnitId: string
+) {
+  return prisma.bundleItem.deleteMany({
+    where: { bundleProductId, includedContentUnitId: contentUnitId },
   })
 }
 
