@@ -116,6 +116,16 @@ enum ReportStatus {
   DISMISSED
 }
 
+enum BillingType {
+  one_time
+  recurring
+}
+
+enum BillingInterval {
+  month
+  year
+}
+
 // ──────────────────────────────────────────────
 // Core Models
 // ──────────────────────────────────────────────
@@ -298,6 +308,32 @@ model Product {
   entitlements      Entitlement[]
   discountCodes     DiscountCode[]
   journeys          Journey[]
+  priceVariants     PriceVariant[]
+}
+
+model PriceVariant {
+  id              String           @id @default(uuid()) @db.Uuid
+  productId       String           @db.Uuid
+  label           String
+  description     String?
+  amountCents     Int
+  currency        String           @default("DKK")
+  billingType     BillingType
+  interval        BillingInterval?
+  intervalCount   Int              @default(1)
+  trialDays       Int?
+  stripePriceId   String?
+  position        Int              @default(0)
+  isActive        Boolean          @default(true)
+  isHighlighted   Boolean          @default(false)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  product      Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  entitlements Entitlement[]
+
+  @@index([productId, position])
+  @@index([productId, isActive])
 }
 
 model CourseLesson {
@@ -345,6 +381,7 @@ model Entitlement {
   userId                  String            @db.Uuid
   organizationId          String?           @db.Uuid
   productId               String            @db.Uuid
+  priceVariantId          String?           @db.Uuid
   source                  EntitlementSource
   status                  EntitlementStatus @default(ACTIVE)
   stripeSubscriptionId    String?
@@ -359,6 +396,7 @@ model Entitlement {
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   organization Organization? @relation(fields: [organizationId], references: [id])
   product      Product       @relation(fields: [productId], references: [id])
+  priceVariant PriceVariant? @relation(fields: [priceVariantId], references: [id])
 
   @@index([userId, status])
   @@index([stripeSubscriptionId])
