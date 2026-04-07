@@ -16,9 +16,30 @@ export async function createCheckoutSession(
     where: { id: validated.productId },
   })
 
-  if (!product.stripePriceId) {
+  // Resolve PriceVariant if specified, otherwise fall back to legacy product price
+  let variant: Awaited<ReturnType<typeof prisma.priceVariant.findUnique>> = null
+  if (validated.priceVariantId) {
+    variant = await prisma.priceVariant.findUnique({
+      where: { id: validated.priceVariantId },
+    })
+    if (!variant || variant.productId !== product.id) {
+      throw new Error('Ugyldig prisvariant')
+    }
+    if (!variant.isActive) {
+      throw new Error('Prisvariant er ikke aktiv')
+    }
+    if (!variant.stripePriceId) {
+      throw new Error('Prisvariant er ikke synkroniseret med Stripe')
+    }
+  } else if (!product.stripePriceId) {
     throw new Error('Product is not synced to Stripe')
   }
+
+  const stripePriceId = variant?.stripePriceId ?? product.stripePriceId!
+  // Determine checkout mode: variant takes precedence
+  const isRecurring = variant
+    ? variant.billingType === 'recurring'
+    : product.type === 'SUBSCRIPTION'
 
   const user = await prisma.user.findUniqueOrThrow({
     where: { id: userId },
@@ -51,15 +72,19 @@ export async function createCheckoutSession(
 
   const session = await stripe.checkout.sessions.create(
     {
-      mode: product.type === 'SUBSCRIPTION' ? 'subscription' : 'payment',
+      mode: isRecurring ? 'subscription' : 'payment',
       customer_email: user.email,
-      line_items: [{ price: product.stripePriceId, quantity: 1 }],
+      line_items: [{ price: stripePriceId, quantity: 1 }],
       ...(discountCouponId ? { discounts: [{ coupon: discountCouponId }] } : {}),
+      ...(isRecurring && variant?.trialDays
+        ? { subscription_data: { trial_period_days: variant.trialDays } }
+        : {}),
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/products/${product.slug}`,
       metadata: {
         userId,
         productId: product.id,
+        ...(variant ? { priceVariantId: variant.id } : {}),
         ...(discountCodeId ? { discountCodeId } : {}),
       },
     },
