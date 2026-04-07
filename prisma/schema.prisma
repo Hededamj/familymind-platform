@@ -262,6 +262,7 @@ model ContentUnit {
   journeyDayContents JourneyDayContent[]
   userProgress       UserContentProgress[]
   savedContent       SavedContent[]
+  bundledIn          BundleItem[]        @relation("IncludedContentUnit")
 }
 
 model ContentTag {
@@ -365,15 +366,18 @@ model CourseModule {
 }
 
 model BundleItem {
-  id                String @id @default(uuid()) @db.Uuid
-  bundleProductId   String @db.Uuid
-  includedProductId String @db.Uuid
-  position          Int    @default(0)
+  id                    String @id @default(uuid()) @db.Uuid
+  bundleProductId       String @db.Uuid
+  includedProductId     String? @db.Uuid
+  includedContentUnitId String? @db.Uuid
+  position              Int    @default(0)
 
-  bundle          Product @relation("BundleProduct", fields: [bundleProductId], references: [id], onDelete: Cascade)
-  includedProduct Product @relation("IncludedProduct", fields: [includedProductId], references: [id], onDelete: Cascade)
+  bundle              Product      @relation("BundleProduct", fields: [bundleProductId], references: [id], onDelete: Cascade)
+  includedProduct     Product?     @relation("IncludedProduct", fields: [includedProductId], references: [id], onDelete: Cascade)
+  includedContentUnit ContentUnit? @relation("IncludedContentUnit", fields: [includedContentUnitId], references: [id], onDelete: Cascade)
 
   @@unique([bundleProductId, includedProductId])
+  @@unique([bundleProductId, includedContentUnitId])
 }
 
 model Entitlement {
