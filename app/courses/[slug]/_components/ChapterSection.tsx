@@ -30,7 +30,7 @@ export function ChapterSection({
   return (
     <section>
       {/* Chapter heading */}
-      <div className="mb-3 flex items-baseline gap-2">
+      <div className="mb-3 flex items-baseline gap-2 px-1">
         <h2 className="font-serif text-lg">{title}</h2>
         <span
           className={`text-xs font-medium ${
@@ -41,18 +41,19 @@ export function ChapterSection({
         </span>
       </div>
 
-      {/* Lesson list */}
-      <div className="grid gap-2.5">
-        {lessons.map((lesson, i) => (
-          <LessonCard
-            key={lesson.id}
-            lesson={lesson}
-            initialSaved={savedLessonIds.has(lesson.id)}
-            completed={completedLessonIds.has(lesson.id)}
-            courseSlug={courseSlug}
-            index={i}
-          />
-        ))}
+      {/* Horizontal scroll row — 2 cards visible on mobile with peek of next */}
+      <div className="-mx-4 sm:-mx-6">
+        <div className="flex gap-3 overflow-x-auto scroll-smooth px-4 pb-2 sm:px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {lessons.map((lesson) => (
+            <LessonCard
+              key={lesson.id}
+              lesson={lesson}
+              initialSaved={savedLessonIds.has(lesson.id)}
+              completed={completedLessonIds.has(lesson.id)}
+              courseSlug={courseSlug}
+            />
+          ))}
+        </div>
       </div>
     </section>
   )
