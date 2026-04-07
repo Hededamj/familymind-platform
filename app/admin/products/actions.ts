@@ -91,6 +91,26 @@ export async function removeBundleItemAction(
   revalidatePath(`/admin/products/${bundleProductId}/edit`)
 }
 
+export async function addContentUnitToBundleAction(
+  bundleProductId: string,
+  contentUnitId: string
+) {
+  await requireAdmin()
+  await productService.addContentUnitToBundle(bundleProductId, contentUnitId)
+  revalidatePath('/admin/products')
+  revalidatePath(`/admin/products/${bundleProductId}/edit`)
+}
+
+export async function removeContentUnitFromBundleAction(
+  bundleProductId: string,
+  contentUnitId: string
+) {
+  await requireAdmin()
+  await productService.removeContentUnitFromBundle(bundleProductId, contentUnitId)
+  revalidatePath('/admin/products')
+  revalidatePath(`/admin/products/${bundleProductId}/edit`)
+}
+
 export async function syncToStripeAction(productId: string) {
   await requireAdmin()
   try {
