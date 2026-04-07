@@ -86,35 +86,49 @@ export default async function CourseLandingPage({
           </Link>
 
           {/* Course header card */}
-          <div className="mb-8 overflow-hidden rounded-2xl bg-gradient-to-br from-[var(--color-sand)] to-white p-5 sm:p-6">
-            <h1 className="mb-1.5 font-serif text-xl sm:text-2xl">{product.title}</h1>
-            {product.description && (
-              <p className="mb-4 text-sm leading-relaxed text-muted-foreground">{product.description}</p>
-            )}
-
-            {/* Progress section */}
-            <div className="space-y-2">
-              <div className="flex items-baseline justify-between">
-                <span className="text-sm font-medium">
-                  {courseProgress.percentComplete}% gennemført
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  {courseProgress.completedLessons} af {courseProgress.totalLessons} lektioner
-                </span>
-              </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-white">
-                <div
-                  className="h-full rounded-full bg-[var(--color-coral)] transition-all duration-500"
-                  style={{ width: `${courseProgress.percentComplete}%` }}
+          <div className="mb-8 overflow-hidden rounded-2xl">
+            {product.coverImageUrl && (
+              <div className="relative aspect-[16/9] w-full">
+                <Image
+                  src={product.coverImageUrl.replace(/\s+/g, '')}
+                  alt={product.title}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 640px) 100vw, 672px"
+                  priority
                 />
               </div>
-              <div className="flex gap-3 text-xs text-muted-foreground">
-                {courseProgress.chapterCount > 0 && (
-                  <span>{courseProgress.chapterCount} kapitler</span>
-                )}
-                {courseProgress.totalDurationMinutes > 0 && (
-                  <span>ca. {courseProgress.totalDurationMinutes} min</span>
-                )}
+            )}
+            <div className="bg-gradient-to-br from-[var(--color-sand)] to-white p-5 sm:p-6">
+              <h1 className="mb-1.5 font-serif text-xl sm:text-2xl">{product.title}</h1>
+              {product.description && (
+                <p className="mb-4 text-sm leading-relaxed text-muted-foreground">{product.description}</p>
+              )}
+
+              {/* Progress section */}
+              <div className="space-y-2">
+                <div className="flex items-baseline justify-between">
+                  <span className="text-sm font-medium">
+                    {courseProgress.percentComplete}% gennemført
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {courseProgress.completedLessons} af {courseProgress.totalLessons} lektioner
+                  </span>
+                </div>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-white">
+                  <div
+                    className="h-full rounded-full bg-[var(--color-coral)] transition-all duration-500"
+                    style={{ width: `${courseProgress.percentComplete}%` }}
+                  />
+                </div>
+                <div className="flex gap-3 text-xs text-muted-foreground">
+                  {courseProgress.chapterCount > 0 && (
+                    <span>{courseProgress.chapterCount} kapitler</span>
+                  )}
+                  {courseProgress.totalDurationMinutes > 0 && (
+                    <span>ca. {courseProgress.totalDurationMinutes} min</span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
