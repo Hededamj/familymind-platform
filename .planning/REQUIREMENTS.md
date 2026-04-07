@@ -21,7 +21,7 @@
 
 - [x] **COURSE-01**: Kursus-siden viser progress-bar med procent completion
 - [x] **COURSE-02**: Kursus-header viser antal kapitler og total estimeret varighed
-- [ ] **COURSE-03**: Kursus-header viser cover-billede hvis tilgængeligt
+- [x] **COURSE-03**: Kursus-header viser cover-billede hvis tilgængeligt
 
 ### Filter & Bookmark
 
@@ -57,7 +57,7 @@
 | CHAP-03 | Phase 8 | Pending |
 | COURSE-01 | Phase 7 | Complete |
 | COURSE-02 | Phase 7 | Complete |
-| COURSE-03 | Phase 9 | Pending |
+| COURSE-03 | Phase 9 | Complete |
 | FILTER-01 | Phase 9 | Pending |
 | SAVE-01 | Phase 7 | Complete |
 

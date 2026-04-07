@@ -135,11 +135,11 @@ Plans:
   2. A progress bar with percentage label is visible in the course header
   3. The course header shows the number of chapters and total estimated duration
   4. Tapping a filter tab (Alle / Video / Artikler) hides lessons that do not match the selected type across all chapters
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 09-01: Course header redesign (cover image, progress bar, chapter count + duration)
-- [ ] 09-02: Content-type filter tabs + filtering logic
+- [x] 09-01-PLAN.md — Cover image in authenticated course header (COURSE-03)
+- [ ] 09-02-PLAN.md — CourseFilteredView client wrapper with Alle/Video/Artikler/Lyd tabs (FILTER-01)
 
 **UI hint**: yes
 

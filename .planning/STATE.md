@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Kursus-visning Redesign
 status: executing
-stopped_at: Checkpoint 08-02 Task 3 — awaiting human-verify
-last_updated: "2026-04-07T14:03:56.383Z"
+stopped_at: Completed 09-01-PLAN.md
+last_updated: "2026-04-07T14:17:30.434Z"
 last_activity: 2026-04-07
 progress:
   total_phases: 3
   completed_phases: 2
-  total_plans: 4
-  completed_plans: 4
-  percent: 100
+  total_plans: 6
+  completed_plans: 5
+  percent: 83
 ---
 
 # Project State
@@ -21,12 +21,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-06)
 
 **Core value:** Forældre skal have en smooth, native-lignende mobiloplevelse
-**Current focus:** Phase 08 — lektionskort-kapitel-layout
+**Current focus:** Phase 09 — kursus-header-filter
 
 ## Current Position
 
-Phase: 9
-Plan: Not started
+Phase: 09 (kursus-header-filter) — EXECUTING
+Plan: 2 of 2
 Status: Ready to execute
 Last activity: 2026-04-07
 
@@ -70,6 +70,7 @@ Previous milestone velocity (v1.0 + v1.1):
 | Phase 07-kursus-data-layer-savedcontent P01 | 3min | 2 tasks | 3 files |
 | Phase 07-kursus-data-layer-savedcontent P02 | 2min | 2 tasks | 3 files |
 | Phase 08 P01 | 56s | 1 tasks | 1 files |
+| Phase 09-kursus-header-filter P01 | 1 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -111,6 +112,8 @@ Carried from v1.0:
 - [Phase 07-kursus-data-layer-savedcontent]: savedLessonIds is Set<string> (not array) for O(1) has() lookup in Phase 8 LessonCard bookmark toggle
 - [Phase 07-kursus-data-layer-savedcontent]: Gemt section conditionally rendered only when savedLessons.length > 0 — no empty state needed at this phase
 - [Phase 08]: Used text-[var(--color-coral)] (not text-accent) for saved bookmark state to match coral design token pattern from Phase 6 dashboard
+- [Phase 09-kursus-header-filter]: fill + aspect-[16/9] container used for cover image in authenticated header — responsive pattern, no fixed dimensions needed
+- [Phase 09-kursus-header-filter]: coverImageUrl sanitized with .replace(/\s+/g, '') — consistent with thumbnailUrl whitespace fix from Phase 8
 
 ### Pending Todos
 
@@ -124,6 +127,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-06T20:45:49.002Z
-Stopped at: Checkpoint 08-02 Task 3 — awaiting human-verify
+Last session: 2026-04-07T14:17:30.422Z
+Stopped at: Completed 09-01-PLAN.md
 Resume file: None
