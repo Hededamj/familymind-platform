@@ -53,8 +53,20 @@ export async function POST(req: Request) {
       const session = event.data.object as Stripe.Checkout.Session
       const userId = session.metadata?.userId
       const productId = session.metadata?.productId
+      const priceVariantId = session.metadata?.priceVariantId
 
       if (!userId || !productId) break
+
+      // Look up variant if provided
+      let priceVariant: Awaited<ReturnType<typeof prisma.priceVariant.findUnique>> = null
+      if (priceVariantId) {
+        const parsed = z.string().uuid().safeParse(priceVariantId)
+        if (parsed.success) {
+          priceVariant = await prisma.priceVariant.findUnique({
+            where: { id: parsed.data },
+          })
+        }
+      }
 
       // Log connected account for debugging
       if (event.account) {
@@ -76,23 +88,47 @@ export async function POST(req: Request) {
       const paidAmountCents = session.amount_total ?? undefined
       const paidCurrency = session.currency?.toUpperCase() ?? undefined
 
+      // Determine source: variant billingType wins, fallback to product type
+      const isVariantRecurring = priceVariant
+        ? priceVariant.billingType === 'recurring'
+        : product.type === 'SUBSCRIPTION'
+
       if (product.type === 'SUBSCRIPTION') {
-        await createEntitlement({
-          userId,
-          productId,
-          source: 'SUBSCRIPTION',
-          stripeSubscriptionId: session.subscription as string,
-          stripeCheckoutSessionId: session.id,
-          paidAmountCents,
-          paidCurrency,
-        })
+        // SUBSCRIPTION-product: variant may be one_time (lifetime) or recurring
+        if (isVariantRecurring) {
+          await createEntitlement({
+            userId,
+            productId,
+            priceVariantId: priceVariant?.id,
+            source: 'SUBSCRIPTION',
+            stripeSubscriptionId: session.subscription as string,
+            stripeCheckoutSessionId: session.id,
+            paidAmountCents,
+            paidCurrency,
+          })
+        } else {
+          // Lifetime / one-time variant on a SUBSCRIPTION-type product
+          await createEntitlement({
+            userId,
+            productId,
+            priceVariantId: priceVariant?.id,
+            source: 'PURCHASE',
+            stripeCheckoutSessionId: session.id,
+            paidAmountCents,
+            paidCurrency,
+          })
+        }
       } else if (product.type === 'BUNDLE') {
         // Atomic: create bundle + included product entitlements in one transaction
         await prisma.$transaction(async (tx) => {
           await createEntitlement({
             userId,
             productId,
-            source: 'PURCHASE',
+            priceVariantId: priceVariant?.id,
+            source: isVariantRecurring ? 'SUBSCRIPTION' : 'PURCHASE',
+            ...(isVariantRecurring
+              ? { stripeSubscriptionId: session.subscription as string }
+              : {}),
             stripeCheckoutSessionId: session.id,
             paidAmountCents,
             paidCurrency,
@@ -110,6 +146,7 @@ export async function POST(req: Request) {
         await createEntitlement({
           userId,
           productId,
+          priceVariantId: priceVariant?.id,
           source: 'PURCHASE',
           stripeCheckoutSessionId: session.id,
           paidAmountCents,

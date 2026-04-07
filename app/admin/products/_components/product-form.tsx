@@ -52,6 +52,7 @@ import {
 } from '../actions'
 import { createContentAction } from '../../content/actions'
 import { VideoUploader } from '@/components/video-uploader'
+import { PriceVariantsSection, type PriceVariant } from './price-variants-section'
 import {
   ArrowUp,
   ArrowDown,
@@ -136,6 +137,7 @@ type Product = {
   courseLessons: CourseLesson[]
   modules: CourseModule[]
   bundleItems: BundleItem[]
+  priceVariants?: PriceVariant[]
 }
 
 type AvailableProduct = {
@@ -1235,6 +1237,22 @@ export function ProductForm({
           </CardContent>
         </Card>
       )}
+
+      {/* Price Variants (SUBSCRIPTION + BUNDLE in edit mode) */}
+      {(formData.type === 'SUBSCRIPTION' || formData.type === 'BUNDLE') &&
+        mode === 'edit' &&
+        initialData && (
+          <PriceVariantsSection
+            productId={initialData.id}
+            initialVariants={(initialData.priceVariants ?? []).map((v) => ({
+              ...v,
+              description: v.description ?? null,
+              interval: v.interval ?? null,
+              trialDays: v.trialDays ?? null,
+              stripePriceId: v.stripePriceId ?? null,
+            }))}
+          />
+        )}
 
       {/* Stripe Sync (edit mode only) */}
       {mode === 'edit' && initialData && (

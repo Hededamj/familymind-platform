@@ -19,6 +19,7 @@ export async function createEntitlement(
     expiresAt?: Date
     paidAmountCents?: number
     paidCurrency?: string
+    priceVariantId?: string
   },
   tx?: Parameters<Parameters<typeof prisma.$transaction>[0]>[0]
 ) {
@@ -29,7 +30,7 @@ export async function createEntitlement(
 export async function getUserEntitlements(userId: string) {
   return prisma.entitlement.findMany({
     where: { userId, ...activeEntitlementFilter },
-    include: { product: true },
+    include: { product: true, priceVariant: true },
   })
 }
 
@@ -45,16 +46,31 @@ export async function canAccessContent(
   if (!content) return false
   if (content.isFree || content.accessLevel === 'FREE') return true
 
-  // Check if user has active subscription for SUBSCRIPTION content
+  // Check if user has active subscription for SUBSCRIPTION content.
+  // SUBSCRIPTION-products may have bundleItems — if so, the subscription only
+  // grants access to content inside those scoped products. If no bundleItems,
+  // it's a "everything" subscription (legacy behavior).
   if (content.accessLevel === 'SUBSCRIPTION') {
-    const subEntitlement = await prisma.entitlement.findFirst({
+    const subEntitlements = await prisma.entitlement.findMany({
       where: {
         userId,
         ...activeEntitlementFilter,
         product: { type: 'SUBSCRIPTION' },
       },
+      include: { product: { include: { bundleItems: true } } },
     })
-    if (subEntitlement) return true
+    for (const ent of subEntitlements) {
+      if (ent.product.bundleItems.length === 0) {
+        // Unscoped subscription — grants access to all SUBSCRIPTION content
+        return true
+      }
+      // Scoped subscription — only content inside the bundled products
+      const bundledIds = ent.product.bundleItems.map((bi) => bi.includedProductId)
+      const hasContent = await prisma.courseLesson.findFirst({
+        where: { productId: { in: bundledIds }, contentUnitId },
+      })
+      if (hasContent) return true
+    }
   }
 
   // Check if user owns a product containing this content
