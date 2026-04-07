@@ -64,12 +64,21 @@ export async function canAccessContent(
         // Unscoped subscription — grants access to all SUBSCRIPTION content
         return true
       }
+      // Direct contentUnit reference inside bundle items
+      const directHit = ent.product.bundleItems.some(
+        (bi) => bi.includedContentUnitId === contentUnitId
+      )
+      if (directHit) return true
       // Scoped subscription — only content inside the bundled products
-      const bundledIds = ent.product.bundleItems.map((bi) => bi.includedProductId)
-      const hasContent = await prisma.courseLesson.findFirst({
-        where: { productId: { in: bundledIds }, contentUnitId },
-      })
-      if (hasContent) return true
+      const bundledIds = ent.product.bundleItems
+        .map((bi) => bi.includedProductId)
+        .filter((id): id is string => id !== null)
+      if (bundledIds.length > 0) {
+        const hasContent = await prisma.courseLesson.findFirst({
+          where: { productId: { in: bundledIds }, contentUnitId },
+        })
+        if (hasContent) return true
+      }
     }
   }
 
@@ -112,9 +121,16 @@ export async function canAccessContent(
     include: { product: { include: { bundleItems: true } } },
   })
   if (bundleEntitlements.length > 0) {
-    const allBundledProductIds = bundleEntitlements.flatMap((be) =>
-      be.product.bundleItems.map((bi) => bi.includedProductId)
+    // Direct contentUnit reference inside bundle items
+    const directHit = bundleEntitlements.some((be) =>
+      be.product.bundleItems.some(
+        (bi) => bi.includedContentUnitId === contentUnitId
+      )
     )
+    if (directHit) return true
+    const allBundledProductIds = bundleEntitlements
+      .flatMap((be) => be.product.bundleItems.map((bi) => bi.includedProductId))
+      .filter((id): id is string => id !== null)
     if (allBundledProductIds.length > 0) {
       const hasContent = await prisma.courseLesson.findFirst({
         where: { productId: { in: allBundledProductIds }, contentUnitId },
