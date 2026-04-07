@@ -25,6 +25,7 @@ export interface WeeklyFocus {
 }
 
 export async function getCheckInPrompt(userId: string): Promise<string> {
+  // getUserActiveJourney is React-cached, so this is free if already fetched
   const activeJourney = await getUserActiveJourney(userId)
 
   if (activeJourney) {
@@ -35,21 +36,21 @@ export async function getCheckInPrompt(userId: string): Promise<string> {
     return `Hvordan går det med ${activeJourney.journey.title}?`
   }
 
-  // No active journey — check for completed journey
-  const completedJourney = await prisma.userJourney.findFirst({
-    where: { userId, status: 'COMPLETED' },
-    orderBy: { completedAt: 'desc' },
-  })
+  // Parallelize completed journey + profile lookup (independent queries)
+  const [completedJourney, profile] = await Promise.all([
+    prisma.userJourney.findFirst({
+      where: { userId, status: 'COMPLETED' },
+      orderBy: { completedAt: 'desc' },
+    }),
+    prisma.userProfile.findUnique({
+      where: { userId },
+      select: { primaryChallengeTagId: true },
+    }),
+  ])
 
   if (completedJourney) {
     return 'Tillykke med at gennemføre dit forløb! Hvad er dit næste mål?'
   }
-
-  // No journey — check profile for challenge tag
-  const profile = await prisma.userProfile.findUnique({
-    where: { userId },
-    select: { primaryChallengeTagId: true },
-  })
 
   if (!profile) {
     return 'Velkommen! Hvordan har du det i dag?'
@@ -180,6 +181,7 @@ export async function getWeeklyFocus(userId: string): Promise<WeeklyFocus | null
 }
 
 export async function getDashboardState(userId: string) {
+  // First parallel batch — fetch independent data + activeJourney (cached)
   const [activeJourney, inProgressCourses, recommendations, recentlyCompleted] =
     await Promise.all([
       getUserActiveJourney(userId),
@@ -196,7 +198,6 @@ export async function getDashboardState(userId: string) {
   let journeyProgress: Awaited<ReturnType<typeof getJourneyProgress>> | null = null
 
   if (activeJourney && activeJourney.currentDay) {
-    journeyProgress = await getJourneyProgress(activeJourney.id)
     stateKey = inProgressCourses.length > 0 ? 'active_journey_plus_courses' : 'active_journey'
   } else if (inProgressCourses.length > 0) {
     stateKey = 'no_journey_has_courses'
@@ -206,15 +207,19 @@ export async function getDashboardState(userId: string) {
     stateKey = 'new_user'
   }
 
-  // Load dashboard message for this state
-  const message = await prisma.dashboardMessage.findUnique({ where: { stateKey } })
+  // Final parallel batch — message, personalized fields, and journeyProgress all together
+  const [message, checkInPrompt, weeklyFocus, personalizedWelcome, journeyProgressResult] =
+    await Promise.all([
+      prisma.dashboardMessage.findUnique({ where: { stateKey } }),
+      getCheckInPrompt(userId),
+      getWeeklyFocus(userId),
+      getPersonalizedWelcome(userId, stateKey),
+      activeJourney && activeJourney.currentDay
+        ? getJourneyProgress(activeJourney.id)
+        : Promise.resolve(null),
+    ])
 
-  // Resolve all personalized fields in parallel
-  const [checkInPrompt, weeklyFocus, personalizedWelcome] = await Promise.all([
-    getCheckInPrompt(userId),
-    getWeeklyFocus(userId),
-    getPersonalizedWelcome(userId, stateKey),
-  ])
+  journeyProgress = journeyProgressResult
 
   return {
     stateKey,

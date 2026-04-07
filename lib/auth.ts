@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { getOrCreateUser } from '@/lib/services/user.service'
 import { redirect } from 'next/navigation'
@@ -5,8 +6,11 @@ import { redirect } from 'next/navigation'
 /**
  * Get current user from Supabase session, creating DB user if needed.
  * Returns null if not authenticated.
+ *
+ * Wrapped with React cache() so multiple calls within the same request
+ * deduplicate to a single Supabase + DB lookup.
  */
-export async function getCurrentUser() {
+export const getCurrentUser = cache(async () => {
   const supabase = await createClient()
   const { data: { user: supabaseUser } } = await supabase.auth.getUser()
 
@@ -19,7 +23,7 @@ export async function getCurrentUser() {
   })
 
   return user
-}
+})
 
 /**
  * Require authentication. Redirects to /login if not authenticated.

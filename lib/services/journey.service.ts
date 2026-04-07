@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import { prisma } from '@/lib/prisma'
 import { assignUserToCohort } from './community.service'
 import { checkAndNotifyMilestones, sendDayCompleteNotification, sendJourneyCompleteNotification } from './engagement.service'
@@ -213,7 +214,7 @@ export async function startJourney(userId: string, journeyId: string) {
   })
 }
 
-export async function getUserActiveJourney(userId: string) {
+export const getUserActiveJourney = cache(async (userId: string) => {
   return prisma.userJourney.findFirst({
     where: { userId, status: 'ACTIVE' },
     include: {
@@ -237,7 +238,7 @@ export async function getUserActiveJourney(userId: string) {
       checkIns: true,
     },
   })
-}
+})
 
 export async function completeDay(userJourneyId: string, dayId: string, checkInOptionId: string, reflection?: string) {
   const result = await prisma.$transaction(async (tx) => {
