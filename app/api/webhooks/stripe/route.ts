@@ -31,13 +31,8 @@ export async function POST(req: Request) {
   }
 
   let event
-
   try {
-    event = getStripe().webhooks.constructEvent(
-      body,
-      signature,
-      webhookSecret
-    )
+    event = getStripe().webhooks.constructEvent(body, signature, webhookSecret)
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'
     console.error(`Webhook signature verification failed: ${message}`)
@@ -47,116 +42,46 @@ export async function POST(req: Request) {
     )
   }
 
-  // Handle webhook events
   switch (event.type) {
     case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session
       const userId = session.metadata?.userId
-      const productId = session.metadata?.productId
       const priceVariantId = session.metadata?.priceVariantId
 
-      if (!userId || !productId) break
+      if (!userId || !priceVariantId) break
 
-      // Look up variant if provided
-      let priceVariant: Awaited<ReturnType<typeof prisma.priceVariant.findUnique>> = null
-      if (priceVariantId) {
-        const parsed = z.string().uuid().safeParse(priceVariantId)
-        if (parsed.success) {
-          priceVariant = await prisma.priceVariant.findUnique({
-            where: { id: parsed.data },
-          })
-        }
-      }
+      const parsedVariant = z.string().uuid().safeParse(priceVariantId)
+      if (!parsedVariant.success) break
 
-      // Log connected account for debugging
-      if (event.account) {
-        console.log(`Checkout from connected account: ${event.account}`)
-      }
-
-      const product = await prisma.product.findUnique({
-        where: { id: productId },
-        include: { bundleItems: true },
+      const variant = await prisma.priceVariant.findUnique({
+        where: { id: parsedVariant.data },
       })
-      if (!product) break
+      if (!variant) break
 
-      // Idempotency: check if this checkout session was already processed
-      const existingEntitlement = await prisma.entitlement.findUnique({
+      // Idempotency
+      const existing = await prisma.entitlement.findUnique({
         where: { stripeCheckoutSessionId: session.id },
       })
-      if (existingEntitlement) break // Already processed
+      if (existing) break
 
       const paidAmountCents = session.amount_total ?? undefined
       const paidCurrency = session.currency?.toUpperCase() ?? undefined
+      const isRecurring = variant.billingType === 'recurring'
 
-      // Determine source: variant billingType wins, fallback to product type
-      const isVariantRecurring = priceVariant
-        ? priceVariant.billingType === 'recurring'
-        : product.type === 'SUBSCRIPTION'
+      await createEntitlement({
+        userId,
+        courseId: variant.courseId ?? undefined,
+        bundleId: variant.bundleId ?? undefined,
+        priceVariantId: variant.id,
+        source: isRecurring ? 'SUBSCRIPTION' : 'PURCHASE',
+        ...(isRecurring
+          ? { stripeSubscriptionId: session.subscription as string }
+          : {}),
+        stripeCheckoutSessionId: session.id,
+        paidAmountCents,
+        paidCurrency,
+      })
 
-      if (product.type === 'SUBSCRIPTION') {
-        // SUBSCRIPTION-product: variant may be one_time (lifetime) or recurring
-        if (isVariantRecurring) {
-          await createEntitlement({
-            userId,
-            productId,
-            priceVariantId: priceVariant?.id,
-            source: 'SUBSCRIPTION',
-            stripeSubscriptionId: session.subscription as string,
-            stripeCheckoutSessionId: session.id,
-            paidAmountCents,
-            paidCurrency,
-          })
-        } else {
-          // Lifetime / one-time variant on a SUBSCRIPTION-type product
-          await createEntitlement({
-            userId,
-            productId,
-            priceVariantId: priceVariant?.id,
-            source: 'PURCHASE',
-            stripeCheckoutSessionId: session.id,
-            paidAmountCents,
-            paidCurrency,
-          })
-        }
-      } else if (product.type === 'BUNDLE') {
-        // Atomic: create bundle + included product entitlements in one transaction
-        await prisma.$transaction(async (tx) => {
-          await createEntitlement({
-            userId,
-            productId,
-            priceVariantId: priceVariant?.id,
-            source: isVariantRecurring ? 'SUBSCRIPTION' : 'PURCHASE',
-            ...(isVariantRecurring
-              ? { stripeSubscriptionId: session.subscription as string }
-              : {}),
-            stripeCheckoutSessionId: session.id,
-            paidAmountCents,
-            paidCurrency,
-          }, tx)
-          for (const item of product.bundleItems) {
-            // Skip direct ContentUnit-references — access granted via canAccessContent
-            if (!item.includedProductId) continue
-            await createEntitlement({
-              userId,
-              productId: item.includedProductId,
-              source: 'PURCHASE',
-            }, tx)
-          }
-        })
-      } else {
-        // For COURSE and SINGLE
-        await createEntitlement({
-          userId,
-          productId,
-          priceVariantId: priceVariant?.id,
-          source: 'PURCHASE',
-          stripeCheckoutSessionId: session.id,
-          paidAmountCents,
-          paidCurrency,
-        })
-      }
-
-      // Increment discount code usage
       const discountCodeId = session.metadata?.discountCodeId
       if (discountCodeId) {
         const parsed = z.string().uuid().safeParse(discountCodeId)
@@ -165,29 +90,21 @@ export async function POST(req: Request) {
             where: { id: parsed.data },
             data: { currentUses: { increment: 1 } },
           })
-        } else {
-          console.warn(`Invalid discountCodeId in checkout metadata: ${discountCodeId}`)
         }
       }
-
       break
     }
 
     case 'customer.subscription.updated': {
       const subscription = event.data.object as Stripe.Subscription
-
       if (subscription.status === 'active') {
         await updateEntitlementStatus(subscription.id, 'ACTIVE')
-      } else if (subscription.status === 'past_due') {
-        // Keep active for now, but could flag
-        console.log(`Subscription ${subscription.id} is past due`)
       } else if (
         subscription.status === 'canceled' ||
         subscription.status === 'unpaid'
       ) {
         await updateEntitlementStatus(subscription.id, 'CANCELLED')
       }
-
       break
     }
 
@@ -204,14 +121,12 @@ export async function POST(req: Request) {
       console.error(
         `Payment failed for invoice ${invoice.id}, subscription: ${subscriptionRef}`
       )
-      // Don't immediately revoke — Stripe will retry. Log for monitoring.
       break
     }
 
     case 'account.updated': {
       const account = event.data.object as Stripe.Account
       if (account.id) {
-        // Only sync accounts we know about — avoid API calls for unknown accounts
         const knownOrg = await prisma.organization.findFirst({
           where: { stripeAccountId: account.id },
           select: { id: true },

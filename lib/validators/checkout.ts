@@ -1,7 +1,6 @@
 import { z } from 'zod'
 
 export const createCheckoutSchema = z.object({
-  productId: z.string().uuid(),
-  priceVariantId: z.string().uuid().optional(),
+  priceVariantId: z.string().uuid(),
   discountCode: z.string().optional(),
 })

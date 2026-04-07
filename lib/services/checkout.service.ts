@@ -12,38 +12,21 @@ export async function createCheckoutSession(
   const validated = createCheckoutSchema.parse(data)
   const stripe = getStripe()
 
-  const product = await prisma.product.findUniqueOrThrow({
-    where: { id: validated.productId },
+  const variant = await prisma.priceVariant.findUnique({
+    where: { id: validated.priceVariantId },
+    include: { course: true, bundle: true },
   })
+  if (!variant) throw new Error('Ugyldig prisvariant')
+  if (!variant.isActive) throw new Error('Prisvariant er ikke aktiv')
+  if (!variant.stripePriceId)
+    throw new Error('Prisvariant er ikke synkroniseret med Stripe')
 
-  // Resolve PriceVariant if specified, otherwise fall back to legacy product price
-  let variant: Awaited<ReturnType<typeof prisma.priceVariant.findUnique>> = null
-  if (validated.priceVariantId) {
-    variant = await prisma.priceVariant.findUnique({
-      where: { id: validated.priceVariantId },
-    })
-    if (!variant || variant.productId !== product.id) {
-      throw new Error('Ugyldig prisvariant')
-    }
-    if (!variant.isActive) {
-      throw new Error('Prisvariant er ikke aktiv')
-    }
-    if (!variant.stripePriceId) {
-      throw new Error('Prisvariant er ikke synkroniseret med Stripe')
-    }
-  } else if (!product.stripePriceId) {
-    throw new Error('Product is not synced to Stripe')
-  }
+  const owner = variant.course ?? variant.bundle
+  if (!owner) throw new Error('Prisvariant har ingen ejer')
 
-  const stripePriceId = variant?.stripePriceId ?? product.stripePriceId!
-  // Determine checkout mode: variant takes precedence
-  const isRecurring = variant
-    ? variant.billingType === 'recurring'
-    : product.type === 'SUBSCRIPTION'
+  const isRecurring = variant.billingType === 'recurring'
 
-  const user = await prisma.user.findUniqueOrThrow({
-    where: { id: userId },
-  })
+  const user = await prisma.user.findUniqueOrThrow({ where: { id: userId } })
 
   // Resolve tenant's Stripe Connect account (if any)
   let stripeAccountId: string | undefined
@@ -55,36 +38,39 @@ export async function createCheckoutSession(
     if (org?.stripeAccountId && org.stripeAccountStatus === 'active') {
       stripeAccountId = org.stripeAccountId
     }
-    // If no active Connect account, fall back to platform Stripe key (no stripeAccount header)
   }
 
   let discountCouponId: string | undefined
   let discountCodeId: string | undefined
 
   if (validated.discountCode) {
-    const discount = await validateDiscountCode(
-      validated.discountCode,
-      validated.productId
-    )
+    const discount = await validateDiscountCode(validated.discountCode, {
+      courseId: variant.courseId ?? undefined,
+      bundleId: variant.bundleId ?? undefined,
+    })
     discountCouponId = discount.stripeCouponId
     discountCodeId = discount.discountId
   }
+
+  const cancelSlug = owner.slug
+  const cancelPath = variant.courseId ? `/courses/${cancelSlug}` : `/bundles/${cancelSlug}`
 
   const session = await stripe.checkout.sessions.create(
     {
       mode: isRecurring ? 'subscription' : 'payment',
       customer_email: user.email,
-      line_items: [{ price: stripePriceId, quantity: 1 }],
+      line_items: [{ price: variant.stripePriceId, quantity: 1 }],
       ...(discountCouponId ? { discounts: [{ coupon: discountCouponId }] } : {}),
-      ...(isRecurring && variant?.trialDays
+      ...(isRecurring && variant.trialDays
         ? { subscription_data: { trial_period_days: variant.trialDays } }
         : {}),
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/products/${product.slug}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}${cancelPath}`,
       metadata: {
         userId,
-        productId: product.id,
-        ...(variant ? { priceVariantId: variant.id } : {}),
+        priceVariantId: variant.id,
+        ...(variant.courseId ? { courseId: variant.courseId } : {}),
+        ...(variant.bundleId ? { bundleId: variant.bundleId } : {}),
         ...(discountCodeId ? { discountCodeId } : {}),
       },
     },
@@ -96,7 +82,7 @@ export async function createCheckoutSession(
 
 export async function validateDiscountCode(
   code: string,
-  productId: string
+  target: { courseId?: string; bundleId?: string }
 ) {
   const discount = await prisma.discountCode.findUnique({ where: { code } })
 
@@ -106,11 +92,12 @@ export async function validateDiscountCode(
     throw new Error('Rabatkoden er udl\u00f8bet')
   if (discount.maxUses && discount.currentUses >= discount.maxUses)
     throw new Error('Rabatkoden er brugt op')
-  if (
-    discount.applicableProductId &&
-    discount.applicableProductId !== productId
-  ) {
-    throw new Error('Rabatkoden g\u00e6lder ikke for dette produkt')
+
+  if (discount.applicableCourseId && discount.applicableCourseId !== target.courseId) {
+    throw new Error('Rabatkoden g\u00e6lder ikke for dette kursus')
+  }
+  if (discount.applicableBundleId && discount.applicableBundleId !== target.bundleId) {
+    throw new Error('Rabatkoden g\u00e6lder ikke for denne bundle')
   }
 
   return {
