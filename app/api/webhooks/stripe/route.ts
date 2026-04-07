@@ -58,7 +58,7 @@ export async function POST(req: Request) {
       if (!userId || !productId) break
 
       // Look up variant if provided
-      let priceVariant = null
+      let priceVariant: Awaited<ReturnType<typeof prisma.priceVariant.findUnique>> = null
       if (priceVariantId) {
         const parsed = z.string().uuid().safeParse(priceVariantId)
         if (parsed.success) {

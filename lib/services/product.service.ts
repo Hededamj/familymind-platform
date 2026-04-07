@@ -322,7 +322,7 @@ export async function syncVariantToStripe(variantId: string) {
 // PriceVariant CRUD
 export async function createPriceVariant(productId: string, data: {
   label: string
-  description?: string
+  description?: string | null
   amountCents: number
   currency?: string
   billingType: 'one_time' | 'recurring'
@@ -331,12 +331,13 @@ export async function createPriceVariant(productId: string, data: {
   trialDays?: number | null
   position?: number
   isHighlighted?: boolean
+  isActive?: boolean
 }) {
   return prisma.priceVariant.create({
     data: {
       productId,
       label: data.label,
-      description: data.description,
+      description: data.description ?? null,
       amountCents: data.amountCents,
       currency: data.currency ?? 'DKK',
       billingType: data.billingType,
@@ -345,6 +346,7 @@ export async function createPriceVariant(productId: string, data: {
       trialDays: data.trialDays ?? null,
       position: data.position ?? 0,
       isHighlighted: data.isHighlighted ?? false,
+      isActive: data.isActive ?? true,
     },
   })
 }
