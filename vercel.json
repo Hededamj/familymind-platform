@@ -1,4 +1,5 @@
 {
+  "regions": ["arn1"],
   "crons": [
     { "path": "/api/cron/engagement", "schedule": "0 7 * * *" },
     { "path": "/api/cron/reengagement", "schedule": "0 8 * * *" },
