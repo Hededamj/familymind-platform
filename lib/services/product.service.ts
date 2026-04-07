@@ -219,6 +219,7 @@ export async function updateProductImages(id: string, data: { coverImageUrl?: st
 export async function syncToStripe(productId: string) {
   const product = await prisma.product.findUniqueOrThrow({
     where: { id: productId },
+    include: { priceVariants: true },
   })
   const stripe = getStripe()
 
@@ -235,8 +236,8 @@ export async function syncToStripe(productId: string) {
     })
   }
 
+  // Legacy single-price sync — keep for backwards compatibility
   if (product.stripePriceId) {
-    // Can't update price amount — archive old and create new
     await stripe.prices.update(product.stripePriceId, { active: false })
   }
 
@@ -249,11 +250,149 @@ export async function syncToStripe(productId: string) {
       : {}),
   })
 
-  return prisma.product.update({
+  await prisma.product.update({
     where: { id: productId },
     data: {
       stripeProductId: stripeProduct.id,
       stripePriceId: stripePrice.id,
     },
   })
+
+  // Sync each variant that doesn't yet have a stripePriceId
+  for (const variant of product.priceVariants) {
+    if (variant.stripePriceId) continue
+    await syncVariantToStripe(variant.id)
+  }
+
+  return prisma.product.findUniqueOrThrow({
+    where: { id: productId },
+    include: { priceVariants: true },
+  })
+}
+
+export async function syncVariantToStripe(variantId: string) {
+  const variant = await prisma.priceVariant.findUniqueOrThrow({
+    where: { id: variantId },
+    include: { product: true },
+  })
+
+  if (variant.stripePriceId) {
+    return variant
+  }
+
+  const stripe = getStripe()
+
+  // Ensure parent product is synced
+  let stripeProductId = variant.product.stripeProductId
+  if (!stripeProductId) {
+    const created = await stripe.products.create({
+      name: variant.product.title,
+      description: variant.product.description || undefined,
+    })
+    stripeProductId = created.id
+    await prisma.product.update({
+      where: { id: variant.productId },
+      data: { stripeProductId },
+    })
+  }
+
+  const stripePrice = await stripe.prices.create({
+    product: stripeProductId,
+    unit_amount: variant.amountCents,
+    currency: variant.currency.toLowerCase(),
+    ...(variant.billingType === 'recurring' && variant.interval
+      ? {
+          recurring: {
+            interval: variant.interval,
+            interval_count: variant.intervalCount,
+          },
+        }
+      : {}),
+  })
+
+  return prisma.priceVariant.update({
+    where: { id: variantId },
+    data: { stripePriceId: stripePrice.id },
+  })
+}
+
+// PriceVariant CRUD
+export async function createPriceVariant(productId: string, data: {
+  label: string
+  description?: string
+  amountCents: number
+  currency?: string
+  billingType: 'one_time' | 'recurring'
+  interval?: 'month' | 'year' | null
+  intervalCount?: number
+  trialDays?: number | null
+  position?: number
+  isHighlighted?: boolean
+}) {
+  return prisma.priceVariant.create({
+    data: {
+      productId,
+      label: data.label,
+      description: data.description,
+      amountCents: data.amountCents,
+      currency: data.currency ?? 'DKK',
+      billingType: data.billingType,
+      interval: data.billingType === 'recurring' ? (data.interval ?? 'month') : null,
+      intervalCount: data.intervalCount ?? 1,
+      trialDays: data.trialDays ?? null,
+      position: data.position ?? 0,
+      isHighlighted: data.isHighlighted ?? false,
+    },
+  })
+}
+
+export async function updatePriceVariant(id: string, data: {
+  label?: string
+  description?: string | null
+  amountCents?: number
+  currency?: string
+  billingType?: 'one_time' | 'recurring'
+  interval?: 'month' | 'year' | null
+  intervalCount?: number
+  trialDays?: number | null
+  position?: number
+  isActive?: boolean
+  isHighlighted?: boolean
+}) {
+  // If amount changed, archive old stripePriceId so a new one is created on next sync
+  const existing = await prisma.priceVariant.findUniqueOrThrow({ where: { id } })
+  const amountChanged = data.amountCents !== undefined && data.amountCents !== existing.amountCents
+  const billingChanged =
+    (data.billingType !== undefined && data.billingType !== existing.billingType) ||
+    (data.interval !== undefined && data.interval !== existing.interval) ||
+    (data.intervalCount !== undefined && data.intervalCount !== existing.intervalCount)
+
+  if ((amountChanged || billingChanged) && existing.stripePriceId) {
+    try {
+      const stripe = getStripe()
+      await stripe.prices.update(existing.stripePriceId, { active: false })
+    } catch (err) {
+      console.warn('Failed to archive stripe price', err)
+    }
+  }
+
+  return prisma.priceVariant.update({
+    where: { id },
+    data: {
+      ...data,
+      ...(amountChanged || billingChanged ? { stripePriceId: null } : {}),
+    },
+  })
+}
+
+export async function deletePriceVariant(id: string) {
+  const refs = await prisma.entitlement.count({ where: { priceVariantId: id } })
+  if (refs > 0) {
+    throw new Error(
+      'Variant kan ikke slettes — der findes ' +
+        refs +
+        ' aktive entitlements. Sæt isActive = false i stedet.'
+    )
+  }
+  return prisma.priceVariant.delete({ where: { id } })
 }
