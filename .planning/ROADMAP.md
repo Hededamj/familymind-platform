@@ -139,7 +139,7 @@ Plans:
 
 Plans:
 - [x] 09-01-PLAN.md — Cover image in authenticated course header (COURSE-03)
-- [ ] 09-02-PLAN.md — CourseFilteredView client wrapper with Alle/Video/Artikler/Lyd tabs (FILTER-01)
+- [x] 09-02-PLAN.md — CourseFilteredView client wrapper with Alle/Video/Artikler/Lyd tabs (FILTER-01)
 
 **UI hint**: yes
 

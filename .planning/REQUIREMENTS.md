@@ -25,7 +25,7 @@
 
 ### Filter & Bookmark
 
-- [ ] **FILTER-01**: Content-type filter tabs (Alle, Video, Artikler) filtrerer lektioner
+- [x] **FILTER-01**: Content-type filter tabs (Alle, Video, Artikler) filtrerer lektioner
 - [x] **SAVE-01**: Brugeren kan gemme/bookmark lektioner og se dem under "Gemt" i profilen
 
 ## v2 Requirements
@@ -58,7 +58,7 @@
 | COURSE-01 | Phase 7 | Complete |
 | COURSE-02 | Phase 7 | Complete |
 | COURSE-03 | Phase 9 | Complete |
-| FILTER-01 | Phase 9 | Pending |
+| FILTER-01 | Phase 9 | Complete |
 | SAVE-01 | Phase 7 | Complete |
 
 **Coverage:**
