@@ -9,7 +9,7 @@ import { getSavedLessons } from '@/lib/services/savedContent.service'
 import { getThumbnailUrl } from '@/lib/bunny'
 import { Button } from '@/components/ui/button'
 import { Check } from 'lucide-react'
-import { ChapterSection } from './_components/ChapterSection'
+import { CourseFilteredView } from './_components/CourseFilteredView'
 
 function resolveThumbnail(contentUnit: any): string | null {
   // Sanitize stored URL (some have stray \n from import bug)
@@ -75,6 +75,31 @@ export default async function CourseLandingPage({
       courseProgress.lessons.filter((l) => l.completed).map((l) => l.contentUnitId)
     )
 
+    const mapLesson = (l: any) => ({
+      id: l.contentUnit.id,
+      slug: l.contentUnit.slug,
+      title: l.contentUnit.title,
+      mediaType: l.contentUnit.mediaType,
+      durationMinutes: l.contentUnit.durationMinutes,
+      thumbnailUrl: resolveThumbnail(l.contentUnit),
+    })
+
+    const sortedModules = (product.modules ?? [])
+      .slice()
+      .sort((a: any, b: any) => a.position - b.position)
+
+    const chaptersData = sortedModules.map((module: any) => ({
+      id: module.id,
+      title: module.title,
+      lessons: lessons.filter((l: any) => l.moduleId === module.id).map(mapLesson),
+    }))
+
+    const hasModules = sortedModules.length > 0
+    const unassignedLessonsData = hasModules
+      ? lessons.filter((l: any) => !l.moduleId).map(mapLesson)
+      : lessons.map(mapLesson)
+    const unassignedTitle = hasModules ? 'Øvrige lektioner' : 'Lektioner'
+
     return (
       <div className="px-4 py-6 sm:px-8 sm:py-8">
         <div className="mx-auto w-full max-w-2xl">
@@ -133,77 +158,14 @@ export default async function CourseLandingPage({
             </div>
           </div>
 
-          {/* Chapter sections */}
-          <div className="space-y-8">
-            {/* Module-based chapters */}
-            {product.modules && product.modules.length > 0 && (
-              <>
-                {product.modules.sort((a: any, b: any) => a.position - b.position).map((module: any) => {
-                  const moduleLessons = lessons
-                    .filter((l: any) => l.moduleId === module.id)
-                    .map((l: any) => ({
-                      id: l.contentUnit.id,
-                      slug: l.contentUnit.slug,
-                      title: l.contentUnit.title,
-                      mediaType: l.contentUnit.mediaType,
-                      durationMinutes: l.contentUnit.durationMinutes,
-                      thumbnailUrl: resolveThumbnail(l.contentUnit),
-                    }))
-                  return (
-                    <ChapterSection
-                      key={module.id}
-                      title={module.title}
-                      lessons={moduleLessons}
-                      savedLessonIds={savedLessonIds}
-                      completedLessonIds={completedLessonIds}
-                      courseSlug={product.slug}
-                    />
-                  )
-                })}
-              </>
-            )}
-
-            {/* Unassigned lessons — CHAP-03 */}
-            {(() => {
-              const unassigned = lessons
-                .filter((l: any) => !l.moduleId)
-                .map((l: any) => ({
-                  id: l.contentUnit.id,
-                  slug: l.contentUnit.slug,
-                  title: l.contentUnit.title,
-                  mediaType: l.contentUnit.mediaType,
-                  durationMinutes: l.contentUnit.durationMinutes,
-                  thumbnailUrl: l.contentUnit.thumbnailUrl,
-                }))
-              return unassigned.length > 0 ? (
-                <ChapterSection
-                  title="Øvrige lektioner"
-                  lessons={unassigned}
-                  savedLessonIds={savedLessonIds}
-                  completedLessonIds={completedLessonIds}
-                  courseSlug={product.slug}
-                />
-              ) : null
-            })()}
-
-            {/* No modules fallback */}
-            {(!product.modules || product.modules.length === 0) && (
-              <ChapterSection
-                title="Lektioner"
-                lessons={lessons.map((l: any) => ({
-                  id: l.contentUnit.id,
-                  slug: l.contentUnit.slug,
-                  title: l.contentUnit.title,
-                  mediaType: l.contentUnit.mediaType,
-                  durationMinutes: l.contentUnit.durationMinutes,
-                  thumbnailUrl: l.contentUnit.thumbnailUrl,
-                }))}
-                savedLessonIds={savedLessonIds}
-                completedLessonIds={completedLessonIds}
-                courseSlug={product.slug}
-              />
-            )}
-          </div>
+          <CourseFilteredView
+            chapters={chaptersData}
+            unassignedLessons={unassignedLessonsData}
+            unassignedTitle={unassignedTitle}
+            courseSlug={product.slug}
+            savedLessonIds={Array.from(savedLessonIds)}
+            completedLessonIds={Array.from(completedLessonIds)}
+          />
         </div>
       </div>
     )
