@@ -60,6 +60,7 @@ export async function listProducts(filters?: {
         orderBy: { position: 'asc' },
       },
       journeys: { where: { isActive: true }, select: { id: true, slug: true, title: true } },
+      priceVariants: { orderBy: { position: 'asc' } },
     },
     orderBy: { createdAt: 'desc' },
   })
@@ -79,6 +80,7 @@ export async function getProduct(slug: string) {
         orderBy: { position: 'asc' },
       },
       journeys: { where: { isActive: true }, select: { id: true, slug: true, title: true } },
+      priceVariants: { orderBy: { position: 'asc' } },
     },
   })
 }
@@ -97,6 +99,7 @@ export async function getProductById(id: string) {
         orderBy: { position: 'asc' },
       },
       journeys: { where: { isActive: true }, select: { id: true, slug: true, title: true } },
+      priceVariants: { orderBy: { position: 'asc' } },
     },
   })
 }

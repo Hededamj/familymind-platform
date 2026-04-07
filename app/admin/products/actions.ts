@@ -5,6 +5,8 @@ import * as productService from '@/lib/services/product.service'
 import {
   createProductSchema,
   updateProductSchema,
+  priceVariantSchema,
+  updatePriceVariantSchema,
 } from '@/lib/validators/product'
 import { revalidatePath } from 'next/cache'
 import type { z } from 'zod'
@@ -149,4 +151,63 @@ export async function updateLandingPageAction(id: string, landingPage: Record<st
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await productService.updateProductLandingPage(id, landingPage as any)
   revalidatePath('/admin/products')
+}
+
+// ── Price Variants ──────────────────────────────────────
+
+export async function createPriceVariantAction(
+  productId: string,
+  data: z.input<typeof priceVariantSchema>
+) {
+  await requireAdmin()
+  const validated = priceVariantSchema.parse(data)
+  const variant = await productService.createPriceVariant(productId, validated)
+  // Auto-sync to Stripe (best-effort)
+  try {
+    await productService.syncVariantToStripe(variant.id)
+  } catch (err) {
+    console.warn('Variant Stripe sync failed', err)
+  }
+  revalidatePath(`/admin/products/${productId}/edit`)
+  return variant
+}
+
+export async function updatePriceVariantAction(
+  variantId: string,
+  data: z.input<typeof updatePriceVariantSchema>
+) {
+  await requireAdmin()
+  const validated = updatePriceVariantSchema.parse(data)
+  const variant = await productService.updatePriceVariant(variantId, validated)
+  try {
+    await productService.syncVariantToStripe(variantId)
+  } catch (err) {
+    console.warn('Variant Stripe sync failed', err)
+  }
+  revalidatePath(`/admin/products/${variant.productId}/edit`)
+  return variant
+}
+
+export async function deletePriceVariantAction(variantId: string) {
+  await requireAdmin()
+  try {
+    await productService.deletePriceVariant(variantId)
+    revalidatePath('/admin/products')
+    return { success: true as const }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Kunne ikke slette variant'
+    return { success: false as const, error: message }
+  }
+}
+
+export async function syncVariantToStripeAction(variantId: string) {
+  await requireAdmin()
+  try {
+    const result = await productService.syncVariantToStripe(variantId)
+    revalidatePath('/admin/products')
+    return { success: true as const, variant: result }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Stripe-synkronisering fejlede'
+    return { success: false as const, error: message }
+  }
 }

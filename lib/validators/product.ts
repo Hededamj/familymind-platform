@@ -18,6 +18,22 @@ export const reorderLessonsSchema = z.object({
   lessonIds: z.array(z.string().uuid()),
 })
 
+export const priceVariantSchema = z.object({
+  label: z.string().min(1),
+  description: z.string().optional().nullable(),
+  amountCents: z.number().int().min(0),
+  currency: z.string().default('DKK'),
+  billingType: z.enum(['one_time', 'recurring']),
+  interval: z.enum(['month', 'year']).optional().nullable(),
+  intervalCount: z.number().int().min(1).default(1),
+  trialDays: z.number().int().min(0).optional().nullable(),
+  position: z.number().int().min(0).default(0),
+  isHighlighted: z.boolean().default(false),
+  isActive: z.boolean().default(true).optional(),
+})
+
+export const updatePriceVariantSchema = priceVariantSchema.partial()
+
 export const landingPageSchema = z.object({
   subtitle: z.string().optional(),
   benefits: z.array(z.string()).optional(),
