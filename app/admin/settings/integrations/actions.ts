@@ -40,7 +40,15 @@ export async function initiateStripeConnectAction() {
   const user = await requireAdmin()
 
   if (!user.organizationId) {
-    throw new Error('Bruger tilhører ingen organisation')
+    redirect('/admin/settings/integrations?connect_error=Bruger+tilh%C3%B8rer+ingen+organisation')
+  }
+
+  // Tjek miljøvariabler før vi prøver at generere URL
+  if (!process.env.STRIPE_CONNECT_CLIENT_ID) {
+    redirect('/admin/settings/integrations?connect_error=Stripe+er+ikke+konfigureret+endnu+(STRIPE_CONNECT_CLIENT_ID+mangler).+Kontakt+udvikleren.')
+  }
+  if (!process.env.NEXT_PUBLIC_APP_URL) {
+    redirect('/admin/settings/integrations?connect_error=NEXT_PUBLIC_APP_URL+er+ikke+sat+i+miljøet')
   }
 
   // Generér CSRF-token og gem i cookie
