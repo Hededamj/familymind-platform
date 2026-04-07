@@ -2,16 +2,14 @@ import { prisma } from '@/lib/prisma'
 
 const activeEntitlementFilter = {
   status: 'ACTIVE' as const,
-  OR: [
-    { expiresAt: null },
-    { expiresAt: { gt: new Date() } },
-  ],
+  OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
 }
 
 export async function createEntitlement(
   data: {
     userId: string
-    productId: string
+    courseId?: string
+    bundleId?: string
     source: 'PURCHASE' | 'SUBSCRIPTION' | 'GIFT' | 'B2B_LICENSE'
     stripeSubscriptionId?: string
     stripeCheckoutSessionId?: string
@@ -23,6 +21,9 @@ export async function createEntitlement(
   },
   tx?: Parameters<Parameters<typeof prisma.$transaction>[0]>[0]
 ) {
+  if ((!data.courseId && !data.bundleId) || (data.courseId && data.bundleId)) {
+    throw new Error('Entitlement skal være knyttet til enten kursus eller bundle')
+  }
   const db = tx ?? prisma
   return db.entitlement.create({ data })
 }
@@ -30,8 +31,42 @@ export async function createEntitlement(
 export async function getUserEntitlements(userId: string) {
   return prisma.entitlement.findMany({
     where: { userId, ...activeEntitlementFilter },
-    include: { product: true, priceVariant: true },
+    include: { course: true, bundle: true, priceVariant: true },
   })
+}
+
+export async function hasAccessToCourse(
+  userId: string,
+  courseId: string
+): Promise<boolean> {
+  // Direct course entitlement
+  const direct = await prisma.entitlement.findFirst({
+    where: { userId, courseId, ...activeEntitlementFilter },
+  })
+  if (direct) return true
+
+  // Via bundle that contains the course
+  const viaBundle = await prisma.entitlement.findFirst({
+    where: {
+      userId,
+      ...activeEntitlementFilter,
+      bundle: { courses: { some: { courseId } } },
+    },
+  })
+  return !!viaBundle
+}
+
+export async function hasAccessToLesson(
+  userId: string,
+  lessonId: string
+): Promise<boolean> {
+  const lesson = await prisma.courseLesson.findUnique({
+    where: { id: lessonId },
+    select: { courseId: true, isFreePreview: true },
+  })
+  if (!lesson) return false
+  if (lesson.isFreePreview) return true
+  return hasAccessToCourse(userId, lesson.courseId)
 }
 
 export async function canAccessContent(
@@ -42,118 +77,14 @@ export async function canAccessContent(
     where: { id: contentUnitId },
     include: { courseLessons: true },
   })
-
   if (!content) return false
-  if (content.isFree || content.accessLevel === 'FREE') return true
+  if (content.isFree) return true
 
-  // Check if user has active subscription for SUBSCRIPTION content.
-  // SUBSCRIPTION-products may have bundleItems — if so, the subscription only
-  // grants access to content inside those scoped products. If no bundleItems,
-  // it's a "everything" subscription (legacy behavior).
-  if (content.accessLevel === 'SUBSCRIPTION') {
-    const subEntitlements = await prisma.entitlement.findMany({
-      where: {
-        userId,
-        ...activeEntitlementFilter,
-        product: { type: 'SUBSCRIPTION' },
-      },
-      include: { product: { include: { bundleItems: true } } },
-    })
-    for (const ent of subEntitlements) {
-      if (ent.product.bundleItems.length === 0) {
-        // Unscoped subscription — grants access to all SUBSCRIPTION content
-        return true
-      }
-      // Direct contentUnit reference inside bundle items
-      const directHit = ent.product.bundleItems.some(
-        (bi) => bi.includedContentUnitId === contentUnitId
-      )
-      if (directHit) return true
-      // Scoped subscription — only content inside the bundled products
-      const bundledIds = ent.product.bundleItems
-        .map((bi) => bi.includedProductId)
-        .filter((id): id is string => id !== null)
-      if (bundledIds.length > 0) {
-        const hasContent = await prisma.courseLesson.findFirst({
-          where: { productId: { in: bundledIds }, contentUnitId },
-        })
-        if (hasContent) return true
-      }
-    }
+  // Check any course this content belongs to (including free previews)
+  for (const lesson of content.courseLessons) {
+    if (lesson.isFreePreview) return true
+    if (await hasAccessToCourse(userId, lesson.courseId)) return true
   }
-
-  // Check if user owns a product containing this content
-  const productIds = content.courseLessons.map((cl) => cl.productId)
-  if (productIds.length > 0) {
-    const entitlement = await prisma.entitlement.findFirst({
-      where: {
-        userId,
-        ...activeEntitlementFilter,
-        productId: { in: productIds },
-      },
-    })
-    if (entitlement) return true
-  }
-
-  // Check standalone single product
-  if (content.isStandalone) {
-    const singleProduct = await prisma.product.findFirst({
-      where: {
-        type: 'SINGLE',
-        courseLessons: { some: { contentUnitId } },
-      },
-    })
-    if (singleProduct) {
-      const ent = await prisma.entitlement.findFirst({
-        where: { userId, productId: singleProduct.id, ...activeEntitlementFilter },
-      })
-      if (ent) return true
-    }
-  }
-
-  // Check bundle entitlements (user owns a bundle that includes a product with this content)
-  const bundleEntitlements = await prisma.entitlement.findMany({
-    where: {
-      userId,
-      ...activeEntitlementFilter,
-      product: { type: 'BUNDLE' },
-    },
-    include: { product: { include: { bundleItems: true } } },
-  })
-  if (bundleEntitlements.length > 0) {
-    // Direct contentUnit reference inside bundle items
-    const directHit = bundleEntitlements.some((be) =>
-      be.product.bundleItems.some(
-        (bi) => bi.includedContentUnitId === contentUnitId
-      )
-    )
-    if (directHit) return true
-    const allBundledProductIds = bundleEntitlements
-      .flatMap((be) => be.product.bundleItems.map((bi) => bi.includedProductId))
-      .filter((id): id is string => id !== null)
-    if (allBundledProductIds.length > 0) {
-      const hasContent = await prisma.courseLesson.findFirst({
-        where: { productId: { in: allBundledProductIds }, contentUnitId },
-      })
-      if (hasContent) return true
-    }
-  }
-
-  // Check org-level entitlements.
-  // Only SUBSCRIPTION content can be unlocked via org — COURSE/SINGLE products
-  // require individual entitlements (purchased or bundled) checked above.
-  const user = await prisma.user.findUnique({ where: { id: userId } })
-  if (user?.organizationId && content.accessLevel === 'SUBSCRIPTION') {
-    const orgSubEntitlement = await prisma.entitlement.findFirst({
-      where: {
-        organizationId: user.organizationId,
-        ...activeEntitlementFilter,
-        product: { type: 'SUBSCRIPTION' },
-      },
-    })
-    if (orgSubEntitlement) return true
-  }
-
   return false
 }
 
