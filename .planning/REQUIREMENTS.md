@@ -13,7 +13,7 @@
 - [ ] **OFF-DATA-02**: Seed data for predefinerede `CancellationReason` tags (pris, tid, fandt-alternativ, indhold-matcher-ikke, personlig-situation, forbedret, teknisk)
 - [ ] **OFF-DATA-03**: Service function `cancelSubscription()` der validerer survey er udfyldt før Stripe cancel kaldes
 - [ ] **OFF-DATA-04**: Service function `pauseSubscription()` der bruger Stripe `subscription.pause_collection` for 1/2/3 måneder
-- [ ] **OFF-DATA-05**: Outbound webhook `/api/webhooks/cancellation-outbound` der POST'er survey-data til en konfigurerbar Zapier endpoint (URL i env var `CANCELLATION_WEBHOOK_URL`) så New Zenler automation fortsat virker
+- [ ] **OFF-DATA-05**: Survey-data er tilgængelig for Phase 12 admin-dashboard via `listCancellations()` service function — ingen Zapier eller New Zenler integration. Re-engagement email automation kommer som separat fremtidig milestone via eksisterende Resend-system.
 
 ### UI — Hygge Cancel Flow
 

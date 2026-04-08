@@ -91,18 +91,18 @@ Plans:
 
 ### v1.3 Offboarding Intelligence (In Progress)
 
-**Milestone Goal:** Erstat ekstern cancellation-formular med in-app opsigelses-flow der indsamler strukturerede data (reasons, tags, feedback), understøtter pause som alternativ, og feeder data til New Zenler via eksisterende Zapier-bridge — alt med "hjemmelig hygge" empatisk tone.
+**Milestone Goal:** Erstat ekstern cancellation-formular med in-app opsigelses-flow der indsamler strukturerede data (reasons, tags, feedback), understøtter pause som alternativ, og giver admin fuldt overblik — alt med "hjemmelig hygge" empatisk tone. Ingen Zapier, ingen New Zenler. Re-engagement email automation kommer som separat fremtidig milestone.
 
-#### Phase 10: Cancel-data Foundation + Zapier Bridge
-**Goal**: The platform has a CancellationSurvey data model, predefined reason tags, Stripe subscription pause support, and an outbound webhook that feeds cancellation data to Zapier so the existing New Zenler email automation keeps working
+#### Phase 10: Cancel-data Foundation
+**Goal**: The platform has a CancellationSurvey data model, predefined reason tags, Stripe subscription pause support, and service functions that validate and persist cancellation data before calling Stripe's cancel API — no external dependencies
 **Depends on**: Phase 9
 **Requirements**: OFF-DATA-01, OFF-DATA-02, OFF-DATA-03, OFF-DATA-04, OFF-DATA-05
 **Success Criteria** (what must be TRUE):
-  1. A CancellationSurvey record can be created with userId, subscriptionId, primary reason tag, multi-tag array, feedback text, wouldReturn flag, and pause-related fields
-  2. Predefined CancellationReason tags exist (pris, tid, fandt-alternativ, indhold-matcher-ikke, personlig-situation, forbedret, teknisk) and are seeded in the database
-  3. The server action subscribeCancellationService() validates a survey is submitted before calling Stripe's subscription cancel API
-  4. Stripe subscription.pause_collection is supported via a service function that pauses for 1, 2, or 3 months
-  5. An outbound webhook POSTs cancellation data to a configurable Zapier endpoint with user email, tags, and feedback so New Zenler receives the event and triggers the existing re-engagement automation
+  1. A CancellationSurvey record can be created linked to an Entitlement with primary reason tag, multi-tag array, feedback text, wouldReturn flag, and pause-related fields
+  2. Predefined CancellationReason tags exist (pris, tid, fandt-alternativ, indhold-matcher-ikke, personlig-situation, forbedret, teknisk) and are seeded in the database via a lookup table pattern
+  3. The service function cancelSubscription() requires a survey to be submitted before calling Stripe's subscription cancel API with cancel_at_period_end: true
+  4. Stripe subscription.pause_collection is supported via a pauseSubscription() service function that pauses for 1, 2, or 3 months with behavior: 'void'
+  5. listCancellations() service function returns survey data with joins, ready for Phase 12 admin dashboard consumption
 **Plans**: TBD
 
 Plans:
