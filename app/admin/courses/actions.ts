@@ -34,6 +34,7 @@ export async function updateCourseAction(
     description: string | null
     coverImageUrl: string | null
     isActive: boolean
+    showStandalone: boolean
   }>
 ) {
   await requireAdmin()

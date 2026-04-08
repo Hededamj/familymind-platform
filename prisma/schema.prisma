@@ -277,6 +277,7 @@ model Course {
   coverImageUrl   String?
   landingPage     Json?
   isActive        Boolean        @default(true)
+  showStandalone  Boolean        @default(false)
   stripeProductId String?
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt

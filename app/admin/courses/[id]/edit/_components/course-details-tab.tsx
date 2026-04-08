@@ -20,6 +20,7 @@ type Props = {
     description: string | null
     coverImageUrl: string | null
     isActive: boolean
+    showStandalone: boolean
   }
 }
 
@@ -31,6 +32,7 @@ export function CourseDetailsTab({ course }: Props) {
   const [description, setDescription] = useState(course.description ?? '')
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(course.coverImageUrl)
   const [isActive, setIsActive] = useState(course.isActive)
+  const [showStandalone, setShowStandalone] = useState(course.showStandalone)
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -42,6 +44,7 @@ export function CourseDetailsTab({ course }: Props) {
           description: description || null,
           coverImageUrl,
           isActive,
+          showStandalone,
         })
         toast.success('Kursus opdateret')
         router.refresh()
@@ -96,9 +99,31 @@ export function CourseDetailsTab({ course }: Props) {
             label="Cover-billede"
           />
 
-          <div className="flex items-center gap-3 pt-2">
-            <Switch id="isActive" checked={isActive} onCheckedChange={setIsActive} />
-            <Label htmlFor="isActive">Aktiv</Label>
+          <div className="space-y-4 pt-2">
+            <div className="flex items-start gap-3">
+              <Switch id="isActive" checked={isActive} onCheckedChange={setIsActive} />
+              <div className="space-y-1">
+                <Label htmlFor="isActive">Aktiv</Label>
+                <p className="text-xs text-muted-foreground">
+                  Når deaktiveret er kurset utilgængeligt overalt — også i bundler.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <Switch
+                id="showStandalone"
+                checked={showStandalone}
+                onCheckedChange={setShowStandalone}
+              />
+              <div className="space-y-1">
+                <Label htmlFor="showStandalone">Vis som selvstændigt produkt</Label>
+                <p className="text-xs text-muted-foreground">
+                  Når aktiveret vises kurset i kataloget så kunder kan købe det selvstændigt.
+                  Slået fra er kurset kun tilgængeligt via bundler.
+                </p>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>

@@ -68,6 +68,7 @@ export default async function EditCoursePage({
               description: course.description,
               coverImageUrl: course.coverImageUrl,
               isActive: course.isActive,
+              showStandalone: course.showStandalone,
             }}
           />
         </TabsContent>

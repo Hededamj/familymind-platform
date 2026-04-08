@@ -24,6 +24,7 @@ export default async function BrowsePage({
 
   const courseWhere = {
     isActive: true,
+    showStandalone: true,
     ...(searchTrimmed
       ? {
           OR: [
