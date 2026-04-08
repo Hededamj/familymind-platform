@@ -61,7 +61,8 @@ type RecommendationsManagerProps = {
   rules: Rule[]
   tags: Tag[]
   journeys: Target[]
-  products: Target[]
+  courses: Target[]
+  bundles: Target[]
   rooms: RoomTarget[]
 }
 
@@ -93,7 +94,8 @@ function targetLabel(
   targetType: string,
   targetId: string,
   journeys: Target[],
-  products: Target[],
+  courses: Target[],
+  bundles: Target[],
   rooms: RoomTarget[]
 ): string {
   if (targetType === 'JOURNEY') {
@@ -104,15 +106,23 @@ function targetLabel(
     const r = rooms.find((x) => x.id === targetId)
     return r ? `Rum: ${r.name}` : 'Rum: Ukendt'
   }
-  const p = products.find((x) => x.id === targetId)
-  return p ? `Produkt: ${p.title}` : 'Produkt: Ukendt'
+  if (targetType === 'COURSE') {
+    const c = courses.find((x) => x.id === targetId)
+    return c ? `Kursus: ${c.title}` : 'Kursus: Ukendt'
+  }
+  if (targetType === 'BUNDLE') {
+    const b = bundles.find((x) => x.id === targetId)
+    return b ? `Bundel: ${b.title}` : 'Bundel: Ukendt'
+  }
+  return `${targetType}: Ukendt`
 }
 
 export function RecommendationsManager({
   rules,
   tags,
   journeys,
-  products,
+  courses,
+  bundles,
   rooms,
 }: RecommendationsManagerProps) {
   const [isPending, startTransition] = useTransition()
@@ -216,7 +226,11 @@ export function RecommendationsManager({
     ? journeys
     : targetType === 'ROOM'
       ? rooms.map((r) => ({ id: r.id, title: r.name }))
-      : products
+      : targetType === 'COURSE'
+        ? courses
+        : targetType === 'BUNDLE'
+          ? bundles
+          : []
 
   return (
     <div className="space-y-4">
@@ -302,14 +316,15 @@ export function RecommendationsManager({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="JOURNEY">Forløb</SelectItem>
-                    <SelectItem value="PRODUCT">Produkt</SelectItem>
+                    <SelectItem value="COURSE">Kursus</SelectItem>
+                    <SelectItem value="BUNDLE">Bundel</SelectItem>
                     <SelectItem value="ROOM">Rum</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1">
                 <Label className="text-xs">
-                  {targetType === 'JOURNEY' ? 'Forløb' : targetType === 'ROOM' ? 'Rum' : 'Produkt'}
+                  {targetType === 'JOURNEY' ? 'Forløb' : targetType === 'ROOM' ? 'Rum' : targetType === 'COURSE' ? 'Kursus' : 'Bundel'}
                 </Label>
                 <Select value={targetId} onValueChange={setTargetId}>
                   <SelectTrigger className="w-full">
@@ -398,7 +413,8 @@ export function RecommendationsManager({
                       rule.targetType,
                       rule.targetId,
                       journeys,
-                      products,
+                      courses,
+                      bundles,
                       rooms
                     )}
                   </TableCell>

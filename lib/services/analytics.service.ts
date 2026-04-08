@@ -341,12 +341,90 @@ export async function getConversionStats(orgId: string, period: Period) {
 
 // ─── Economy ─────────────────────────────────────────
 
-export async function getEconomyStats(_orgId: string, _period: Period) {
-  // TODO PR 2/3: re-implementér economy-tab oven på Course/Bundle + PriceVariant
+export async function getEconomyStats(orgId: string, period: Period) {
+  const since = periodToDate(period)
+  const orgFilter = orgId ? { user: { organizationId: orgId } } : {}
+
+  // Active subscription entitlements (recurring) — current MRR
+  const activeSubscriptions = await prisma.entitlement.findMany({
+    where: {
+      ...orgFilter,
+      status: 'ACTIVE',
+      source: 'SUBSCRIPTION',
+      stripeSubscriptionId: { not: null },
+    },
+    select: { paidAmountCents: true },
+  })
+  const currentMrr = activeSubscriptions.reduce((sum, e) => sum + (e.paidAmountCents ?? 0), 0)
+
+  // New subscriptions in period
+  const newSubscriptions = await prisma.entitlement.findMany({
+    where: {
+      ...orgFilter,
+      source: 'SUBSCRIPTION',
+      createdAt: { gte: since },
+    },
+    select: { paidAmountCents: true },
+  })
+  const newMrr = newSubscriptions.reduce((sum, e) => sum + (e.paidAmountCents ?? 0), 0)
+
+  // Cancelled in period
+  const cancelledSubscriptions = await prisma.entitlement.findMany({
+    where: {
+      ...orgFilter,
+      source: 'SUBSCRIPTION',
+      status: 'CANCELLED',
+      cancelledAt: { gte: since },
+    },
+    select: { paidAmountCents: true },
+  })
+  const lostMrr = cancelledSubscriptions.reduce((sum, e) => sum + (e.paidAmountCents ?? 0), 0)
+
+  // Revenue per course
+  const courseRevenue = await prisma.entitlement.groupBy({
+    by: ['courseId'],
+    where: { ...orgFilter, courseId: { not: null }, paidAmountCents: { not: null } },
+    _sum: { paidAmountCents: true },
+  })
+  const courseIds = courseRevenue.map((r) => r.courseId).filter((id): id is string => id !== null)
+  const courses = courseIds.length > 0
+    ? await prisma.course.findMany({
+        where: { id: { in: courseIds } },
+        select: { id: true, title: true },
+      })
+    : []
+  const courseTitleById = new Map(courses.map((c) => [c.id, c.title]))
+
+  // Revenue per bundle
+  const bundleRevenue = await prisma.entitlement.groupBy({
+    by: ['bundleId'],
+    where: { ...orgFilter, bundleId: { not: null }, paidAmountCents: { not: null } },
+    _sum: { paidAmountCents: true },
+  })
+  const bundleIds = bundleRevenue.map((r) => r.bundleId).filter((id): id is string => id !== null)
+  const bundles = bundleIds.length > 0
+    ? await prisma.bundle.findMany({
+        where: { id: { in: bundleIds } },
+        select: { id: true, title: true },
+      })
+    : []
+  const bundleTitleById = new Map(bundles.map((b) => [b.id, b.title]))
+
+  const revenuePerProduct = [
+    ...courseRevenue.map((r) => ({
+      title: `Kursus: ${courseTitleById.get(r.courseId!) ?? 'Ukendt'}`,
+      revenue: r._sum.paidAmountCents ?? 0,
+    })),
+    ...bundleRevenue.map((r) => ({
+      title: `Bundel: ${bundleTitleById.get(r.bundleId!) ?? 'Ukendt'}`,
+      revenue: r._sum.paidAmountCents ?? 0,
+    })),
+  ].sort((a, b) => b.revenue - a.revenue)
+
   return {
-    mrr: { current: 0, new: 0, lost: 0, net: 0 },
+    mrr: { current: currentMrr, new: newMrr, lost: lostMrr, net: newMrr - lostMrr },
     mrrTrend: [] as Array<{ week: string; total: number }>,
-    revenuePerProduct: [] as Array<{ title: string; revenue: number }>,
+    revenuePerProduct,
     keyMetrics: { avgLtv: 0, medianLifetimeDays: null as number | null, revenuePerUser: 0 },
   }
 }

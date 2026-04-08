@@ -120,7 +120,8 @@ export const createDiscountSchema = z.object({
   maxUses: z.number().int().min(1).nullable().optional(),
   validFrom: z.string().optional(),
   validUntil: z.string().nullable().optional(),
-  applicableProductId: uuid.nullable().optional(),
+  applicableCourseId: uuid.nullable().optional(),
+  applicableBundleId: uuid.nullable().optional(),
   isActive: z.boolean().optional(),
   duration: z.enum(['once', 'repeating', 'forever']).optional(),
   durationInMonths: z.number().int().min(1).max(36).nullable().optional(),
@@ -130,7 +131,8 @@ export const updateDiscountSchema = z.object({
   code: z.string().min(1).optional(),
   maxUses: z.number().int().min(1).nullable().optional(),
   validUntil: z.string().nullable().optional(),
-  applicableProductId: uuid.nullable().optional(),
+  applicableCourseId: uuid.nullable().optional(),
+  applicableBundleId: uuid.nullable().optional(),
   isActive: z.boolean().optional(),
 })
 
