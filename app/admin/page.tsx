@@ -10,6 +10,7 @@ import {
 import {
   Users,
   Package,
+  Layers,
   Map,
   MessageSquare,
   UsersRound,
@@ -24,6 +25,7 @@ export default async function AdminPage() {
   const [
     userCount,
     productCount,
+    bundleCount,
     journeyCount,
     cohortCount,
     roomCount,
@@ -32,6 +34,7 @@ export default async function AdminPage() {
   ] = await Promise.all([
     prisma.user.count(),
     prisma.course.count({ where: { isActive: true } }),
+    prisma.bundle.count({ where: { isActive: true } }),
     prisma.journey.count({ where: { isActive: true } }),
     prisma.cohort.count(),
     prisma.communityRoom.count({ where: { isArchived: false } }),
@@ -46,6 +49,7 @@ export default async function AdminPage() {
   const stats = [
     { label: 'Brugere', value: userCount, href: '/admin/users', icon: Users },
     { label: 'Kurser', value: productCount, href: '/admin/courses', icon: Package },
+    { label: 'Bundler', value: bundleCount, href: '/admin/bundles', icon: Layers },
     { label: 'Forløb', value: journeyCount, href: '/admin/journeys', icon: Map },
     { label: 'Kohorter', value: cohortCount, href: '/admin/cohorts', icon: UsersRound },
     { label: 'Rum', value: roomCount, href: '/admin/community/rooms', icon: MessageSquare },

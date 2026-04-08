@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import {
   FileText,
   Package,
+  Layers,
   Ticket,
   Map,
   Settings,
@@ -48,6 +49,7 @@ const navSections: NavSection[] = [
     label: 'Indhold',
     items: [
       { href: '/admin/courses', label: 'Kurser', icon: Package, tooltip: 'Opret og administrer kurser, moduler, lektioner og priser' },
+      { href: '/admin/bundles', label: 'Bundler', icon: Layers, tooltip: 'Saml flere kurser i en pakke med fælles pris' },
       { href: '/admin/content', label: 'Lektioner', icon: FileText, tooltip: 'Individuelle indholdsstykker — video, tekst, øvelser' },
       { href: '/admin/journeys', label: 'Forløb', icon: Map, tooltip: 'Dagbaserede forløb der guider brugeren igennem et tema' },
       { href: '/admin/discounts', label: 'Rabatkoder', icon: Ticket, tooltip: 'Procentuelle eller faste rabatter synkroniseret med Stripe' },

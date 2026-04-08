@@ -40,6 +40,7 @@ const labels: Record<string, string> = {
   new: "Opret ny",
   edit: "Rediger",
   courses: "Kurser",
+  bundles: "Bundler",
   modules: "Moduler",
   lessons: "Lektioner",
   media: "Medier",
