@@ -1,10 +1,41 @@
-# Requirements: FamilyMind MobilePay Checkout
+# Requirements: FamilyMind Platform
 
 **Defined:** 2026-04-08
+**Last milestone added:** 2026-04-08 (v1.3 Offboarding Intelligence)
+
+## v1.3 Requirements — Offboarding Intelligence
+
+**Core Value:** Indsaml strukturerede opsigelses-data i-app så vi kan tagge og re-engagere churned kunder — uden at bruge dark patterns.
+
+### Data Foundation
+
+- [ ] **OFF-DATA-01**: Prisma-model `CancellationSurvey` med userId, subscriptionId, cancelledAt, primaryReason, tags[], feedback, wouldReturn, offeredPause, pauseAccepted
+- [ ] **OFF-DATA-02**: Seed data for predefinerede `CancellationReason` tags (pris, tid, fandt-alternativ, indhold-matcher-ikke, personlig-situation, forbedret, teknisk)
+- [ ] **OFF-DATA-03**: Service function `cancelSubscription()` der validerer survey er udfyldt før Stripe cancel kaldes
+- [ ] **OFF-DATA-04**: Service function `pauseSubscription()` der bruger Stripe `subscription.pause_collection` for 1/2/3 måneder
+- [ ] **OFF-DATA-05**: Outbound webhook `/api/webhooks/cancellation-outbound` der POST'er survey-data til en konfigurerbar Zapier endpoint (URL i env var `CANCELLATION_WEBHOOK_URL`) så New Zenler automation fortsat virker
+
+### UI — Hygge Cancel Flow
+
+- [ ] **OFF-UI-01**: Ny side `/dashboard/subscription/cancel` (ikke modal) erstatter ekstern formular-link
+- [ ] **OFF-UI-02**: Step 1 viser empatisk overskrift + warm illustration i FamilyMind design system (sand, coral, DM Serif Display)
+- [ ] **OFF-UI-03**: Step 2 lader brugeren vælge reason-tag chips + valgfri fritekst feedback
+- [ ] **OFF-UI-04**: Step 3 tilbyder pause (1/2/3 måneder) som alternativ med tydelig "nej tak, opsig" knap uden guilt-trips
+- [ ] **OFF-UI-05**: Step 4 bekræfter opsigelsesdato (slutning af betalingsperiode) og gennemfører Stripe cancel
+- [ ] **OFF-UI-06**: Step 5 viser tak-besked med brugerens navn og "velkommen tilbage når du er klar" tone
+
+### Admin — Churn Analytics
+
+- [ ] **OFF-ADMIN-01**: `/admin/analytics/churn` viser søjlediagram over cancellation reasons med tællere for 7/30/90 dages vindue
+- [ ] **OFF-ADMIN-02**: Liste over nyeste feedback med bruger-info og tags
+- [ ] **OFF-ADMIN-03**: Filter churned users efter tag-kombinationer (fx "pris + har børn under 5") og eksportér som CSV
+- [ ] **OFF-ADMIN-04**: Trend-linje der viser churn rate per måned
+
+## v1.4 Requirements — MobilePay Checkout
+
 **Core Value:** Dansk-native subscription-betaling der eliminerer kort-friction og match markedsstandard
 **Source spec:** `docs/superpowers/specs/2026-04-08-mobilepay-subscription-design.md`
-
-## v1.3 Requirements
+**Status:** Planned — starts when MobilePay/Vipps API credentials are available
 
 ### Datamodel & Infrastruktur
 
@@ -77,43 +108,65 @@
 
 ## Traceability
 
+### v1.3 Offboarding Intelligence
+
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MP-DATA-01 | Phase 10 | Pending |
-| MP-DATA-02 | Phase 10 | Pending |
-| MP-DATA-03 | Phase 10 | Pending |
-| MP-DATA-04 | Phase 10 | Pending |
-| MP-DATA-05 | Phase 10 | Pending |
-| MP-CHECKOUT-01 | Phase 11 | Pending |
-| MP-CHECKOUT-02 | Phase 11 | Pending |
-| MP-CHECKOUT-03 | Phase 11 | Pending |
-| MP-CHECKOUT-04 | Phase 11 | Pending |
-| MP-CHECKOUT-05 | Phase 11 | Pending |
-| MP-WEBHOOK-01 | Phase 11 | Pending |
-| MP-WEBHOOK-02 | Phase 11 | Pending |
-| MP-WEBHOOK-03 | Phase 11 | Pending |
-| MP-WEBHOOK-04 | Phase 12 | Pending |
-| MP-WEBHOOK-05 | Phase 12 | Pending |
-| MP-CRON-01 | Phase 12 | Pending |
-| MP-CRON-02 | Phase 12 | Pending |
-| MP-CRON-03 | Phase 12 | Pending |
-| MP-CRON-04 | Phase 12 | Pending |
-| MP-ERR-01 | Phase 12 | Pending |
-| MP-ERR-02 | Phase 12 | Pending |
-| MP-ERR-03 | Phase 12 | Pending |
-| MP-ERR-04 | Phase 12 | Pending |
-| MP-ERR-05 | Phase 13 | Pending |
-| MP-ADMIN-01 | Phase 13 | Pending |
-| MP-ADMIN-02 | Phase 13 | Pending |
-| MP-ADMIN-03 | Phase 13 | Pending |
-| MP-ADMIN-04 | Phase 13 | Pending |
-| MP-USER-01 | Phase 13 | Pending |
-| MP-USER-02 | Phase 13 | Pending |
+| OFF-DATA-01 | Phase 10 | Pending |
+| OFF-DATA-02 | Phase 10 | Pending |
+| OFF-DATA-03 | Phase 10 | Pending |
+| OFF-DATA-04 | Phase 10 | Pending |
+| OFF-DATA-05 | Phase 10 | Pending |
+| OFF-UI-01 | Phase 11 | Pending |
+| OFF-UI-02 | Phase 11 | Pending |
+| OFF-UI-03 | Phase 11 | Pending |
+| OFF-UI-04 | Phase 11 | Pending |
+| OFF-UI-05 | Phase 11 | Pending |
+| OFF-UI-06 | Phase 11 | Pending |
+| OFF-ADMIN-01 | Phase 12 | Pending |
+| OFF-ADMIN-02 | Phase 12 | Pending |
+| OFF-ADMIN-03 | Phase 12 | Pending |
+| OFF-ADMIN-04 | Phase 12 | Pending |
+
+### v1.4 MobilePay Checkout
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| MP-DATA-01 | Phase 13 | Pending |
+| MP-DATA-02 | Phase 13 | Pending |
+| MP-DATA-03 | Phase 13 | Pending |
+| MP-DATA-04 | Phase 13 | Pending |
+| MP-DATA-05 | Phase 13 | Pending |
+| MP-CHECKOUT-01 | Phase 14 | Pending |
+| MP-CHECKOUT-02 | Phase 14 | Pending |
+| MP-CHECKOUT-03 | Phase 14 | Pending |
+| MP-CHECKOUT-04 | Phase 14 | Pending |
+| MP-CHECKOUT-05 | Phase 14 | Pending |
+| MP-WEBHOOK-01 | Phase 14 | Pending |
+| MP-WEBHOOK-02 | Phase 14 | Pending |
+| MP-WEBHOOK-03 | Phase 14 | Pending |
+| MP-WEBHOOK-04 | Phase 15 | Pending |
+| MP-WEBHOOK-05 | Phase 15 | Pending |
+| MP-CRON-01 | Phase 15 | Pending |
+| MP-CRON-02 | Phase 15 | Pending |
+| MP-CRON-03 | Phase 15 | Pending |
+| MP-CRON-04 | Phase 15 | Pending |
+| MP-ERR-01 | Phase 15 | Pending |
+| MP-ERR-02 | Phase 15 | Pending |
+| MP-ERR-03 | Phase 15 | Pending |
+| MP-ERR-04 | Phase 15 | Pending |
+| MP-ERR-05 | Phase 16 | Pending |
+| MP-ADMIN-01 | Phase 16 | Pending |
+| MP-ADMIN-02 | Phase 16 | Pending |
+| MP-ADMIN-03 | Phase 16 | Pending |
+| MP-ADMIN-04 | Phase 16 | Pending |
+| MP-USER-01 | Phase 16 | Pending |
+| MP-USER-02 | Phase 16 | Pending |
 
 **Coverage:**
-- v1.3 requirements: 29 total
-- Mapped to phases: 29
-- Unmapped: 0
+- v1.3 Offboarding: 15 requirements, 15 mapped
+- v1.4 MobilePay: 29 requirements, 29 mapped
+- Total unmapped: 0
 
 ## v1.2 Requirements (archived — completed)
 

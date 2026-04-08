@@ -1,13 +1,13 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.3
-milestone_name: MobilePay Checkout
+milestone_name: Offboarding Intelligence
 status: defining
 stopped_at: Milestone initialized
 last_updated: "2026-04-08T12:00:00.000Z"
 last_activity: 2026-04-08
 progress:
-  total_phases: 4
+  total_phases: 3
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -20,15 +20,15 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-04-08)
 
-**Core value:** Dansk-native subscription-betaling der fjerner kort-friction
-**Current focus:** Milestone v1.3 — MobilePay Checkout (Phases 10-13)
+**Core value:** Indsaml strukturerede opsigelses-data i-app så churned kunder kan tagges og re-engageres — uden dark patterns
+**Current focus:** Milestone v1.3 — Offboarding Intelligence (Phases 10-12)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: Not started (ready to plan Phase 10)
 Plan: —
-Status: Milestone v1.3 initialized — ready to discuss/plan Phase 10
-Last activity: 2026-04-08 — Milestone v1.3 MobilePay Checkout started
+Status: Milestone v1.3 Offboarding Intelligence defined — ready to /gsd:plan-phase 10
+Last activity: 2026-04-08 — Milestone v1.3 restructured (MobilePay → v1.4, Offboarding → v1.3)
 
 Progress: [░░░░░░░░░░] 0%
 
