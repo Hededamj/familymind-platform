@@ -59,10 +59,14 @@ export async function grantAccessAction(
   const { createEntitlement } = await import(
     '@/lib/services/entitlement.service'
   )
-  // STUB PR2: grantAccess skal støtte courseId/bundleId.
-  void validated
-  void createEntitlement
-  throw new Error('Under ombygning')
+  const result = await createEntitlement({
+    userId: validated.userId,
+    courseId: validated.courseId,
+    bundleId: validated.bundleId,
+    source: 'GIFT',
+  })
+  revalidatePath(`/admin/users/${validated.userId}`)
+  return result
 }
 
 export async function revokeEntitlementAction(
@@ -80,10 +84,22 @@ export async function revokeEntitlementAction(
   return result
 }
 
-export async function getProductsAction() {
+export async function listCoursesAndBundlesAction() {
   await requireAdmin()
-  // STUB PR2 — returnerer tom liste indtil grantAccess re-implementeres
-  return [] as Array<{ id: string; title: string; type: string }>
+  const { prisma } = await import('@/lib/prisma')
+  const [courses, bundles] = await Promise.all([
+    prisma.course.findMany({
+      where: { isActive: true },
+      select: { id: true, title: true },
+      orderBy: { title: 'asc' },
+    }),
+    prisma.bundle.findMany({
+      where: { isActive: true },
+      select: { id: true, title: true },
+      orderBy: { title: 'asc' },
+    }),
+  ])
+  return { courses, bundles }
 }
 
 export async function bulkEmailAction(

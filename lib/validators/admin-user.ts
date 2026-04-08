@@ -16,8 +16,12 @@ export const updateUserRoleSchema = z.object({
 
 export const grantAccessSchema = z.object({
   userId: z.string().uuid(),
-  productId: z.string().uuid(),
-})
+  courseId: z.string().uuid().optional(),
+  bundleId: z.string().uuid().optional(),
+}).refine(
+  (data) => (data.courseId ? !data.bundleId : !!data.bundleId),
+  { message: 'Angiv enten courseId eller bundleId, ikke begge' }
+)
 
 export const bulkEmailSchema = z.object({
   userIds: z.array(z.string().uuid()).min(1).max(100),
