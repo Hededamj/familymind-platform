@@ -296,7 +296,7 @@ Phases execute in numeric order: 10 → 11 → 12 → 13 → 14 → 15 → 16
 | 7. Kursus Data Layer + SavedContent | v1.2 | 2/2 | Complete | 2026-04-08 |
 | 8. Lektionskort + Kapitel-layout | v1.2 | 2/2 | Complete | 2026-04-06 |
 | 9. Kursus-header + Filter | v1.2 | 2/2 | Complete | 2026-04-08 |
-| 10. Cancel-data Foundation + Zapier Bridge | v1.3 | 2/2 | Complete   | 2026-04-08 |
+| 10. Cancel-data Foundation + Zapier Bridge | v1.3 | 2/2 | Complete    | 2026-04-08 |
 | 11. Hygge Cancel Flow (UI) | v1.3 | 0/? | Not started | - |
 | 12. Churn Analytics Dashboard | v1.3 | 0/? | Not started | - |
 | 13. MobilePay Core Infrastructure | v1.4 | 0/? | Not started | - |
