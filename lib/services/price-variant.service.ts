@@ -4,7 +4,7 @@ import type { BillingType, BillingInterval } from '@prisma/client'
 
 type PriceVariantInput = {
   label: string
-  description?: string
+  description?: string | null
   amountCents: number
   currency?: string
   billingType: BillingType

@@ -32,9 +32,10 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { toast } from 'sonner'
-import { Plus, Star, Trash2, RefreshCw } from 'lucide-react'
+import { Plus, Star, Trash2, RefreshCw, Pencil } from 'lucide-react'
 import {
   createPriceVariantAction,
+  updatePriceVariantAction,
   deletePriceVariantAction,
   syncVariantToStripeAction,
 } from '../../../actions'
@@ -74,7 +75,8 @@ export function BundlePricingTab({
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
-  const [showAdd, setShowAdd] = useState(false)
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [deletingVariant, setDeletingVariant] = useState<Variant | null>(null)
 
   const [label, setLabel] = useState('')
@@ -86,6 +88,7 @@ export function BundlePricingTab({
   const [isHighlighted, setIsHighlighted] = useState(false)
 
   function reset() {
+    setEditingId(null)
     setLabel('')
     setDescription('')
     setPriceDkk('')
@@ -93,6 +96,28 @@ export function BundlePricingTab({
     setIntervalChoice('month-1')
     setTrialDays('')
     setIsHighlighted(false)
+  }
+
+  function openEdit(v: Variant) {
+    setEditingId(v.id)
+    setLabel(v.label)
+    setDescription(v.description ?? '')
+    setPriceDkk((v.amountCents / 100).toString())
+    setBillingType(v.billingType)
+    if (v.billingType === 'recurring' && v.interval) {
+      if (v.interval === 'year') setIntervalChoice('year-1')
+      else if (v.intervalCount === 6) setIntervalChoice('month-6')
+      else if (v.intervalCount === 3) setIntervalChoice('month-3')
+      else setIntervalChoice('month-1')
+    }
+    setTrialDays(v.trialDays?.toString() ?? '')
+    setIsHighlighted(v.isHighlighted)
+    setDialogOpen(true)
+  }
+
+  function openNew() {
+    reset()
+    setDialogOpen(true)
   }
 
   function parseInterval(choice: IntervalOption): {
@@ -111,7 +136,7 @@ export function BundlePricingTab({
     }
   }
 
-  function handleCreate() {
+  function handleSave() {
     const dkk = parseFloat(priceDkk)
     if (!label.trim() || isNaN(dkk) || dkk < 0) {
       toast.error('Udfyld label og pris')
@@ -121,24 +146,34 @@ export function BundlePricingTab({
     const intervalData =
       billingType === 'recurring' ? parseInterval(intervalChoice) : { interval: null, intervalCount: 1 }
 
+    const payload = {
+      label,
+      description: description || null,
+      amountCents,
+      billingType,
+      interval: intervalData.interval,
+      intervalCount: intervalData.intervalCount,
+      trialDays: billingType === 'recurring' && trialDays ? parseInt(trialDays, 10) : null,
+      isHighlighted,
+    }
+
     startTransition(async () => {
       try {
-        await createPriceVariantAction(bundleId, {
-          label,
-          description: description || undefined,
-          amountCents,
-          billingType,
-          interval: intervalData.interval,
-          intervalCount: intervalData.intervalCount,
-          trialDays: billingType === 'recurring' && trialDays ? parseInt(trialDays, 10) : null,
-          isHighlighted,
-        })
-        toast.success('Prisvariant oprettet')
-        setShowAdd(false)
+        if (editingId) {
+          await updatePriceVariantAction(editingId, payload)
+          toast.success('Prisvariant opdateret')
+        } else {
+          await createPriceVariantAction(bundleId, {
+            ...payload,
+            description: payload.description ?? undefined,
+          })
+          toast.success('Prisvariant oprettet')
+        }
+        setDialogOpen(false)
         reset()
         router.refresh()
       } catch {
-        toast.error('Kunne ikke oprette prisvariant')
+        toast.error(editingId ? 'Kunne ikke opdatere prisvariant' : 'Kunne ikke oprette prisvariant')
       }
     })
   }
@@ -172,7 +207,7 @@ export function BundlePricingTab({
   return (
     <div className="space-y-6">
       <div className="flex justify-end">
-        <Button onClick={() => setShowAdd(true)}>
+        <Button onClick={openNew}>
           <Plus className="mr-2 size-4" />
           Tilføj prisvariant
         </Button>
@@ -209,6 +244,15 @@ export function BundlePricingTab({
                   <Button
                     variant="outline"
                     size="sm"
+                    onClick={() => openEdit(v)}
+                    disabled={isPending}
+                  >
+                    <Pencil className="mr-2 size-4" />
+                    Rediger
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => handleSync(v.id)}
                     disabled={isPending}
                   >
@@ -230,10 +274,10 @@ export function BundlePricingTab({
         </div>
       )}
 
-      <Dialog open={showAdd} onOpenChange={(o) => { setShowAdd(o); if (!o) reset() }}>
+      <Dialog open={dialogOpen} onOpenChange={(o) => { setDialogOpen(o); if (!o) reset() }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Tilføj prisvariant</DialogTitle>
+            <DialogTitle>{editingId ? 'Rediger prisvariant' : 'Tilføj prisvariant'}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
@@ -331,11 +375,11 @@ export function BundlePricingTab({
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowAdd(false)} disabled={isPending}>
-              Annuller
+            <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={isPending}>
+              Annullér
             </Button>
-            <Button onClick={handleCreate} disabled={isPending}>
-              {isPending ? 'Opretter...' : 'Opret'}
+            <Button onClick={handleSave} disabled={isPending}>
+              {isPending ? 'Gemmer...' : editingId ? 'Gem ændringer' : 'Opret'}
             </Button>
           </DialogFooter>
         </DialogContent>

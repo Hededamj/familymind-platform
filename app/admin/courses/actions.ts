@@ -124,7 +124,7 @@ export async function setLessonFreePreviewAction(lessonId: string, isFreePreview
 
 type PriceVariantData = {
   label: string
-  description?: string
+  description?: string | null
   amountCents: number
   billingType: BillingType
   interval?: BillingInterval | null

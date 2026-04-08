@@ -1,38 +1,14 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
-import { ArrowLeft, Check, Star } from 'lucide-react'
+import { ArrowLeft, Check } from 'lucide-react'
 import { getBundle } from '@/lib/services/bundle.service'
 import { getUserEntitlements } from '@/lib/services/entitlement.service'
 import { getCourseProgress } from '@/lib/services/progress.service'
 import { getCurrentUser } from '@/lib/auth'
-import { formatDKK } from '@/lib/format-currency'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import type { BillingInterval, BillingType } from '@prisma/client'
-
-type Variant = {
-  id: string
-  label: string
-  description: string | null
-  amountCents: number
-  currency: string
-  billingType: BillingType
-  interval: BillingInterval | null
-  intervalCount: number
-  isHighlighted: boolean
-}
-
-function billingDescription(v: Variant): string {
-  const amount = formatDKK(v.amountCents)
-  if (v.billingType === 'one_time') return `${amount} engangskøb`
-  if (v.interval === 'month' && v.intervalCount === 1) return `${amount}/md`
-  if (v.interval === 'month') return `${amount} hver ${v.intervalCount}. måned`
-  if (v.interval === 'year' && v.intervalCount === 1) return `${amount}/år`
-  if (v.interval === 'year') return `${amount} hver ${v.intervalCount}. år`
-  return amount
-}
+import { BundlePricingCard } from './_components/BundlePricingCard'
 
 export default async function BundleLandingPage({
   params,
@@ -127,8 +103,7 @@ export default async function BundleLandingPage({
   }
 
   // STATE B: ingen adgang — landingsside
-  const variants = bundle.priceVariants as Variant[]
-  const highlighted = variants.find((v) => v.isHighlighted) ?? variants[0]
+  const variants = bundle.priceVariants.filter((v) => v.isActive)
 
   return (
     <div className="container mx-auto max-w-5xl px-4 py-8">
@@ -174,60 +149,8 @@ export default async function BundleLandingPage({
             <CardHeader>
               <CardTitle>Vælg din plan</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
-              {variants.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  Der er ingen aktive prisvarianter på denne bundel endnu.
-                </p>
-              ) : (
-                variants.map((v) => {
-                  const isSelected = v.id === highlighted?.id
-                  return (
-                    <div
-                      key={v.id}
-                      className={`relative rounded-lg border p-4 ${
-                        isSelected ? 'border-primary bg-primary/5' : 'border-border'
-                      }`}
-                    >
-                      {v.isHighlighted && (
-                        <Badge className="absolute -top-2 right-3">
-                          <Star className="mr-1 size-3 fill-current" />
-                          Mest populær
-                        </Badge>
-                      )}
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <div className="font-semibold">{v.label}</div>
-                          {v.description && (
-                            <div className="text-sm text-muted-foreground">
-                              {v.description}
-                            </div>
-                          )}
-                        </div>
-                        <div className="text-right">
-                          <div className="font-bold">{billingDescription(v)}</div>
-                        </div>
-                      </div>
-                    </div>
-                  )
-                })
-              )}
-
-              {variants.length > 0 && (
-                <Button className="w-full" size="lg" disabled={!user}>
-                  {user
-                    ? highlighted?.billingType === 'recurring'
-                      ? 'Start abonnement'
-                      : 'Køb'
-                    : 'Log ind for at købe'}
-                </Button>
-              )}
-
-              {!user && (
-                <Button asChild variant="outline" className="w-full">
-                  <Link href="/login">Log ind</Link>
-                </Button>
-              )}
+            <CardContent>
+              <BundlePricingCard variants={variants} isLoggedIn={!!user} />
             </CardContent>
           </Card>
         </div>
