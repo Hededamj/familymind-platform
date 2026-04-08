@@ -12,9 +12,7 @@ export const createContentUnitSchema = z.object({
   difficulty: z.enum(['INTRODUCTORY', 'INTERMEDIATE', 'ADVANCED']).default('INTRODUCTORY'),
   ageMin: z.number().int().min(0).optional(),
   ageMax: z.number().int().min(0).optional(),
-  isStandalone: z.boolean().default(false),
   isFree: z.boolean().default(false),
-  accessLevel: z.enum(['FREE', 'SUBSCRIPTION', 'PURCHASE']).default('FREE'),
   bodyHtml: z.string().optional(),
   tagIds: z.array(z.string().uuid()).optional(),
 })
