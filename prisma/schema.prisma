@@ -144,7 +144,8 @@ model User {
   contentReports     ContentReport[]
   cookieConsents     CookieConsent[]
   tags               UserTag[]
-  savedContent       SavedContent[]
+  savedContent         SavedContent[]
+  cancellationSurveys  CancellationSurvey[]
 
   @@index([lastActiveAt])
   @@index([organizationId, createdAt])
@@ -404,7 +405,8 @@ model Entitlement {
   organization Organization? @relation(fields: [organizationId], references: [id])
   course       Course?       @relation(fields: [courseId], references: [id])
   bundle       Bundle?       @relation(fields: [bundleId], references: [id])
-  priceVariant PriceVariant? @relation(fields: [priceVariantId], references: [id])
+  priceVariant       PriceVariant?       @relation(fields: [priceVariantId], references: [id])
+  cancellationSurvey CancellationSurvey?
 
   @@index([userId, status])
   @@index([userId, status, courseId])
@@ -944,4 +946,49 @@ model UserTag {
   @@unique([userId, tagId])
   @@index([userId])
   @@index([tagId])
+}
+
+// ──────────────────────────────────────────────
+// Offboarding / Cancellation Models
+// ──────────────────────────────────────────────
+
+model CancellationReason {
+  id    String @id @default(uuid()) @db.Uuid
+  slug  String @unique
+  label String
+
+  primarySurveys CancellationSurvey[]    @relation("PrimaryReason")
+  surveyTags     CancellationSurveyTag[]
+}
+
+model CancellationSurvey {
+  id              String    @id @default(uuid()) @db.Uuid
+  userId          String    @db.Uuid
+  entitlementId   String    @unique @db.Uuid
+  submittedAt     DateTime  @default(now())
+  cancelledAt     DateTime?
+  primaryReasonId String?   @db.Uuid
+  feedback        String?
+  wouldReturn     Boolean?
+  offeredPause    Boolean   @default(false)
+  pauseAccepted   Boolean   @default(false)
+
+  user          User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entitlement   Entitlement         @relation(fields: [entitlementId], references: [id])
+  primaryReason CancellationReason? @relation("PrimaryReason", fields: [primaryReasonId], references: [id])
+  tags          CancellationSurveyTag[]
+
+  @@unique([userId, entitlementId])
+  @@index([userId, submittedAt])
+  @@index([cancelledAt])
+}
+
+model CancellationSurveyTag {
+  surveyId String @db.Uuid
+  reasonId String @db.Uuid
+
+  survey CancellationSurvey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  reason CancellationReason @relation(fields: [reasonId], references: [id])
+
+  @@id([surveyId, reasonId])
 }
