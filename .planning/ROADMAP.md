@@ -103,10 +103,11 @@ Plans:
   3. The service function cancelSubscription() requires a survey to be submitted before calling Stripe's subscription cancel API with cancel_at_period_end: true
   4. Stripe subscription.pause_collection is supported via a pauseSubscription() service function that pauses for 1, 2, or 3 months with behavior: 'void'
   5. listCancellations() service function returns survey data with joins, ready for Phase 12 admin dashboard consumption
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 10 to break down)
+- [x] 10-01-PLAN.md — CancellationSurvey/Reason Prisma models + seed reason tags
+- [ ] 10-02-PLAN.md — cancelSubscription/pauseSubscription/listCancellations services + Vitest unit tests + VALIDATION.md
 
 **UI hint**: no
 
@@ -295,7 +296,7 @@ Phases execute in numeric order: 10 → 11 → 12 → 13 → 14 → 15 → 16
 | 7. Kursus Data Layer + SavedContent | v1.2 | 2/2 | Complete | 2026-04-08 |
 | 8. Lektionskort + Kapitel-layout | v1.2 | 2/2 | Complete | 2026-04-06 |
 | 9. Kursus-header + Filter | v1.2 | 2/2 | Complete | 2026-04-08 |
-| 10. Cancel-data Foundation + Zapier Bridge | v1.3 | 0/? | Not started | - |
+| 10. Cancel-data Foundation + Zapier Bridge | v1.3 | 1/2 | In Progress|  |
 | 11. Hygge Cancel Flow (UI) | v1.3 | 0/? | Not started | - |
 | 12. Churn Analytics Dashboard | v1.3 | 0/? | Not started | - |
 | 13. MobilePay Core Infrastructure | v1.4 | 0/? | Not started | - |

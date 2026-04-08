@@ -9,8 +9,8 @@
 
 ### Data Foundation
 
-- [ ] **OFF-DATA-01**: Prisma-model `CancellationSurvey` med userId, subscriptionId, cancelledAt, primaryReason, tags[], feedback, wouldReturn, offeredPause, pauseAccepted
-- [ ] **OFF-DATA-02**: Seed data for predefinerede `CancellationReason` tags (pris, tid, fandt-alternativ, indhold-matcher-ikke, personlig-situation, forbedret, teknisk)
+- [x] **OFF-DATA-01**: Prisma-model `CancellationSurvey` med userId, subscriptionId, cancelledAt, primaryReason, tags[], feedback, wouldReturn, offeredPause, pauseAccepted
+- [x] **OFF-DATA-02**: Seed data for predefinerede `CancellationReason` tags (pris, tid, fandt-alternativ, indhold-matcher-ikke, personlig-situation, forbedret, teknisk)
 - [ ] **OFF-DATA-03**: Service function `cancelSubscription()` der validerer survey er udfyldt før Stripe cancel kaldes
 - [ ] **OFF-DATA-04**: Service function `pauseSubscription()` der bruger Stripe `subscription.pause_collection` for 1/2/3 måneder
 - [ ] **OFF-DATA-05**: Survey-data er tilgængelig for Phase 12 admin-dashboard via `listCancellations()` service function — ingen Zapier eller New Zenler integration. Re-engagement email automation kommer som separat fremtidig milestone via eksisterende Resend-system.
@@ -112,8 +112,8 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| OFF-DATA-01 | Phase 10 | Pending |
-| OFF-DATA-02 | Phase 10 | Pending |
+| OFF-DATA-01 | Phase 10 | Complete |
+| OFF-DATA-02 | Phase 10 | Complete |
 | OFF-DATA-03 | Phase 10 | Pending |
 | OFF-DATA-04 | Phase 10 | Pending |
 | OFF-DATA-05 | Phase 10 | Pending |
