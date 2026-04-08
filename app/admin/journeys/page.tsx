@@ -14,6 +14,7 @@ import {
 import { Plus } from 'lucide-react'
 import { Suspense } from 'react'
 import { AdminSearch } from '@/components/admin/admin-search'
+import { ClickableRow } from '@/components/admin/clickable-row'
 import { JourneyActions } from './_components/journey-actions'
 
 function formatDate(date: Date): string {
@@ -98,7 +99,7 @@ export default async function JourneysListPage({
             </TableHeader>
             <TableBody>
               {journeys.map((journey) => (
-                <TableRow key={journey.id}>
+                <ClickableRow key={journey.id} href={`/admin/journeys/${journey.id}/edit`}>
                   <TableCell className="font-medium">
                     {journey.title}
                   </TableCell>
@@ -125,7 +126,7 @@ export default async function JourneysListPage({
                       title={journey.title}
                     />
                   </TableCell>
-                </TableRow>
+                </ClickableRow>
               ))}
             </TableBody>
           </Table>

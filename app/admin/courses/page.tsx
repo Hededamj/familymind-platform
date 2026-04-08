@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/table'
 import { BookOpen, Plus } from 'lucide-react'
 import { AdminSearch } from '@/components/admin/admin-search'
+import { ClickableRow } from '@/components/admin/clickable-row'
 import { CourseActions } from './_components/course-actions'
 
 function formatDate(date: Date): string {
@@ -86,7 +87,7 @@ export default async function CoursesListPage({
             </TableHeader>
             <TableBody>
               {courses.map((course) => (
-                <TableRow key={course.id}>
+                <ClickableRow key={course.id} href={`/admin/courses/${course.id}/edit`}>
                   <TableCell>
                     {course.coverImageUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -117,7 +118,7 @@ export default async function CoursesListPage({
                   <TableCell>
                     <CourseActions courseId={course.id} title={course.title} />
                   </TableCell>
-                </TableRow>
+                </ClickableRow>
               ))}
             </TableBody>
           </Table>

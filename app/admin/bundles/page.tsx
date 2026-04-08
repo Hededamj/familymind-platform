@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/table'
 import { Layers, Plus } from 'lucide-react'
 import { AdminSearch } from '@/components/admin/admin-search'
+import { ClickableRow } from '@/components/admin/clickable-row'
 import { BundleActions } from './_components/bundle-actions'
 
 function formatDate(date: Date): string {
@@ -93,7 +94,7 @@ export default async function BundlesListPage({
             </TableHeader>
             <TableBody>
               {bundles.map((bundle) => (
-                <TableRow key={bundle.id}>
+                <ClickableRow key={bundle.id} href={`/admin/bundles/${bundle.id}/edit`}>
                   <TableCell>
                     {bundle.coverImageUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -124,7 +125,7 @@ export default async function BundlesListPage({
                   <TableCell>
                     <BundleActions bundleId={bundle.id} title={bundle.title} />
                   </TableCell>
-                </TableRow>
+                </ClickableRow>
               ))}
             </TableBody>
           </Table>

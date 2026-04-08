@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { ClickableRow } from '@/components/admin/clickable-row'
 
 function formatDate(date: Date): string {
   return new Intl.DateTimeFormat('da-DK', {
@@ -52,14 +53,9 @@ export default async function CohortsListPage() {
             </TableHeader>
             <TableBody>
               {cohorts.map((cohort) => (
-                <TableRow key={cohort.id}>
+                <ClickableRow key={cohort.id} href={"/admin/cohorts/" + cohort.id}>
                   <TableCell className="font-medium">
-                    <Link
-                      href={"/admin/cohorts/" + cohort.id}
-                      className="hover:underline"
-                    >
-                      {cohort.name || 'Unavngivet kohorte'}
-                    </Link>
+                    {cohort.name || 'Unavngivet kohorte'}
                   </TableCell>
                   <TableCell>
                     <Link
@@ -82,7 +78,7 @@ export default async function CohortsListPage() {
                   <TableCell className="text-muted-foreground">
                     {formatDate(cohort.createdAt)}
                   </TableCell>
-                </TableRow>
+                </ClickableRow>
               ))}
             </TableBody>
           </Table>

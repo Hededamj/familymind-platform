@@ -12,6 +12,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Plus } from 'lucide-react'
+import { ClickableRow } from '@/components/admin/clickable-row'
 import { RoomActions } from './_components/room-actions'
 
 export default async function RoomListPage() {
@@ -56,8 +57,9 @@ export default async function RoomListPage() {
             </TableHeader>
             <TableBody>
               {rooms.map((room) => (
-                <TableRow
+                <ClickableRow
                   key={room.id}
+                  href={`/admin/community/rooms/${room.id}/edit`}
                   className={room.isArchived ? 'opacity-50' : undefined}
                 >
                   <TableCell className="font-medium">
@@ -91,7 +93,7 @@ export default async function RoomListPage() {
                       isArchived={room.isArchived}
                     />
                   </TableCell>
-                </TableRow>
+                </ClickableRow>
               ))}
             </TableBody>
           </Table>

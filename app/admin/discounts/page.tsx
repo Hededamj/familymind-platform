@@ -12,6 +12,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Plus } from 'lucide-react'
+import { ClickableRow } from '@/components/admin/clickable-row'
 import { DiscountActions } from './_components/discount-actions'
 
 function formatDate(date: Date): string {
@@ -86,7 +87,7 @@ export default async function DiscountListPage() {
             </TableHeader>
             <TableBody>
               {discounts.map((discount) => (
-                <TableRow key={discount.id}>
+                <ClickableRow key={discount.id} href={`/admin/discounts/${discount.id}/edit`}>
                   <TableCell className="font-mono font-medium">
                     {discount.code}
                   </TableCell>
@@ -140,7 +141,7 @@ export default async function DiscountListPage() {
                       isActive={discount.isActive}
                     />
                   </TableCell>
-                </TableRow>
+                </ClickableRow>
               ))}
             </TableBody>
           </Table>

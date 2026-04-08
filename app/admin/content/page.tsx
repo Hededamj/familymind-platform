@@ -15,6 +15,7 @@ import { Plus, Video, Headphones, FileText, Type } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { Suspense } from 'react'
 import { AdminSearch } from '@/components/admin/admin-search'
+import { ClickableRow } from '@/components/admin/clickable-row'
 
 const BUNNY_CDN = process.env.BUNNY_CDN_HOSTNAME ?? ''
 
@@ -109,7 +110,7 @@ export default async function ContentListPage({
             </TableHeader>
             <TableBody>
               {contentUnits.map((unit) => (
-                <TableRow key={unit.id}>
+                <ClickableRow key={unit.id} href={`/admin/content/${unit.id}/edit`}>
                   <TableCell>
                     {(() => {
                       const thumb = unit.bunnyVideoId && BUNNY_CDN
@@ -160,7 +161,7 @@ export default async function ContentListPage({
                       isPublished={!!unit.publishedAt}
                     />
                   </TableCell>
-                </TableRow>
+                </ClickableRow>
               ))}
             </TableBody>
           </Table>
