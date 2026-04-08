@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ImageUploader } from '@/components/image-uploader'
 import { toast } from 'sonner'
 import { updateCourseAction } from '../../../actions'
 
@@ -28,7 +29,7 @@ export function CourseDetailsTab({ course }: Props) {
   const [title, setTitle] = useState(course.title)
   const [slug, setSlug] = useState(course.slug)
   const [description, setDescription] = useState(course.description ?? '')
-  const [coverImageUrl, setCoverImageUrl] = useState(course.coverImageUrl ?? '')
+  const [coverImageUrl, setCoverImageUrl] = useState<string | null>(course.coverImageUrl)
   const [isActive, setIsActive] = useState(course.isActive)
 
   function handleSubmit(e: React.FormEvent) {
@@ -39,7 +40,7 @@ export function CourseDetailsTab({ course }: Props) {
           title,
           slug,
           description: description || null,
-          coverImageUrl: coverImageUrl || null,
+          coverImageUrl,
           isActive,
         })
         toast.success('Kursus opdateret')
@@ -89,15 +90,11 @@ export function CourseDetailsTab({ course }: Props) {
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="coverImageUrl">Cover-billede URL</Label>
-            <Input
-              id="coverImageUrl"
-              value={coverImageUrl}
-              onChange={(e) => setCoverImageUrl(e.target.value)}
-              placeholder="https://..."
-            />
-          </div>
+          <ImageUploader
+            value={coverImageUrl}
+            onChange={setCoverImageUrl}
+            label="Cover-billede"
+          />
 
           <div className="flex items-center gap-3 pt-2">
             <Switch id="isActive" checked={isActive} onCheckedChange={setIsActive} />
