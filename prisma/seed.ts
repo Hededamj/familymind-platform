@@ -481,6 +481,26 @@ async function main() {
     },
   })
 
+  // -- Cancellation Reasons (7 lookup rows) --
+  const CANCELLATION_REASONS = [
+    { slug: 'pris',                 label: 'For dyrt' },
+    { slug: 'tid',                  label: 'Mangler tid' },
+    { slug: 'fandt-alternativ',     label: 'Fandt et alternativ' },
+    { slug: 'indhold-matcher-ikke', label: 'Indholdet passer ikke til mig' },
+    { slug: 'personlig-situation',  label: 'Personlig situation' },
+    { slug: 'forbedret',            label: 'Tingene er gået bedre' },
+    { slug: 'teknisk',              label: 'Tekniske problemer' },
+  ] as const
+
+  for (const reason of CANCELLATION_REASONS) {
+    await prisma.cancellationReason.upsert({
+      where: { slug: reason.slug },
+      update: { label: reason.label },
+      create: reason,
+    })
+  }
+  console.log(`Seeded ${CANCELLATION_REASONS.length} cancellation reasons`)
+
   console.log('Seed data created successfully')
 }
 
