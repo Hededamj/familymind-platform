@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MobilePay Checkout — 3 forslag</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #f5f5f3;
+    color: #1a1a1a;
+    margin: 0;
+    padding: 32px 16px;
+    line-height: 1.5;
+  }
+  .container { max-width: 1200px; margin: 0 auto; }
+  h1 { font-size: 28px; margin: 0 0 8px; color: #2d4a3e; }
+  .subtitle { color: #666; margin: 0 0 32px; font-size: 16px; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+  }
+  .card {
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    border: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .card.recommended { border-color: #2d4a3e; }
+  .recommended-badge {
+    background: #2d4a3e;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 6px 12px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .card-image { padding: 24px; background: #fafaf8; display: flex; justify-content: center; }
+  .card-body { padding: 20px 24px 24px; }
+  .card-body h3 { margin: 0 0 8px; font-size: 18px; color: #2d4a3e; }
+  .card-body p { margin: 0; color: #555; font-size: 14px; }
+
+  .phone {
+    width: 260px;
+    background: #fff;
+    border: 8px solid #1a1a1a;
+    border-radius: 32px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  }
+  .phone-status {
+    background: #1a1a1a;
+    color: #fff;
+    font-size: 10px;
+    padding: 4px 16px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .phone-screen {
+    background: #f7f7f5;
+    min-height: 460px;
+    padding: 14px;
+  }
+  .fm-header {
+    font-weight: 700;
+    font-size: 13px;
+    color: #2d4a3e;
+    margin-bottom: 14px;
+    text-align: center;
+  }
+  .product-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .product-title { font-weight: 600; font-size: 13px; margin-bottom: 4px; }
+  .product-price { font-size: 20px; font-weight: 700; color: #2d4a3e; margin: 6px 0; }
+  .product-desc { font-size: 11px; color: #666; line-height: 1.4; margin-bottom: 8px; }
+  .btn {
+    display: block;
+    width: 100%;
+    padding: 11px;
+    border-radius: 10px;
+    border: none;
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 6px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-mp { background: #5a78ff; color: #fff; }
+  .btn-card { background: #2d4a3e; color: #fff; }
+  .btn-outline { background: #fff; border: 1.5px solid #2d4a3e; color: #2d4a3e; }
+  .btn-row { display: flex; gap: 6px; }
+  .btn-row .btn { flex: 1; }
+  .small-link {
+    text-align: center;
+    font-size: 10px;
+    color: #5a78ff;
+    text-decoration: underline;
+    margin-top: 12px;
+  }
+  .step-label {
+    text-align: center;
+    font-size: 10px;
+    color: #888;
+    margin: 8px 0;
+  }
+  .recommendation {
+    margin-top: 32px;
+    padding: 20px 24px;
+    background: #fff;
+    border-left: 4px solid #2d4a3e;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .recommendation strong { color: #2d4a3e; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>MobilePay som subscription-betaling</h1>
+  <p class="subtitle">Tre forslag til hvor og hvordan brugeren vælger MobilePay i checkout-flowet. Mobil-mockups (mobile-first).</p>
+
+  <div class="grid">
+
+    <!-- A -->
+    <div class="card recommended">
+      <div class="recommended-badge">★ Anbefalet</div>
+      <div class="card-image">
+        <div class="phone">
+          <div class="phone-status"><span>9:41</span><span>100%</span></div>
+          <div class="phone-screen">
+            <div class="fm-header">FamilyMind</div>
+            <div class="product-card">
+              <div class="product-title">Medlemskab</div>
+              <div class="product-price">149 kr/md</div>
+              <div class="product-desc">Adgang til alle kurser og fællesskabet</div>
+              <button class="btn btn-card">Bliv medlem</button>
+            </div>
+            <div class="step-label">↓ tap CTA</div>
+            <div class="product-card" style="border: 2px solid #5a78ff;">
+              <div style="font-size:11px;font-weight:600;text-align:center;margin-bottom:10px;">Vælg betalingsmetode</div>
+              <button class="btn btn-mp">🔵 MobilePay</button>
+              <button class="btn btn-outline">💳 Kort / Apple Pay</button>
+              <div style="font-size:9px;text-align:center;color:#888;margin-top:8px;">Opsig når som helst</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <h3>A — Mellemstop med valgside</h3>
+        <p>CTA → vores egen valgside → MobilePay-app eller Stripe Checkout. Ét ekstra tap, men MobilePay får ligeværdig plads, vi ejer det visuelle, og det er nemt at tilføje flere providers senere (white label).</p>
+      </div>
+    </div>
+
+    <!-- B -->
+    <div class="card">
+      <div class="card-image">
+        <div class="phone">
+          <div class="phone-status"><span>9:41</span><span>100%</span></div>
+          <div class="phone-screen">
+            <div class="fm-header">FamilyMind</div>
+            <div class="product-card">
+              <div class="product-title">Medlemskab</div>
+              <div class="product-price">149 kr/md</div>
+              <div class="product-desc">Adgang til alle kurser og fællesskabet</div>
+              <div class="btn-row">
+                <button class="btn btn-mp">🔵 MobilePay</button>
+                <button class="btn btn-card">💳 Kort</button>
+              </div>
+              <div style="font-size:9px;text-align:center;color:#888;margin-top:8px;">Opsig når som helst</div>
+            </div>
+            <div class="product-card" style="opacity:0.55;">
+              <div class="product-title" style="font-size:12px;">Yoga for begyndere</div>
+              <div class="product-price" style="font-size:16px;">299 kr</div>
+              <div class="btn-row">
+                <button class="btn btn-mp" style="font-size:10px;padding:8px;">MobilePay</button>
+                <button class="btn btn-card" style="font-size:10px;padding:8px;">Kort</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <h3>B — To CTA'er på alle salgssider</h3>
+        <p>Begge knapper direkte på produktsiden. Nul ekstra steps, men visuelt rod på alle sider, sværere at gøre konsistent på tværs af kurser/bundles/medlemskab, og dårligere når vi senere tilføjer flere providers.</p>
+      </div>
+    </div>
+
+    <!-- C -->
+    <div class="card">
+      <div class="card-image">
+        <div class="phone">
+          <div class="phone-status"><span>9:41</span><span>100%</span></div>
+          <div class="phone-screen">
+            <div class="fm-header">FamilyMind</div>
+            <div class="product-card">
+              <div class="product-title">Medlemskab</div>
+              <div class="product-price">149 kr/md</div>
+              <div class="product-desc">Adgang til alle kurser og fællesskabet</div>
+              <button class="btn btn-mp">🔵 Bliv medlem med MobilePay</button>
+              <div class="small-link">Brug en anden betalingsmetode</div>
+            </div>
+            <div style="font-size:10px;text-align:center;color:#aaa;margin-top:20px;font-style:italic;">
+              Smart default: MobilePay på dansk mobil,<br>kort på desktop
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <h3>C — Smart default + skift-link</h3>
+        <p>CTA er allerede MobilePay (på dansk mobil). Lille link nedenunder til andre metoder. Færrest klik for flertallet, men kan føles "manipulerende" hvis vi gætter forkert, og er sværere at A/B-teste rent.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="recommendation">
+    <strong>CTO / UX-anbefaling: A.</strong> Det ekstra tap er en lille pris for at give MobilePay en ordentlig plads, fremtidssikre arkitekturen til flere providers, og gøre det white label-venligt. Vi løser hovedproblemet (kort-friction og dropoff ved kortindtastning) uden at skabe visuel rod på alle salgssider.
+  </div>
+</div>
+</body>
+</html>
