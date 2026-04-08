@@ -32,16 +32,23 @@ Forældre skal have en smooth, native-lignende mobiloplevelse der gør det nemt 
 - ✓ Personlig check-in prompt og dashboard-kontekst — v1.1
 - ✓ "Din gode uge" ugentligt fokus fra aktiv journey — v1.1
 - ✓ Visuelt redesignet dashboard med store indholdskort — v1.1
+- ✓ Visuelt rige lektionskort med thumbnails, type-badge og varighed — v1.2
+- ✓ Kapitel-sektioner med horisontal scroll af lektioner — v1.2
+- ✓ Kursus-oversigt med progress-bar og metadata — v1.2
+- ✓ Content-type filter (Alle, Video, Artikler) — v1.2
+- ✓ Bookmark/gem funktionalitet på lektioner — v1.2
 
 ### Active
 
 <!-- Current scope. Building toward these. -->
 
-- [ ] Visuelt rige lektionskort med thumbnails, type-badge og varighed
-- [ ] Kapitel-sektioner med horisontal scroll af lektioner
-- [ ] Kursus-oversigt med progress-bar og metadata
-- [ ] Content-type filter (Alle, Video, Artikler)
-- [ ] Bookmark/gem funktionalitet på lektioner
+- [ ] MobilePay som ligeværdig subscription-betaling via Vipps Recurring API v3
+- [ ] Ny valgside mellem betalingsmetoder (Stripe vs MobilePay)
+- [ ] Recurring charge-scheduler + webhook-idempotens + daglig reconciliation
+- [ ] Failed charge retry-logik + grace period + dunning-emails
+- [ ] Fallback-håndtering når Vipps API er nede
+- [ ] Admin-UI til MobilePay-agreements (se/annullér/refundér)
+- [ ] Tenant-aware MobilePay-credentials på Organization (white label-klar)
 
 ### Out of Scope
 
@@ -53,16 +60,21 @@ Forældre skal have en smooth, native-lignende mobiloplevelse der gør det nemt 
 - AI chat/assistent — Interessant men for komplekst til denne milestone
 - Admin-konfigurerbart PWA app-ikon — Parkeret til næste milestone
 
-## Current Milestone: v1.2 Kursus-visning Redesign
+## Current Milestone: v1.3 MobilePay Checkout
 
-**Goal:** Redesign kursus-siden så den er visuelt engagerende med thumbnails, varighed, type-badges og horisontal scroll pr. kapitel.
+**Goal:** Tilføj MobilePay som ligeværdig subscription-betaling parallelt med Stripe for at reducere dropoff ved kortindtastning og match dansk markedsstandard.
 
 **Target features:**
-- Visuelt rige lektionskort med thumbnails, type-badge og varighed
-- Kapitel-sektioner med horisontal scroll af lektioner
-- Kursus-oversigt med progress-bar og metadata
-- Content-type filter
-- Bookmark/gem funktionalitet
+- Vipps MobilePay Recurring API v3-integration (agreements + charges)
+- Valgside mellem Stripe og MobilePay i checkout-flowet
+- Recurring charge-scheduler via Vercel Cron + webhook-idempotens
+- Daglig reconciliation-cron som sikkerhedsnet
+- Failed charge retry-logik, grace period og dunning-emails
+- Fallback når Vipps API er nede
+- Admin-UI til MobilePay-agreements
+- Tenant-aware credentials på Organization (white label-klar)
+
+**Source of truth:** Fuldt designdokument i `docs/superpowers/specs/2026-04-08-mobilepay-subscription-design.md`
 
 ## Context
 
@@ -89,6 +101,11 @@ Forældre skal have en smooth, native-lignende mobiloplevelse der gør det nemt 
 | Tailwind 4 + shadcn/ui | Allerede i brug, god mobile-first workflow | ✓ Good |
 | Supabase Auth + Prisma ORM | Allerede i brug, service-layer pattern | ✓ Good |
 | mettehummel.dk som afsender-domæne | Ejer ikke familymind.dk | ✓ Good |
+| MobilePay via Vipps Recurring API v3 (ikke Stripe) | Stripe understøtter ikke MobilePay recurring | ✓ v1.3 |
+| Integreret i FamilyMind monorepo (ikke standalone) | Deler User/Entitlement-modeller, ingen datasync | ✓ v1.3 |
+| Ingen split payments på MobilePay | Forretning deler ikke indkomst med instruktører | ✓ v1.3 |
+| Valgside-UX mellem Stripe og MobilePay (mulighed A) | Giver MobilePay ligeværdig plads, white label-klar | ✓ v1.3 |
+| Tenant-aware MobilePay-credentials fra dag ét | Undgår migration når white label rulles ud | ✓ v1.3 |
 
 ## Evolution
 
@@ -108,4 +125,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-06 after milestone v1.2 initialization*
+*Last updated: 2026-04-08 after milestone v1.3 initialization*

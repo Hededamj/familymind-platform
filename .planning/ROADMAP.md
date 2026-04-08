@@ -4,7 +4,8 @@
 
 - ✅ **v1.0 Mobile Polish** - Phases 1-4 (shipped 2026-04-05)
 - ✅ **v1.1 Personlig Dashboard** - Phases 5-6 (shipped 2026-04-06)
-- 🚧 **v1.2 Kursus-visning Redesign** - Phases 7-9 (in progress)
+- ✅ **v1.2 Kursus-visning Redesign** - Phases 7-9 (shipped 2026-04-08)
+- 🚧 **v1.3 MobilePay Checkout** - Phases 10-13 (in progress)
 
 ## Phases
 
@@ -87,7 +88,83 @@ Plans:
 
 </details>
 
-### v1.2 Kursus-visning Redesign (In Progress)
+### v1.3 MobilePay Checkout (In Progress)
+
+**Milestone Goal:** Tilføj MobilePay som ligeværdig subscription-betaling parallelt med Stripe via Vipps Recurring API v3, integreret i platformen og tenant-aware fra start.
+
+**Source spec:** `docs/superpowers/specs/2026-04-08-mobilepay-subscription-design.md`
+
+#### Phase 10: MobilePay Core Infrastructure
+**Goal**: The platform has all data models, Vipps API client, and service-layer functions needed to create, query, and cancel MobilePay agreements and charges — with credentials ready to be configured per-tenant
+**Depends on**: Phase 9
+**Requirements**: MP-DATA-01, MP-DATA-02, MP-DATA-03, MP-DATA-04, MP-DATA-05
+**Success Criteria** (what must be TRUE):
+  1. Prisma migration adds MobilePayAgreement, MobilePayCharge, MobilePayWebhookEvent and extends Organization + Entitlement with the required columns
+  2. lib/mobilepay.ts can authenticate against Vipps sandbox with OAuth2 and cache the access token
+  3. mobilepay.service.ts can create, fetch, and cancel agreements against Vipps sandbox end-to-end (verified by integration test)
+  4. mobilepay.service.ts can create and refund charges against Vipps sandbox
+  5. Client secret is stored encrypted at rest and never logged
+**Plans**: TBD
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 10 to break down)
+
+**UI hint**: no
+
+#### Phase 11: Checkout Flow + Webhook Activation
+**Goal**: A user can choose MobilePay on a dedicated checkout page, approve an agreement in the MobilePay app, and end up with an active Entitlement — driven end-to-end by the webhook flow with full idempotency
+**Depends on**: Phase 10
+**Requirements**: MP-CHECKOUT-01, MP-CHECKOUT-02, MP-CHECKOUT-03, MP-CHECKOUT-04, MP-CHECKOUT-05, MP-WEBHOOK-01, MP-WEBHOOK-02, MP-WEBHOOK-03
+**Success Criteria** (what must be TRUE):
+  1. A user tapping "Bliv medlem" lands on /checkout/vaelg-betaling with both Stripe and MobilePay clearly visible as equal options
+  2. Selecting MobilePay on mobile deeplinks into the MobilePay app; on desktop a QR code is shown
+  3. After the user approves in MobilePay, the success page transitions to "Du er medlem" as soon as the webhook has been processed
+  4. The Entitlement is created exactly once even if Vipps delivers the same webhook multiple times
+  5. A user with an already-active subscription Entitlement cannot create a duplicate via MobilePay checkout
+**Plans**: TBD
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 11 to break down)
+
+**UI hint**: yes
+
+#### Phase 12: Recurring Charges + Failure Handling
+**Goal**: Active MobilePay agreements are charged automatically each cycle, failures are retried and communicated to the user, and the system degrades gracefully if Vipps is unavailable
+**Depends on**: Phase 11
+**Requirements**: MP-WEBHOOK-04, MP-WEBHOOK-05, MP-CRON-01, MP-CRON-02, MP-CRON-03, MP-CRON-04, MP-ERR-01, MP-ERR-02, MP-ERR-03, MP-ERR-04
+**Success Criteria** (what must be TRUE):
+  1. The daily charge cron creates MobilePay charges 2 days before nextChargeDate in batches of 20 without duplicates
+  2. A successful charge.charged webhook extends Entitlement.expiresAt and emits a receipt email
+  3. Three consecutive failed charges move the Entitlement to PAST_DUE with a configurable grace period and dunning emails
+  4. The daily reconciliation cron detects and logs any divergence between local state and Vipps API within 24 hours
+  5. If Vipps API is unavailable, the checkout page shows a fallback banner and the MobilePay button is disabled until recovery
+**Plans**: TBD
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 12 to break down)
+
+**UI hint**: no
+
+#### Phase 13: Admin UI + User Subscription Management
+**Goal**: Admins can see, cancel, and refund MobilePay agreements alongside Stripe subscriptions, users can cancel their own subscription from one unified button regardless of provider, and analytics show provider-level conversion and failure metrics
+**Depends on**: Phase 12
+**Requirements**: MP-ADMIN-01, MP-ADMIN-02, MP-ADMIN-03, MP-ADMIN-04, MP-USER-01, MP-USER-02, MP-ERR-05
+**Success Criteria** (what must be TRUE):
+  1. /admin/users/[id] has a Betaling tab that lists both Stripe and MobilePay in a unified table with provider badges
+  2. Admin can force-cancel any MobilePay agreement and issue full or partial refunds with IDOR protection
+  3. /admin/analytics shows payment-method breakdown, per-provider conversion rate, and failed charge rate
+  4. A user cancelling from "Mit abonnement" routes through the correct provider without knowing which one they used
+  5. Admin receives notifications when reconciliation finds divergence, agreements fail, or Vipps outage threshold is exceeded
+**Plans**: TBD
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 13 to break down)
+
+**UI hint**: yes
+
+---
+
+### v1.2 Kursus-visning Redesign (Shipped 2026-04-08)
 
 **Milestone Goal:** Redesign kursus-siden med visuelt rige lektionskort, kapitel-sektioner med horisontal scroll, progress-tracking og bookmark-funktionalitet.
 
@@ -146,7 +223,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 7 → 8 → 9
+Phases execute in numeric order: 10 → 11 → 12 → 13
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -156,6 +233,10 @@ Phases execute in numeric order: 7 → 8 → 9
 | 4. Navigation + PWA | v1.0 | 2/2 | Complete | 2026-04-05 |
 | 5. Dashboard Service Layer | v1.1 | 2/2 | Complete | 2026-04-06 |
 | 6. Dashboard UI Redesign | v1.1 | 2/2 | Complete | 2026-04-06 |
-| 7. Kursus Data Layer + SavedContent | v1.2 | 0/2 | Not started | - |
-| 8. Lektionskort + Kapitel-layout | v1.2 | 2/2 | Complete   | 2026-04-06 |
-| 9. Kursus-header + Filter | v1.2 | 0/2 | Not started | - |
+| 7. Kursus Data Layer + SavedContent | v1.2 | 2/2 | Complete | 2026-04-08 |
+| 8. Lektionskort + Kapitel-layout | v1.2 | 2/2 | Complete | 2026-04-06 |
+| 9. Kursus-header + Filter | v1.2 | 2/2 | Complete | 2026-04-08 |
+| 10. MobilePay Core Infrastructure | v1.3 | 0/? | Not started | - |
+| 11. Checkout Flow + Webhook Activation | v1.3 | 0/? | Not started | - |
+| 12. Recurring Charges + Failure Handling | v1.3 | 0/? | Not started | - |
+| 13. Admin UI + User Subscription Management | v1.3 | 0/? | Not started | - |

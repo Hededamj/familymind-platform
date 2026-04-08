@@ -1,34 +1,34 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.2
-milestone_name: Kursus-visning Redesign
-status: verifying
-stopped_at: Completed 09-02-PLAN.md
-last_updated: "2026-04-08T11:02:54.490Z"
+milestone: v1.3
+milestone_name: MobilePay Checkout
+status: defining
+stopped_at: Milestone initialized
+last_updated: "2026-04-08T12:00:00.000Z"
 last_activity: 2026-04-08
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 6
-  completed_plans: 6
-  percent: 100
+  total_phases: 4
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-06)
+See: .planning/PROJECT.md (updated 2026-04-08)
 
-**Core value:** Forældre skal have en smooth, native-lignende mobiloplevelse
-**Current focus:** Phase 09 — kursus-header-filter
+**Core value:** Dansk-native subscription-betaling der fjerner kort-friction
+**Current focus:** Milestone v1.3 — MobilePay Checkout (Phases 10-13)
 
 ## Current Position
 
-Phase: 09
-Plan: Not started
-Status: Phase complete — ready for verification
-Last activity: 2026-04-08
+Phase: Not started (defining requirements)
+Plan: —
+Status: Milestone v1.3 initialized — ready to discuss/plan Phase 10
+Last activity: 2026-04-08 — Milestone v1.3 MobilePay Checkout started
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -75,6 +75,10 @@ Previous milestone velocity (v1.0 + v1.1):
 | Phase 09-kursus-header-filter P02 | 2min | 2 tasks | 2 files |
 
 ## Accumulated Context
+
+### Roadmap Evolution
+
+- 2026-04-08: Milestone v1.3 MobilePay Checkout added (Phases 10-13). Source spec: docs/superpowers/specs/2026-04-08-mobilepay-subscription-design.md
 
 ### Decisions
 
