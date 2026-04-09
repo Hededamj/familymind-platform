@@ -27,7 +27,7 @@
 
 ### UI — Hygge Cancel Flow (Phase 12)
 
-- [ ] **OFF-UI-01**: Ny side `/dashboard/subscription/cancel` (ikke modal) erstatter ekstern formular-link
+- [x] **OFF-UI-01**: Ny side `/dashboard/subscription/cancel` (ikke modal) erstatter ekstern formular-link
 - [ ] **OFF-UI-02**: Step 1 viser empatisk overskrift + warm illustration + "skip survey" link direkte til bekræftelse
 - [ ] **OFF-UI-03**: Step 2 lader brugeren vælge reason-tag chips + valgfri fritekst feedback
 - [ ] **OFF-UI-04**: Step 3 dynamisk rendering af offer type baseret på `resolveEligibleOffer()` — DiscountCard, PausePicker, SupportContact, ContentSuggestions, eller RespectSkip variant
@@ -130,7 +130,7 @@
 | OFF-DATA-03 | Phase 10 | Complete |
 | OFF-DATA-04 | Phase 10 | Complete |
 | OFF-DATA-05 | Phase 10 | Complete |
-| OFF-UI-01 | Phase 11 | Pending |
+| OFF-UI-01 | Phase 11 | Complete |
 | OFF-UI-02 | Phase 11 | Pending |
 | OFF-UI-03 | Phase 11 | Pending |
 | OFF-UI-04 | Phase 11 | Pending |
