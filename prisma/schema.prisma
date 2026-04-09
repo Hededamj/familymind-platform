@@ -113,6 +113,14 @@ enum BillingInterval {
   year
 }
 
+enum RetentionOfferType {
+  DISCOUNT
+  PAUSE
+  SUPPORT
+  CONTENT_HELP
+  NONE
+}
+
 // ──────────────────────────────────────────────
 // Core Models
 // ──────────────────────────────────────────────
@@ -959,6 +967,7 @@ model CancellationReason {
 
   primarySurveys CancellationSurvey[]    @relation("PrimaryReason")
   surveyTags     CancellationSurveyTag[]
+  offerTriggers  RetentionOfferTrigger[]
 }
 
 model CancellationSurvey {
@@ -977,6 +986,7 @@ model CancellationSurvey {
   entitlement   Entitlement         @relation(fields: [entitlementId], references: [id])
   primaryReason CancellationReason? @relation("PrimaryReason", fields: [primaryReasonId], references: [id])
   tags          CancellationSurveyTag[]
+  retentionAcceptance RetentionOfferAcceptance?
 
   @@unique([userId, entitlementId])
   @@index([userId, submittedAt])
@@ -991,4 +1001,68 @@ model CancellationSurveyTag {
   reason CancellationReason @relation(fields: [reasonId], references: [id])
 
   @@id([surveyId, reasonId])
+}
+
+// ──────────────────────────────────────────────
+// Retention Offer Engine Models
+// ──────────────────────────────────────────────
+
+model RetentionOffer {
+  id              String              @id @default(uuid()) @db.Uuid
+  organizationId  String?             @db.Uuid
+  name            String
+  offerType       RetentionOfferType
+  isActive        Boolean             @default(true)
+  priority        Int                 @default(0)
+
+  maxUsesPerUser  Int                 @default(1)
+  cooldownDays    Int                 @default(365)
+
+  stripeCouponId  String?
+  durationMonths  Int?
+
+  pauseMonths     Int?
+
+  supportUrl      String?
+  supportMessage  String?
+
+  contentUrl      String?
+  contentMessage  String?
+
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  triggers        RetentionOfferTrigger[]
+  acceptances     RetentionOfferAcceptance[]
+
+  @@index([organizationId, isActive, priority])
+  @@index([offerType, isActive])
+}
+
+model RetentionOfferTrigger {
+  id                   String             @id @default(uuid()) @db.Uuid
+  offerId              String             @db.Uuid
+  cancellationReasonId String             @db.Uuid
+
+  offer              RetentionOffer     @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  cancellationReason CancellationReason @relation(fields: [cancellationReasonId], references: [id])
+
+  @@unique([offerId, cancellationReasonId])
+  @@index([cancellationReasonId])
+}
+
+model RetentionOfferAcceptance {
+  id         String             @id @default(uuid()) @db.Uuid
+  offerId    String             @db.Uuid
+  surveyId   String             @unique @db.Uuid
+  userId     String             @db.Uuid
+  acceptedAt DateTime           @default(now())
+  offerType  RetentionOfferType
+  expiresAt  DateTime?
+
+  offer  RetentionOffer     @relation(fields: [offerId], references: [id])
+  survey CancellationSurvey @relation(fields: [surveyId], references: [id])
+
+  @@index([userId, acceptedAt])
+  @@index([offerId, acceptedAt])
 }
