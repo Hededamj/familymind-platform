@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Offboarding Intelligence
-status: executing
-stopped_at: Completed 11-01-PLAN.md
-last_updated: "2026-04-09T19:53:32.842Z"
+status: verifying
+stopped_at: Completed 11-retention-offer-engine/11-02-PLAN.md
+last_updated: "2026-04-09T20:00:09.011Z"
 last_activity: 2026-04-09
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 4
-  completed_plans: 3
-  percent: 75
+  completed_plans: 4
+  percent: 100
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 
 Phase: 11 (retention-offer-engine) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-09
 
 Progress: [░░░░░░░░░░] 0%
@@ -78,6 +78,7 @@ Previous milestone velocity (v1.0 + v1.1):
 | Phase 10-offboarding-cancel-data-foundation P02 | 3min | 3 tasks | 3 files |
 | Phase 10-offboarding-cancel-data-foundation P02 | 10min | 3 tasks | 2 files |
 | Phase 11-retention-offer-engine P01 | 8 | 1 tasks | 1 files |
+| Phase 11-retention-offer-engine P02 | 15 | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -138,6 +139,10 @@ Carried from v1.0:
 - [Phase 11-retention-offer-engine]: organizationId nullable on RetentionOffer — null = platform-wide default, non-null = tenant-scoped offer
 - [Phase 11-retention-offer-engine]: surveyId @unique on RetentionOfferAcceptance as idempotency anchor — prevents duplicate Stripe calls on retry
 - [Phase 11-retention-offer-engine]: Type-specific fields as nullable columns (not JSON) for explicit TypeScript types and per-type admin validation
+- [Phase 11-retention-offer-engine]: discounts:[{coupon}] array shape for Stripe subscription update — not legacy top-level coupon string
+- [Phase 11-retention-offer-engine]: expiresAt computed locally via setMonth(now + durationMonths) — not read from Stripe API response
+- [Phase 11-retention-offer-engine]: PAUSE offer skips cancel_at_period_end reversal branch — pause_collection handles its own Stripe state
+- [Phase 11-retention-offer-engine]: resolveEligibleOffer has no organizationId filter — platform-wide offers visible to all; multi-tenant scoping deferred to Phase 13
 
 ### Pending Todos
 
@@ -151,6 +156,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-09T19:53:32.837Z
-Stopped at: Completed 11-01-PLAN.md
+Last session: 2026-04-09T20:00:09.006Z
+Stopped at: Completed 11-retention-offer-engine/11-02-PLAN.md
 Resume file: None

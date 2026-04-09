@@ -18,12 +18,12 @@
 ### Retention Offer Engine (Phase 11)
 
 - [x] **OFF-ENGINE-01**: Prisma-modeller `RetentionOffer`, `RetentionOfferTrigger`, `RetentionOfferAcceptance` med organizationId, offerType (DISCOUNT/PAUSE/SUPPORT/CONTENT_HELP/NONE), durationMonths, maxUsesPerUser, cooldownDays, og type-specifikke felter (stripeCouponId, pauseMonths, supportUrl, contentUrl)
-- [ ] **OFF-ENGINE-02**: `resolveEligibleOffer(userId, reasonSlugs)` service function returnerer højest-priority eligible offer eller null, iterating gennem candidates med `isOfferEligible()` check (maxUses, cooldown, active-offer-check)
-- [ ] **OFF-ENGINE-03**: `applyDiscountOffer()` kalder `stripe.subscriptions.update()` med discounts array og Stripe Connect account context (`{ stripeAccount: org.stripeAccountId }`) når tenant har Connect-konto
-- [ ] **OFF-ENGINE-04**: `applyPauseOffer()` genbruger Phase 10 `pauseSubscription()` men opretter `RetentionOfferAcceptance` row for tracking
-- [ ] **OFF-ENGINE-05**: Accepting any offer auto-reverses `cancel_at_period_end` flag hvis det var sat (kunden bliver, ikke cancelled)
-- [ ] **OFF-ENGINE-06**: Idempotency: andet kald til `acceptOffer` med samme surveyId returnerer eksisterende acceptance uden duplikeret Stripe-kald
-- [ ] **OFF-ENGINE-07**: Vitest unit tests for alle service functions med `vi.mock` for `@/lib/prisma` og `@/lib/stripe`
+- [x] **OFF-ENGINE-02**: `resolveEligibleOffer(userId, reasonSlugs)` service function returnerer højest-priority eligible offer eller null, iterating gennem candidates med `isOfferEligible()` check (maxUses, cooldown, active-offer-check)
+- [x] **OFF-ENGINE-03**: `applyDiscountOffer()` kalder `stripe.subscriptions.update()` med discounts array og Stripe Connect account context (`{ stripeAccount: org.stripeAccountId }`) når tenant har Connect-konto
+- [x] **OFF-ENGINE-04**: `applyPauseOffer()` genbruger Phase 10 `pauseSubscription()` men opretter `RetentionOfferAcceptance` row for tracking
+- [x] **OFF-ENGINE-05**: Accepting any offer auto-reverses `cancel_at_period_end` flag hvis det var sat (kunden bliver, ikke cancelled)
+- [x] **OFF-ENGINE-06**: Idempotency: andet kald til `acceptOffer` med samme surveyId returnerer eksisterende acceptance uden duplikeret Stripe-kald
+- [x] **OFF-ENGINE-07**: Vitest unit tests for alle service functions med `vi.mock` for `@/lib/prisma` og `@/lib/stripe`
 
 ### UI — Hygge Cancel Flow (Phase 12)
 

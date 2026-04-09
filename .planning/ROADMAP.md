@@ -126,7 +126,7 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 11 to break down)
+- [x] TBD (run /gsd:plan-phase 11 to break down) (completed 2026-04-09)
 
 **UI hint**: no
 
@@ -319,7 +319,7 @@ Phases execute in numeric order: 10 → 11 → 12 → 13 → 14 → 15 → 16 �
 | 8. Lektionskort + Kapitel-layout | v1.2 | 2/2 | Complete | 2026-04-06 |
 | 9. Kursus-header + Filter | v1.2 | 2/2 | Complete | 2026-04-08 |
 | 10. Cancel-data Foundation | v1.3 | 2/2 | Complete | 2026-04-08 |
-| 11. Retention Offer Engine | v1.3 | 1/2 | In Progress|  |
+| 11. Retention Offer Engine | v1.3 | 2/2 | Complete   | 2026-04-09 |
 | 12. Hygge Cancel Flow (UI) | v1.3 | 0/? | Not started | - |
 | 13. Admin Churn + Retention Config | v1.3 | 0/? | Not started | - |
 | 14. MobilePay Core Infrastructure | v1.4 | 0/? | Not started | - |
