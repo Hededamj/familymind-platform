@@ -13,23 +13,36 @@
 - [x] **OFF-DATA-02**: Seed data for predefinerede `CancellationReason` tags (pris, tid, fandt-alternativ, indhold-matcher-ikke, personlig-situation, forbedret, teknisk)
 - [x] **OFF-DATA-03**: Service function `cancelSubscription()` der validerer survey er udfyldt før Stripe cancel kaldes
 - [x] **OFF-DATA-04**: Service function `pauseSubscription()` der bruger Stripe `subscription.pause_collection` for 1/2/3 måneder
-- [x] **OFF-DATA-05**: Survey-data er tilgængelig for Phase 12 admin-dashboard via `listCancellations()` service function — ingen Zapier eller New Zenler integration. Re-engagement email automation kommer som separat fremtidig milestone via eksisterende Resend-system.
+- [x] **OFF-DATA-05**: Survey-data er tilgængelig for Phase 13 admin-dashboard via `listCancellations()` service function — ingen Zapier eller New Zenler integration.
 
-### UI — Hygge Cancel Flow
+### Retention Offer Engine (Phase 11)
+
+- [ ] **OFF-ENGINE-01**: Prisma-modeller `RetentionOffer`, `RetentionOfferTrigger`, `RetentionOfferAcceptance` med organizationId, offerType (DISCOUNT/PAUSE/SUPPORT/CONTENT_HELP/NONE), durationMonths, maxUsesPerUser, cooldownDays, og type-specifikke felter (stripeCouponId, pauseMonths, supportUrl, contentUrl)
+- [ ] **OFF-ENGINE-02**: `resolveEligibleOffer(userId, reasonSlugs)` service function returnerer højest-priority eligible offer eller null, iterating gennem candidates med `isOfferEligible()` check (maxUses, cooldown, active-offer-check)
+- [ ] **OFF-ENGINE-03**: `applyDiscountOffer()` kalder `stripe.subscriptions.update()` med discounts array og Stripe Connect account context (`{ stripeAccount: org.stripeAccountId }`) når tenant har Connect-konto
+- [ ] **OFF-ENGINE-04**: `applyPauseOffer()` genbruger Phase 10 `pauseSubscription()` men opretter `RetentionOfferAcceptance` row for tracking
+- [ ] **OFF-ENGINE-05**: Accepting any offer auto-reverses `cancel_at_period_end` flag hvis det var sat (kunden bliver, ikke cancelled)
+- [ ] **OFF-ENGINE-06**: Idempotency: andet kald til `acceptOffer` med samme surveyId returnerer eksisterende acceptance uden duplikeret Stripe-kald
+- [ ] **OFF-ENGINE-07**: Vitest unit tests for alle service functions med `vi.mock` for `@/lib/prisma` og `@/lib/stripe`
+
+### UI — Hygge Cancel Flow (Phase 12)
 
 - [ ] **OFF-UI-01**: Ny side `/dashboard/subscription/cancel` (ikke modal) erstatter ekstern formular-link
-- [ ] **OFF-UI-02**: Step 1 viser empatisk overskrift + warm illustration i FamilyMind design system (sand, coral, DM Serif Display)
+- [ ] **OFF-UI-02**: Step 1 viser empatisk overskrift + warm illustration + "skip survey" link direkte til bekræftelse
 - [ ] **OFF-UI-03**: Step 2 lader brugeren vælge reason-tag chips + valgfri fritekst feedback
-- [ ] **OFF-UI-04**: Step 3 tilbyder pause (1/2/3 måneder) som alternativ med tydelig "nej tak, opsig" knap uden guilt-trips
+- [ ] **OFF-UI-04**: Step 3 dynamisk rendering af offer type baseret på `resolveEligibleOffer()` — DiscountCard, PausePicker, SupportContact, ContentSuggestions, eller RespectSkip variant
 - [ ] **OFF-UI-05**: Step 4 bekræfter opsigelsesdato (slutning af betalingsperiode) og gennemfører Stripe cancel
-- [ ] **OFF-UI-06**: Step 5 viser tak-besked med brugerens navn og "velkommen tilbage når du er klar" tone
+- [ ] **OFF-UI-06**: Step 5 viser personaliseret tak-besked med 3 varianter (cancel, pause, retention accepteret)
+- [ ] **OFF-UI-07**: Hele flowet er mobile-first responsivt i FamilyMind design system
 
-### Admin — Churn Analytics
+### Admin — Churn Analytics + Retention Config (Phase 13)
 
 - [ ] **OFF-ADMIN-01**: `/admin/analytics/churn` viser søjlediagram over cancellation reasons med tællere for 7/30/90 dages vindue
-- [ ] **OFF-ADMIN-02**: Liste over nyeste feedback med bruger-info og tags
+- [ ] **OFF-ADMIN-02**: Liste over nyeste feedback med bruger-info, tags, og offer acceptance status
 - [ ] **OFF-ADMIN-03**: Filter churned users efter tag-kombinationer (fx "pris + har børn under 5") og eksportér som CSV
-- [ ] **OFF-ADMIN-04**: Trend-linje der viser churn rate per måned
+- [ ] **OFF-ADMIN-04**: `/admin/retention` viser liste af konfigurerede RetentionOffers med type, status, og acceptance counts
+- [ ] **OFF-ADMIN-05**: Admin kan oprette ny RetentionOffer via form — inkl. "Create Stripe coupon" action der kalder `stripe.coupons.create()` med tenant's stripeAccount context og auto-fylder stripeCouponId
+- [ ] **OFF-ADMIN-06**: Admin kan mappe offers til CancellationReasons, sætte priority, maxUsesPerUser, og cooldownDays
 
 ## v1.4 Requirements — MobilePay Checkout
 

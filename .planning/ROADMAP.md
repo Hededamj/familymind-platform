@@ -5,8 +5,8 @@
 - ✅ **v1.0 Mobile Polish** - Phases 1-4 (shipped 2026-04-05)
 - ✅ **v1.1 Personlig Dashboard** - Phases 5-6 (shipped 2026-04-06)
 - ✅ **v1.2 Kursus-visning Redesign** - Phases 7-9 (shipped 2026-04-08)
-- 🚧 **v1.3 Offboarding Intelligence** - Phases 10-12 (in progress)
-- 📋 **v1.4 MobilePay Checkout** - Phases 13-16 (planned — awaiting API credentials)
+- 🚧 **v1.3 Offboarding Intelligence** - Phases 10-13 (in progress)
+- 📋 **v1.4 MobilePay Checkout** - Phases 14-17 (planned — awaiting API credentials)
 
 ## Phases
 
@@ -111,37 +111,59 @@ Plans:
 
 **UI hint**: no
 
-#### Phase 11: Hygge Cancel Flow (UI)
-**Goal**: A user clicking cancel on their subscription goes through a warm, multi-step in-app flow that asks why, offers pause as an alternative, and leaves them feeling respected — not guilt-tripped
+#### Phase 11: Retention Offer Engine
+**Goal**: The platform has a configurable retention engine where tenants can define offers (discount, pause, support, content, skip) and map them to cancellation reasons — with abuse prevention via maxUsesPerUser and cooldownDays, white-label safe via Stripe Connect account context
 **Depends on**: Phase 10
-**Requirements**: OFF-UI-01, OFF-UI-02, OFF-UI-03, OFF-UI-04, OFF-UI-05, OFF-UI-06
+**Requirements**: OFF-ENGINE-01, OFF-ENGINE-02, OFF-ENGINE-03, OFF-ENGINE-04, OFF-ENGINE-05, OFF-ENGINE-06, OFF-ENGINE-07
 **Success Criteria** (what must be TRUE):
-  1. The "Opsig abonnement" button on "Mit abonnement" routes to a dedicated /dashboard/subscription/cancel page (not a modal)
-  2. Step 1 shows an empathetic headline and warm illustration in the FamilyMind design system (sand, coral, DM Serif Display)
-  3. Step 2 lets the user pick a primary reason from tag chips and add free-text feedback (both optional, but one is encouraged)
-  4. Step 3 offers pause (1/2/3 months) as an alternative — with clear "nej tak, opsig" button that does not guilt-trip
-  5. Step 4 confirms the cancellation date (end of billing period) and completes the Stripe cancel via the server action
-  6. Step 5 shows a thank-you message with the user's name and a "velkommen tilbage når du er klar" tone — no upsell pressure
+  1. Prisma models RetentionOffer, RetentionOfferTrigger, RetentionOfferAcceptance exist with organizationId, offerType, durationMonths, maxUsesPerUser, cooldownDays, and type-specific config fields
+  2. resolveEligibleOffer(userId, reasonSlugs) service function returns highest-priority eligible offer or null, iterating through candidates with isOfferEligible() check
+  3. applyDiscountOffer() calls stripe.subscriptions.update() with discounts array and Stripe Connect account context when tenant has stripeAccountId
+  4. applyPauseOffer() reuses Phase 10 pauseSubscription() but records acceptance row for tracking
+  5. Accepting any offer auto-reverses cancel_at_period_end flag if it was set
+  6. Idempotency: second call to acceptOffer with same surveyId returns existing acceptance without duplicate Stripe call
+  7. All service functions have Vitest unit tests with vi.mock for @/lib/prisma and @/lib/stripe
 **Plans**: TBD
 
 Plans:
 - [ ] TBD (run /gsd:plan-phase 11 to break down)
 
-**UI hint**: yes
+**UI hint**: no
 
-#### Phase 12: Churn Analytics Dashboard
-**Goal**: Admins can see why customers cancel, filter by tags and time periods, and export segments for re-engagement — turning raw data into actionable insights
+#### Phase 12: Hygge Cancel Flow (UI)
+**Goal**: A user clicking cancel on their subscription goes through a warm, multi-step in-app flow with contextual retention offers (discount for pris, pause for tid, support for teknisk, content for matcher-ikke, skip for others) that adapt to their selected reason — all in FamilyMind's hygge tone
 **Depends on**: Phase 11
-**Requirements**: OFF-ADMIN-01, OFF-ADMIN-02, OFF-ADMIN-03, OFF-ADMIN-04
+**Requirements**: OFF-UI-01, OFF-UI-02, OFF-UI-03, OFF-UI-04, OFF-UI-05, OFF-UI-06, OFF-UI-07
 **Success Criteria** (what must be TRUE):
-  1. /admin/analytics/churn shows a bar chart of cancellation reasons with counts over a selectable time window (7/30/90 days)
-  2. A list of the most recent cancellation feedback is visible with user info and tags
-  3. Admins can filter churned users by tag combinations (e.g. "pris + har børn under 5") and export the segment as CSV
-  4. A trend line shows churn rate per month across the entire user base
+  1. The "Opsig abonnement" button on "Mit abonnement" routes to /dashboard/subscription/cancel (not a modal)
+  2. Step 1 shows empathetic intro with option to skip directly to confirm (no forced survey)
+  3. Step 2 lets user pick multi-reason tags and optional free-text feedback
+  4. Step 3 dynamically renders the offer type matching resolveEligibleOffer() output — discount card, pause picker, support contact, content suggestions, or respect-skip variant
+  5. Step 4 confirms the cancellation with end-of-period date and final opt-out option
+  6. Step 5 shows a personalized thank-you page for cancel, pause, or retention accept paths
+  7. Entire flow is mobile-first responsive in FamilyMind design system (sand, coral, DM Serif Display)
 **Plans**: TBD
 
 Plans:
 - [ ] TBD (run /gsd:plan-phase 12 to break down)
+
+**UI hint**: yes
+
+#### Phase 13: Admin — Churn Analytics + Retention Offer Configuration
+**Goal**: Admins can see churn data as actionable insights AND configure retention offers per tenant — creating Stripe coupons via admin UI, mapping them to reasons, and setting abuse prevention rules
+**Depends on**: Phase 12
+**Requirements**: OFF-ADMIN-01, OFF-ADMIN-02, OFF-ADMIN-03, OFF-ADMIN-04, OFF-ADMIN-05, OFF-ADMIN-06
+**Success Criteria** (what must be TRUE):
+  1. /admin/analytics/churn shows a bar chart of cancellation reasons with counts over 7/30/90 day windows
+  2. Recent cancellation feedback is visible with user info, tags, and offer acceptance status
+  3. Admins can filter churned users by tag combinations and export segments as CSV
+  4. /admin/retention shows a list of configured RetentionOffers with offer type, status, and acceptance counts
+  5. Admin can create a new RetentionOffer via a form — including "Create Stripe coupon" action that calls stripe.coupons.create() with tenant's stripeAccount context and auto-fills stripeCouponId
+  6. Admin can map offers to CancellationReasons, set priority, maxUsesPerUser, and cooldownDays
+**Plans**: TBD
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 13 to break down)
 
 **UI hint**: yes
 
@@ -154,9 +176,9 @@ Plans:
 **Source spec:** `docs/superpowers/specs/2026-04-08-mobilepay-subscription-design.md`
 **Note:** Kræver MobilePay/Vipps API credentials fra eksterne part — startes når disse er tilgængelige.
 
-#### Phase 13: MobilePay Core Infrastructure
+#### Phase 14: MobilePay Core Infrastructure
 **Goal**: The platform has all data models, Vipps API client, and service-layer functions needed to create, query, and cancel MobilePay agreements and charges — with credentials ready to be configured per-tenant
-**Depends on**: Phase 12
+**Depends on**: Phase 13
 **Requirements**: MP-DATA-01, MP-DATA-02, MP-DATA-03, MP-DATA-04, MP-DATA-05
 **Success Criteria** (what must be TRUE):
   1. Prisma migration adds MobilePayAgreement, MobilePayCharge, MobilePayWebhookEvent and extends Organization + Entitlement with the required columns
@@ -171,9 +193,9 @@ Plans:
 
 **UI hint**: no
 
-#### Phase 14: Checkout Flow + Webhook Activation
+#### Phase 15: Checkout Flow + Webhook Activation
 **Goal**: A user can choose MobilePay on a dedicated checkout page, approve an agreement in the MobilePay app, and end up with an active Entitlement — driven end-to-end by the webhook flow with full idempotency
-**Depends on**: Phase 13
+**Depends on**: Phase 14
 **Requirements**: MP-CHECKOUT-01, MP-CHECKOUT-02, MP-CHECKOUT-03, MP-CHECKOUT-04, MP-CHECKOUT-05, MP-WEBHOOK-01, MP-WEBHOOK-02, MP-WEBHOOK-03
 **Success Criteria** (what must be TRUE):
   1. A user tapping "Bliv medlem" lands on /checkout/vaelg-betaling with both Stripe and MobilePay clearly visible as equal options
@@ -184,13 +206,13 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 14 to break down)
+- [ ] TBD (run /gsd:plan-phase 15 to break down)
 
 **UI hint**: yes
 
-#### Phase 15: Recurring Charges + Failure Handling
+#### Phase 16: Recurring Charges + Failure Handling
 **Goal**: Active MobilePay agreements are charged automatically each cycle, failures are retried and communicated to the user, and the system degrades gracefully if Vipps is unavailable
-**Depends on**: Phase 14
+**Depends on**: Phase 15
 **Requirements**: MP-WEBHOOK-04, MP-WEBHOOK-05, MP-CRON-01, MP-CRON-02, MP-CRON-03, MP-CRON-04, MP-ERR-01, MP-ERR-02, MP-ERR-03, MP-ERR-04
 **Success Criteria** (what must be TRUE):
   1. The daily charge cron creates MobilePay charges 2 days before nextChargeDate in batches of 20 without duplicates
@@ -201,13 +223,13 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 15 to break down)
+- [ ] TBD (run /gsd:plan-phase 16 to break down)
 
 **UI hint**: no
 
-#### Phase 16: Admin UI + User Subscription Management
+#### Phase 17: Admin UI + User Subscription Management
 **Goal**: Admins can see, cancel, and refund MobilePay agreements alongside Stripe subscriptions, users can cancel their own subscription from one unified button regardless of provider, and analytics show provider-level conversion and failure metrics
-**Depends on**: Phase 15
+**Depends on**: Phase 16
 **Requirements**: MP-ADMIN-01, MP-ADMIN-02, MP-ADMIN-03, MP-ADMIN-04, MP-USER-01, MP-USER-02, MP-ERR-05
 **Success Criteria** (what must be TRUE):
   1. /admin/users/[id] has a Betaling tab that lists both Stripe and MobilePay in a unified table with provider badges
@@ -218,7 +240,7 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 16 to break down)
+- [ ] TBD (run /gsd:plan-phase 17 to break down)
 
 **UI hint**: yes
 
@@ -283,7 +305,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 10 → 11 → 12 → 13 → 14 → 15 → 16
+Phases execute in numeric order: 10 → 11 → 12 → 13 → 14 → 15 → 16 → 17
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -296,10 +318,11 @@ Phases execute in numeric order: 10 → 11 → 12 → 13 → 14 → 15 → 16
 | 7. Kursus Data Layer + SavedContent | v1.2 | 2/2 | Complete | 2026-04-08 |
 | 8. Lektionskort + Kapitel-layout | v1.2 | 2/2 | Complete | 2026-04-06 |
 | 9. Kursus-header + Filter | v1.2 | 2/2 | Complete | 2026-04-08 |
-| 10. Cancel-data Foundation + Zapier Bridge | v1.3 | 2/2 | Complete    | 2026-04-08 |
-| 11. Hygge Cancel Flow (UI) | v1.3 | 0/? | Not started | - |
-| 12. Churn Analytics Dashboard | v1.3 | 0/? | Not started | - |
-| 13. MobilePay Core Infrastructure | v1.4 | 0/? | Not started | - |
-| 14. Checkout Flow + Webhook Activation | v1.4 | 0/? | Not started | - |
-| 15. Recurring Charges + Failure Handling | v1.4 | 0/? | Not started | - |
-| 16. Admin UI + User Subscription Management | v1.4 | 0/? | Not started | - |
+| 10. Cancel-data Foundation | v1.3 | 2/2 | Complete | 2026-04-08 |
+| 11. Retention Offer Engine | v1.3 | 0/? | Not started | - |
+| 12. Hygge Cancel Flow (UI) | v1.3 | 0/? | Not started | - |
+| 13. Admin Churn + Retention Config | v1.3 | 0/? | Not started | - |
+| 14. MobilePay Core Infrastructure | v1.4 | 0/? | Not started | - |
+| 15. Checkout Flow + Webhook Activation | v1.4 | 0/? | Not started | - |
+| 16. Recurring Charges + Failure Handling | v1.4 | 0/? | Not started | - |
+| 17. Admin UI + User Subscription Management | v1.4 | 0/? | Not started | - |
