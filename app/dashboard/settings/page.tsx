@@ -81,6 +81,12 @@ export default async function SettingsPage() {
                   </span>
                 </div>
                 <ManageSubscriptionButton />
+                <Link
+                  href="/dashboard/subscription/cancel"
+                  className="inline-block text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+                >
+                  Opsig abonnement
+                </Link>
               </div>
             ) : (
               <div className="space-y-4">
