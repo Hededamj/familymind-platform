@@ -40,7 +40,8 @@ const mockedPauseSubscription = pauseSubscription as ReturnType<typeof vi.fn>
 
 // Helper to get stripe mock instance
 function getStripeMock() {
-  return (getStripe as ReturnType<typeof vi.fn>)() as {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (getStripe as any)() as {
     subscriptions: {
       retrieve: ReturnType<typeof vi.fn>
       update: ReturnType<typeof vi.fn>
@@ -192,7 +193,8 @@ describe('acceptOffer', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     // Reset getStripe mock to return fresh mock object each test
-    ;(getStripe as ReturnType<typeof vi.fn>).mockReturnValue({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ;(getStripe as any).mockReturnValue({
       subscriptions: {
         retrieve: vi.fn(),
         update: vi.fn(),
