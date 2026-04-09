@@ -17,7 +17,7 @@
 
 ### Retention Offer Engine (Phase 11)
 
-- [ ] **OFF-ENGINE-01**: Prisma-modeller `RetentionOffer`, `RetentionOfferTrigger`, `RetentionOfferAcceptance` med organizationId, offerType (DISCOUNT/PAUSE/SUPPORT/CONTENT_HELP/NONE), durationMonths, maxUsesPerUser, cooldownDays, og type-specifikke felter (stripeCouponId, pauseMonths, supportUrl, contentUrl)
+- [x] **OFF-ENGINE-01**: Prisma-modeller `RetentionOffer`, `RetentionOfferTrigger`, `RetentionOfferAcceptance` med organizationId, offerType (DISCOUNT/PAUSE/SUPPORT/CONTENT_HELP/NONE), durationMonths, maxUsesPerUser, cooldownDays, og type-specifikke felter (stripeCouponId, pauseMonths, supportUrl, contentUrl)
 - [ ] **OFF-ENGINE-02**: `resolveEligibleOffer(userId, reasonSlugs)` service function returnerer højest-priority eligible offer eller null, iterating gennem candidates med `isOfferEligible()` check (maxUses, cooldown, active-offer-check)
 - [ ] **OFF-ENGINE-03**: `applyDiscountOffer()` kalder `stripe.subscriptions.update()` med discounts array og Stripe Connect account context (`{ stripeAccount: org.stripeAccountId }`) når tenant har Connect-konto
 - [ ] **OFF-ENGINE-04**: `applyPauseOffer()` genbruger Phase 10 `pauseSubscription()` men opretter `RetentionOfferAcceptance` row for tracking

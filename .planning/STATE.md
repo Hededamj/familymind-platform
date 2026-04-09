@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Offboarding Intelligence
-status: verifying
-stopped_at: Completed 10-02-PLAN.md
-last_updated: "2026-04-08T20:24:55.624Z"
-last_activity: 2026-04-08
+status: executing
+stopped_at: Completed 11-01-PLAN.md
+last_updated: "2026-04-09T19:53:32.842Z"
+last_activity: 2026-04-09
 progress:
-  total_phases: 3
+  total_phases: 4
   completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
-  percent: 100
+  total_plans: 4
+  completed_plans: 3
+  percent: 75
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** Indsaml strukturerede opsigelses-data i-app så churned kunder kan tagges og re-engageres — uden dark patterns
-**Current focus:** Phase 10 — offboarding-cancel-data-foundation
+**Current focus:** Phase 11 — retention-offer-engine
 
 ## Current Position
 
-Phase: 11
-Plan: Not started
-Status: Phase complete — ready for verification
-Last activity: 2026-04-08
+Phase: 11 (retention-offer-engine) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-04-09
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -77,6 +77,7 @@ Previous milestone velocity (v1.0 + v1.1):
 | Phase 10-offboarding-cancel-data-foundation P01 | 12min | 2 tasks | 2 files |
 | Phase 10-offboarding-cancel-data-foundation P02 | 3min | 3 tasks | 3 files |
 | Phase 10-offboarding-cancel-data-foundation P02 | 10min | 3 tasks | 2 files |
+| Phase 11-retention-offer-engine P01 | 8 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -134,6 +135,9 @@ Carried from v1.0:
 - [Phase 10-offboarding-cancel-data-foundation]: Stripe idempotency: retrieve subscription before update, check cancel_at_period_end to prevent double-cancel error
 - [Phase 10-offboarding-cancel-data-foundation]: pauseSubscription uses upsert — user may pause before completing full cancellation survey; upsert handles both create and update case
 - [Phase 10-offboarding-cancel-data-foundation]: Stripe SDK cast to unknown — v20.3.1 does not expose current_period_end cleanly on retrieve response type
+- [Phase 11-retention-offer-engine]: organizationId nullable on RetentionOffer — null = platform-wide default, non-null = tenant-scoped offer
+- [Phase 11-retention-offer-engine]: surveyId @unique on RetentionOfferAcceptance as idempotency anchor — prevents duplicate Stripe calls on retry
+- [Phase 11-retention-offer-engine]: Type-specific fields as nullable columns (not JSON) for explicit TypeScript types and per-type admin validation
 
 ### Pending Todos
 
@@ -147,6 +151,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-08T20:23:26.854Z
-Stopped at: Completed 10-02-PLAN.md
+Last session: 2026-04-09T19:53:32.837Z
+Stopped at: Completed 11-01-PLAN.md
 Resume file: None
