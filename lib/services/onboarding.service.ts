@@ -31,16 +31,17 @@ export async function saveOnboardingProfile(userId: string, data: {
   // Fetch questions to derive fields server-side
   const questions = await getActiveQuestions()
 
-  // Derive childAges from SLIDER and DATE responses
+  // Derive childAges (in years, decimals allowed) from SLIDER and DATE responses.
+  // Rounded to 1 decimal — more precision than that is noise.
   const childAges: number[] = []
   for (const q of questions) {
     const response = data.responses.find((r) => r.questionId === q.id)
     if (!response) continue
 
     if (q.questionType === 'SLIDER') {
-      const val = parseInt(response.selectedOptionIds[0] ?? '', 10)
-      if (!isNaN(val) && val >= 0 && val <= 216) {
-        childAges.push(val)
+      const val = parseFloat(response.selectedOptionIds[0] ?? '')
+      if (!isNaN(val) && val >= 0 && val <= 18) {
+        childAges.push(Math.round(val * 10) / 10)
       }
     }
     if (q.questionType === 'DATE') {
@@ -49,11 +50,10 @@ export async function saveOnboardingProfile(userId: string, data: {
         const birthDate = new Date(dateStr)
         if (!isNaN(birthDate.getTime())) {
           const now = new Date()
-          const ageMonths =
-            (now.getFullYear() - birthDate.getFullYear()) * 12 +
-            (now.getMonth() - birthDate.getMonth())
-          if (ageMonths >= 0) {
-            childAges.push(ageMonths)
+          const ms = now.getTime() - birthDate.getTime()
+          const ageYears = ms / (365.25 * 24 * 60 * 60 * 1000)
+          if (ageYears >= 0 && ageYears <= 18) {
+            childAges.push(Math.round(ageYears * 10) / 10)
           }
         }
       }

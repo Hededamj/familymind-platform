@@ -69,10 +69,11 @@ export async function getCheckInPrompt(userId: string): Promise<string> {
 }
 
 function getAgeGroupLabel(childAges: number[]): string {
+  // childAges are in years (decimals allowed)
   const minAge = Math.min(...childAges)
-  if (minAge < 12) return 'lille en'
-  if (minAge <= 36) return 'tumling'
-  if (minAge <= 72) return 'børnehavebarn'
+  if (minAge < 1) return 'lille en'
+  if (minAge <= 3) return 'tumling'
+  if (minAge <= 6) return 'børnehavebarn'
   return 'skolebarn'
 }
 

@@ -195,8 +195,8 @@ export function ContentForm({
         ? parseInt(formData.durationMinutes, 10)
         : undefined,
       difficulty: formData.difficulty,
-      ageMin: formData.ageMin ? parseInt(formData.ageMin, 10) : undefined,
-      ageMax: formData.ageMax ? parseInt(formData.ageMax, 10) : undefined,
+      ageMin: formData.ageMin ? parseFloat(formData.ageMin.replace(',', '.')) : undefined,
+      ageMax: formData.ageMax ? parseFloat(formData.ageMax.replace(',', '.')) : undefined,
       isFree: formData.isFree,
       bodyHtml:
         formData.mediaType === 'TEXT' && formData.bodyHtml
@@ -397,29 +397,36 @@ export function ContentForm({
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="ageMin">Minimumsalder (måneder)</Label>
+              <Label htmlFor="ageMin">Minimumsalder (år)</Label>
               <Input
                 id="ageMin"
                 type="number"
                 min="0"
+                max="18"
+                step="0.25"
                 value={formData.ageMin}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, ageMin: e.target.value }))
                 }
                 placeholder="0"
               />
+              <p className="text-xs text-muted-foreground">
+                Decimaler tilladt — f.eks. 0,5 = 6 måneder
+              </p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="ageMax">Maksimumsalder (måneder)</Label>
+              <Label htmlFor="ageMax">Maksimumsalder (år)</Label>
               <Input
                 id="ageMax"
                 type="number"
                 min="0"
+                max="18"
+                step="0.25"
                 value={formData.ageMax}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, ageMax: e.target.value }))
                 }
-                placeholder="36"
+                placeholder="3"
               />
             </div>
           </div>

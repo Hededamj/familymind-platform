@@ -243,8 +243,8 @@ model ContentUnit {
   thumbnailUrl    String?
   durationMinutes Int?
   difficulty      Difficulty  @default(INTRODUCTORY)
-  ageMin          Int? // months
-  ageMax          Int? // months
+  ageMin          Float? // years (decimals allowed, e.g. 0.5 = 6 months)
+  ageMax          Float? // years (decimals allowed, e.g. 0.5 = 6 months)
   isFree          Boolean     @default(false)
   bodyHtml        String?     // Rich text artikelindhold (HTML) — bruges når mediaType=TEXT
   publishedAt     DateTime?
@@ -584,7 +584,7 @@ model UserProfile {
   id                    String    @id @default(uuid()) @db.Uuid
   userId                String    @unique @db.Uuid
   responses             Json? // array of {questionId, selectedOptionIds}
-  childAges             Json? // extracted from date question
+  childAges             Json? // array of ages in years (decimals allowed) derived from SLIDER/DATE responses
   primaryChallengeTagId String?   @db.Uuid
   completedAt           DateTime?
 
@@ -628,7 +628,7 @@ model OnboardingOption {
 model RecommendationRule {
   id         String  @id @default(uuid()) @db.Uuid
   name       String
-  conditions Json // e.g. {"tagId": "x", "ageMin": 0, "ageMax": 36}
+  conditions Json // e.g. {"tagId": "x", "ageMin": 0, "ageMax": 3} (ageMin/ageMax in years, decimals allowed)
   targetType String // "JOURNEY" or "PRODUCT"
   targetId   String  @db.Uuid
   priority   Int     @default(0)

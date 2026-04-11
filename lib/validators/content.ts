@@ -10,8 +10,8 @@ export const createContentUnitSchema = z.object({
   thumbnailUrl: z.string().url().optional(),
   durationMinutes: z.number().int().positive().optional(),
   difficulty: z.enum(['INTRODUCTORY', 'INTERMEDIATE', 'ADVANCED']).default('INTRODUCTORY'),
-  ageMin: z.number().int().min(0).optional(),
-  ageMax: z.number().int().min(0).optional(),
+  ageMin: z.number().min(0).max(18).optional(), // years, decimals allowed (e.g. 0.5 = 6 months)
+  ageMax: z.number().min(0).max(18).optional(), // years, decimals allowed
   isFree: z.boolean().default(false),
   bodyHtml: z.string().optional(),
   tagIds: z.array(z.string().uuid()).optional(),

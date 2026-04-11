@@ -125,7 +125,7 @@ describe('getPersonalizedWelcome', () => {
       ctaUrl: null,
     })
     mockedPrisma.userProfile.findUnique.mockResolvedValue({
-      childAges: [24],
+      childAges: [2],
       primaryChallengeTagId: 'tag1',
     })
     mockedPrisma.contentTag.findUnique.mockResolvedValue({ id: 'tag1', name: 'søvn' })
@@ -145,7 +145,7 @@ describe('getPersonalizedWelcome', () => {
       ctaUrl: null,
     })
     mockedPrisma.userProfile.findUnique.mockResolvedValue({
-      childAges: [8],
+      childAges: [0.5],
       primaryChallengeTagId: null,
     })
 
@@ -339,7 +339,7 @@ describe('getDashboardState', () => {
       ctaLabel: null,
       ctaUrl: null,
     })
-    mockedPrisma.userProfile.findUnique.mockResolvedValue({ childAges: [24], primaryChallengeTagId: null })
+    mockedPrisma.userProfile.findUnique.mockResolvedValue({ childAges: [2], primaryChallengeTagId: null })
 
     const result = await getDashboardState('user1')
 

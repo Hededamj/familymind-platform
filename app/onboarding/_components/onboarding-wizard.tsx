@@ -36,16 +36,18 @@ type Props = {
 
 // ---------- Helpers ----------
 
-function formatMonths(months: number): string {
-  if (months < 12) {
+function formatYears(years: number): string {
+  // years can be a decimal (e.g. 0.5 = 6 months, 1.25 = 1 year + 3 months)
+  if (years < 1) {
+    const months = Math.round(years * 12)
     return `${months} ${months === 1 ? 'måned' : 'måneder'}`
   }
-  const years = Math.floor(months / 12)
-  const remaining = months % 12
-  if (remaining === 0) {
-    return `${years} år`
+  const wholeYears = Math.floor(years)
+  const remainingMonths = Math.round((years - wholeYears) * 12)
+  if (remainingMonths === 0) {
+    return `${wholeYears} år`
   }
-  return `${years} år og ${remaining} ${remaining === 1 ? 'måned' : 'måneder'}`
+  return `${wholeYears} år og ${remainingMonths} ${remainingMonths === 1 ? 'måned' : 'måneder'}`
 }
 
 // ---------- Component ----------
@@ -64,12 +66,12 @@ export function OnboardingWizard({ questions, brandName }: Props) {
 
   // Current selection for this question
   const currentSelection = responses[question.id] ?? []
-  const currentSliderValue = sliderValues[question.id] ?? 24
+  const currentSliderValue = sliderValues[question.id] ?? 2 // years4
 
   // Check if the current step has a valid answer
   const hasAnswer = (() => {
     if (question.questionType === 'SLIDER') {
-      // Slider always has a value (defaults to 24)
+      // Slider always has a value (defaults to 2 years)
       return true
     }
     if (question.questionType === 'DATE') {
@@ -138,7 +140,7 @@ export function OnboardingWizard({ questions, brandName }: Props) {
         if (q.questionType === 'SLIDER') {
           return {
             questionId: q.id,
-            selectedOptionIds: [String(sliderValues[q.id] ?? 24)],
+            selectedOptionIds: [String(sliderValues[q.id] ?? 2)],
           }
         }
         return {
@@ -242,20 +244,20 @@ export function OnboardingWizard({ questions, brandName }: Props) {
           <div className="space-y-8 px-2">
             <div className="text-center">
               <span className="text-4xl font-bold text-primary">
-                {formatMonths(currentSliderValue)}
+                {formatYears(currentSliderValue)}
               </span>
             </div>
             <Slider
               value={[currentSliderValue]}
               onValueChange={handleSliderChange}
               min={0}
-              max={72}
-              step={1}
+              max={18}
+              step={0.25}
               className="w-full"
             />
             <div className="flex justify-between text-sm text-muted-foreground">
-              <span>0 måneder</span>
-              <span>6 år</span>
+              <span>0 år</span>
+              <span>18 år</span>
             </div>
           </div>
         )
@@ -274,14 +276,12 @@ export function OnboardingWizard({ questions, brandName }: Props) {
               <p className="text-center text-sm text-muted-foreground">
                 Det er ca.{' '}
                 <span className="font-medium text-foreground">
-                  {formatMonths(
+                  {formatYears(
                     Math.max(
                       0,
-                      Math.floor(
-                        (new Date().getTime() -
-                          new Date(currentSelection[0]).getTime()) /
-                          (1000 * 60 * 60 * 24 * 30.44)
-                      )
+                      (new Date().getTime() -
+                        new Date(currentSelection[0]).getTime()) /
+                        (1000 * 60 * 60 * 24 * 365.25)
                     )
                   )}
                 </span>

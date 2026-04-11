@@ -84,7 +84,7 @@ function conditionsSummary(c: unknown, tags: Tag[]): string {
   if (cond.ageMin !== undefined || cond.ageMax !== undefined) {
     const min = cond.ageMin ?? 0
     const max = cond.ageMax ?? '+'
-    parts.push(`Alder: ${min}-${max} mdr`)
+    parts.push(`Alder: ${min}-${max} år`)
   }
 
   return parts.length > 0 ? parts.join(', ') : 'Ingen betingelser'
@@ -174,8 +174,8 @@ export function RecommendationsManager({
   function buildConditions(): Conditions {
     const cond: Conditions = {}
     if (tagId && tagId !== 'none') cond.tagId = tagId
-    if (ageMin) cond.ageMin = parseInt(ageMin, 10)
-    if (ageMax) cond.ageMax = parseInt(ageMax, 10)
+    if (ageMin) cond.ageMin = parseFloat(ageMin.replace(',', '.'))
+    if (ageMax) cond.ageMax = parseFloat(ageMax.replace(',', '.'))
     return cond
   }
 
@@ -279,21 +279,27 @@ export function RecommendationsManager({
                 </Select>
               </div>
               <div className="space-y-1">
-                <Label className="text-xs">Min. alder (måneder)</Label>
+                <Label className="text-xs">Min. alder (år)</Label>
                 <Input
                   type="number"
+                  min="0"
+                  max="18"
+                  step="0.25"
                   value={ageMin}
                   onChange={(e) => setAgeMin(e.target.value)}
                   placeholder="0"
                 />
               </div>
               <div className="space-y-1">
-                <Label className="text-xs">Max. alder (måneder)</Label>
+                <Label className="text-xs">Max. alder (år)</Label>
                 <Input
                   type="number"
+                  min="0"
+                  max="18"
+                  step="0.25"
                   value={ageMax}
                   onChange={(e) => setAgeMax(e.target.value)}
-                  placeholder="36"
+                  placeholder="3"
                 />
               </div>
             </div>
