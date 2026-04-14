@@ -35,7 +35,7 @@ type MilestoneManagerProps = {
 const TRIGGER_TYPE_LABELS: Record<string, string> = {
   DAYS_ACTIVE: 'Aktive dage',
   PHASE_COMPLETE: 'Fase gennemført',
-  JOURNEY_COMPLETE: 'Rejse gennemført',
+  JOURNEY_COMPLETE: 'Forløb gennemført',
   CONTENT_COUNT: 'Antal indhold',
   CHECKIN_STREAK: 'Check-in-stribe',
 }

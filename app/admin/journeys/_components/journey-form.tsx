@@ -102,10 +102,10 @@ export function JourneyForm({ mode, initialData, availableCourses = [] }: Journe
             description: formData.description || undefined,
             slug: formData.slug,
             targetAgeMin: formData.targetAgeMin
-              ? parseInt(formData.targetAgeMin, 10)
+              ? parseFloat(formData.targetAgeMin.replace(',', '.'))
               : undefined,
             targetAgeMax: formData.targetAgeMax
-              ? parseInt(formData.targetAgeMax, 10)
+              ? parseFloat(formData.targetAgeMax.replace(',', '.'))
               : undefined,
             estimatedDays: formData.estimatedDays
               ? parseInt(formData.estimatedDays, 10)
@@ -119,10 +119,10 @@ export function JourneyForm({ mode, initialData, availableCourses = [] }: Journe
             description: formData.description || null,
             slug: formData.slug,
             targetAgeMin: formData.targetAgeMin
-              ? parseInt(formData.targetAgeMin, 10)
+              ? parseFloat(formData.targetAgeMin.replace(',', '.'))
               : null,
             targetAgeMax: formData.targetAgeMax
-              ? parseInt(formData.targetAgeMax, 10)
+              ? parseFloat(formData.targetAgeMax.replace(',', '.'))
               : null,
             estimatedDays: formData.estimatedDays
               ? parseInt(formData.estimatedDays, 10)
@@ -206,6 +206,8 @@ export function JourneyForm({ mode, initialData, availableCourses = [] }: Journe
                 id="targetAgeMin"
                 type="number"
                 min="0"
+                max="18"
+                step="0.25"
                 value={formData.targetAgeMin}
                 onChange={(e) =>
                   setFormData((prev) => ({
@@ -222,6 +224,8 @@ export function JourneyForm({ mode, initialData, availableCourses = [] }: Journe
                 id="targetAgeMax"
                 type="number"
                 min="0"
+                max="18"
+                step="0.25"
                 value={formData.targetAgeMax}
                 onChange={(e) =>
                   setFormData((prev) => ({
@@ -229,7 +233,7 @@ export function JourneyForm({ mode, initialData, availableCourses = [] }: Journe
                     targetAgeMax: e.target.value,
                   }))
                 }
-                placeholder="36"
+                placeholder="3"
               />
             </div>
             <div className="space-y-2">

@@ -12,9 +12,9 @@ import { updateDashboardMessageAction } from '../actions'
 
 const STATE_KEY_LABELS: Record<string, string> = {
   new_user: 'Ny bruger',
-  active_journey: 'Aktiv rejse',
-  completed_journey: 'Afsluttet rejse',
-  no_journey: 'Ingen rejse',
+  active_journey: 'Aktivt forløb',
+  completed_journey: 'Afsluttet forløb',
+  no_journey: 'Intet forløb',
   returning_user: 'Tilbagevendende bruger',
   inactive_user: 'Inaktiv bruger',
 }
@@ -123,7 +123,7 @@ export function DashboardMessagesManager({
                     <Input
                       value={editCtaLabel}
                       onChange={(e) => setEditCtaLabel(e.target.value)}
-                      placeholder="F.eks. Start din rejse"
+                      placeholder="F.eks. Start dit forløb"
                     />
                   </div>
                   <div className="space-y-2">

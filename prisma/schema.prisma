@@ -480,8 +480,8 @@ model Journey {
   title         String
   description   String?
   slug          String   @unique
-  targetAgeMin  Int? // months
-  targetAgeMax  Int? // months
+  targetAgeMin  Float? // years (decimals allowed)
+  targetAgeMax  Float? // years (decimals allowed)
   estimatedDays Int?
   isActive      Boolean  @default(true)
   courseId      String?  @db.Uuid

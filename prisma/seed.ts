@@ -86,7 +86,7 @@ async function main() {
         },
         {
           title: 'Fællesskab',
-          description: 'Del erfaringer med andre forældre på samme rejse. Moderet af fagfolk.',
+          description: 'Del erfaringer med andre forældre på samme forløb. Moderet af fagfolk.',
           icon: 'Users',
         },
       ],
@@ -155,20 +155,20 @@ async function main() {
   // -- Dashboard Messages (5 states) --
   await Promise.all([
     prisma.dashboardMessage.upsert({ where: { stateKey: 'new_user' }, update: {}, create: { stateKey: 'new_user', heading: 'Velkommen til FamilyMind!', body: 'Vi har fundet nogle anbefalinger til dig baseret på din profil.', ctaLabel: 'Se anbefalinger', ctaUrl: '/browse' } }),
-    prisma.dashboardMessage.upsert({ where: { stateKey: 'active_journey' }, update: {}, create: { stateKey: 'active_journey', heading: 'Fortsæt din rejse', body: 'Du er godt på vej. Fortsæt hvor du slap.', ctaLabel: 'Fortsæt', ctaUrl: '/dashboard' } }),
-    prisma.dashboardMessage.upsert({ where: { stateKey: 'active_journey_plus_courses' }, update: {}, create: { stateKey: 'active_journey_plus_courses', heading: 'Din dag venter', body: 'Fortsæt din rejse og dine kurser nedenfor.', ctaLabel: 'Fortsæt', ctaUrl: '/dashboard' } }),
-    prisma.dashboardMessage.upsert({ where: { stateKey: 'no_journey_has_courses' }, update: {}, create: { stateKey: 'no_journey_has_courses', heading: 'Klar til en rejse?', body: 'Du følger kurser, men har du overvejet en struktureret rejse?', ctaLabel: 'Udforsk rejser', ctaUrl: '/browse' } }),
-    prisma.dashboardMessage.upsert({ where: { stateKey: 'completed_journey' }, update: {}, create: { stateKey: 'completed_journey', heading: 'Tillykke! 🎉', body: 'Du har gennemført din rejse. Klar til den næste?', ctaLabel: 'Find din næste rejse', ctaUrl: '/browse' } }),
+    prisma.dashboardMessage.upsert({ where: { stateKey: 'active_journey' }, update: {}, create: { stateKey: 'active_journey', heading: 'Fortsæt dit forløb', body: 'Du er godt på vej. Fortsæt hvor du slap.', ctaLabel: 'Fortsæt', ctaUrl: '/dashboard' } }),
+    prisma.dashboardMessage.upsert({ where: { stateKey: 'active_journey_plus_courses' }, update: {}, create: { stateKey: 'active_journey_plus_courses', heading: 'Din dag venter', body: 'Fortsæt dit forløb og dine kurser nedenfor.', ctaLabel: 'Fortsæt', ctaUrl: '/dashboard' } }),
+    prisma.dashboardMessage.upsert({ where: { stateKey: 'no_journey_has_courses' }, update: {}, create: { stateKey: 'no_journey_has_courses', heading: 'Klar til et forløb?', body: 'Du følger kurser, men har du overvejet et struktureret forløb?', ctaLabel: 'Udforsk forløb', ctaUrl: '/browse' } }),
+    prisma.dashboardMessage.upsert({ where: { stateKey: 'completed_journey' }, update: {}, create: { stateKey: 'completed_journey', heading: 'Tillykke! 🎉', body: 'Du har gennemført dit forløb. Klar til det næste?', ctaLabel: 'Find dit næste forløb', ctaUrl: '/browse' } }),
   ])
 
   // -- Email Templates (all types) --
   const emailTemplates = await Promise.all([
     prisma.emailTemplate.upsert({ where: { templateKey: 'weekly_plan' }, update: {}, create: { templateKey: 'weekly_plan', subject: 'Din uge er klar, {{userName}}', bodyHtml: '<h1>Hej {{userName}}</h1><p>Din nye uge i {{journeyTitle}} er klar. Log ind og se hvad der venter dig.</p>', description: 'Sent weekly when a new journey week is ready' } }),
-    prisma.emailTemplate.upsert({ where: { templateKey: 'midweek_nudge' }, update: {}, create: { templateKey: 'midweek_nudge', subject: 'Husk din rejse, {{userName}}', bodyHtml: '<h1>Hej {{userName}}</h1><p>Du har ikke åbnet dit indhold endnu i denne uge. Tag et kig?</p>', description: 'Sent mid-week if user has not opened content' } }),
+    prisma.emailTemplate.upsert({ where: { templateKey: 'midweek_nudge' }, update: {}, create: { templateKey: 'midweek_nudge', subject: 'Husk dit forløb, {{userName}}', bodyHtml: '<h1>Hej {{userName}}</h1><p>Du har ikke åbnet dit indhold endnu i denne uge. Tag et kig?</p>', description: 'Sent mid-week if user has not opened content' } }),
     prisma.emailTemplate.upsert({ where: { templateKey: 'reflection' }, update: {}, create: { templateKey: 'reflection', subject: 'Tid til refleksion', bodyHtml: '<h1>Hej {{userName}}</h1><p>Du har set dit indhold — nu er det tid til at reflektere. Hvordan gik det?</p>', description: 'Sent if user consumed content but has not checked in' } }),
     prisma.emailTemplate.upsert({ where: { templateKey: 'monthly_progress' }, update: {}, create: { templateKey: 'monthly_progress', subject: 'Din månedlige fremgang', bodyHtml: '<h1>Hej {{userName}}</h1><p>Her er din fremgang denne måned hos {{brandName}}.</p>', description: 'Monthly progress summary' } }),
     prisma.emailTemplate.upsert({ where: { templateKey: 'reengagement_tier1' }, update: {}, create: { templateKey: 'reengagement_tier1', subject: 'Vi savner dig, {{userName}}', bodyHtml: '<h1>Hej {{userName}}</h1><p>Det er et stykke tid siden vi har set dig. Hvad med at tage et hurtigt kig?</p>', description: 'Re-engagement tier 1: gentle reminder' } }),
-    prisma.emailTemplate.upsert({ where: { templateKey: 'reengagement_tier2' }, update: {}, create: { templateKey: 'reengagement_tier2', subject: 'Din rejse venter stadig', bodyHtml: '<h1>Hej {{userName}}</h1><p>Din rejse i {{journeyTitle}} venter stadig på dig. Hop ind igen?</p>', description: 'Re-engagement tier 2: journey reminder' } }),
+    prisma.emailTemplate.upsert({ where: { templateKey: 'reengagement_tier2' }, update: {}, create: { templateKey: 'reengagement_tier2', subject: 'Dit forløb venter stadig', bodyHtml: '<h1>Hej {{userName}}</h1><p>Dit forløb {{journeyTitle}} venter stadig på dig. Hop ind igen?</p>', description: 'Re-engagement tier 2: journey reminder' } }),
     prisma.emailTemplate.upsert({ where: { templateKey: 'reengagement_tier3' }, update: {}, create: { templateKey: 'reengagement_tier3', subject: 'Nyt indhold du måske har misset', bodyHtml: '<h1>Hej {{userName}}</h1><p>Der er kommet nyt indhold siden sidst. Se hvad der er nyt.</p>', description: 'Re-engagement tier 3: new content highlight' } }),
     prisma.emailTemplate.upsert({ where: { templateKey: 'reengagement_tier4' }, update: {}, create: { templateKey: 'reengagement_tier4', subject: 'Vi holder din plads', bodyHtml: '<h1>Hej {{userName}}</h1><p>Dit abonnement er stadig aktivt. Vi holder din plads klar, når du er klar til at vende tilbage.</p>', description: 'Re-engagement tier 4: final gentle nudge' } }),
     prisma.emailTemplate.upsert({ where: { templateKey: 'community_reply' }, update: {}, create: { templateKey: 'community_reply', subject: '{{replierName}} svarede på dit indlæg', bodyHtml: '<h1>Hej {{userName}}</h1><p>{{replierName}} har svaret på dit indlæg:</p><blockquote>{{replySnippet}}</blockquote><p>Dit indlæg: "{{postSnippet}}"</p><p><a href="{{appUrl}}/dashboard">Se svaret</a></p>', description: 'Sent when someone replies to your discussion post' } }),
@@ -215,11 +215,11 @@ async function main() {
     ),
     createIfNotExists(
       () => prisma.milestoneDefinition.findFirst({ where: { name: 'Fase gennemført' } }),
-      () => prisma.milestoneDefinition.create({ data: { name: 'Fase gennemført', triggerType: 'PHASE_COMPLETE', triggerValue: 1, celebrationTitle: 'Fase klaret!', celebrationMessage: 'Du har gennemført en hel fase i din rejse. Imponerende!', isActive: true } })
+      () => prisma.milestoneDefinition.create({ data: { name: 'Fase gennemført', triggerType: 'PHASE_COMPLETE', triggerValue: 1, celebrationTitle: 'Fase klaret!', celebrationMessage: 'Du har gennemført en hel fase i dit forløb. Imponerende!', isActive: true } })
     ),
     createIfNotExists(
-      () => prisma.milestoneDefinition.findFirst({ where: { name: 'Rejse gennemført' } }),
-      () => prisma.milestoneDefinition.create({ data: { name: 'Rejse gennemført', triggerType: 'JOURNEY_COMPLETE', triggerValue: 1, celebrationTitle: 'Tillykke! 🎉', celebrationMessage: 'Du har gennemført hele din rejse. Du er fantastisk!', isActive: true } })
+      () => prisma.milestoneDefinition.findFirst({ where: { name: 'Forløb gennemført' } }),
+      () => prisma.milestoneDefinition.create({ data: { name: 'Forløb gennemført', triggerType: 'JOURNEY_COMPLETE', triggerValue: 1, celebrationTitle: 'Tillykke! 🎉', celebrationMessage: 'Du har gennemført hele dit forløb. Du er fantastisk!', isActive: true } })
     ),
     createIfNotExists(
       () => prisma.milestoneDefinition.findFirst({ where: { name: '10 indhold gennemført' } }),
@@ -381,10 +381,10 @@ async function main() {
     const journey = await prisma.journey.create({
       data: {
         title: 'Bedre søvnrutiner',
-        description: 'En struktureret rejse mod bedre søvn for hele familien. Lær teknikker og opbyg gode vaner dag for dag.',
+        description: 'Et struktureret forløb mod bedre søvn for hele familien. Lær teknikker og opbyg gode vaner dag for dag.',
         slug: 'bedre-sovnrutiner',
-        targetAgeMin: 6,
-        targetAgeMax: 72,
+        targetAgeMin: 0.5,
+        targetAgeMax: 6,
         estimatedDays: 6,
         isActive: true,
       },
@@ -420,7 +420,7 @@ async function main() {
     // Recommendation rule for this journey
     await prisma.recommendationRule.create({
       data: {
-        name: 'Søvnudfordringer → Søvnrejse',
+        name: 'Søvnudfordringer → Søvnforløb',
         conditions: { tagId: tagSleep.id },
         targetType: 'JOURNEY',
         targetId: journey.id,

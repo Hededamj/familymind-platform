@@ -15,10 +15,13 @@ type Journey = {
 
 function ageLabel(min: number | null, max: number | null): string | null {
   if (min == null && max == null) return null
-  const minYears = min != null ? Math.floor(min / 12) : 0
-  const maxYears = max != null ? Math.floor(max / 12) : null
-  if (maxYears != null) return `${minYears}–${maxYears} år`
-  return `${minYears}+ år`
+  const formatAge = (years: number) => {
+    if (years < 1) return `${Math.round(years * 12)} mdr`
+    return Number.isInteger(years) ? `${years} år` : `${years.toFixed(1).replace('.', ',')} år`
+  }
+  if (min != null && max != null) return `${formatAge(min)}–${formatAge(max)}`
+  if (max != null) return `0–${formatAge(max)}`
+  return `${formatAge(min!)}+`
 }
 
 export function JourneyCard({ journey }: { journey: Journey }) {

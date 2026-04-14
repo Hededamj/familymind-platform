@@ -245,7 +245,7 @@ export function RecommendationsManager({
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="F.eks. Søvnrejse for 0-6 mdr"
+                placeholder="F.eks. Søvnforløb for 0-3 år"
               />
             </div>
             <div className="space-y-2">
