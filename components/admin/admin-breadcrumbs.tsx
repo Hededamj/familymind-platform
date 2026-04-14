@@ -14,7 +14,7 @@ import {
 const labels: Record<string, string> = {
   admin: "Admin",
   products: "Produkter",
-  journeys: "Rejser",
+  journeys: "Forløb",
   content: "Indhold",
   users: "Brugere",
   analytics: "Indsigt",

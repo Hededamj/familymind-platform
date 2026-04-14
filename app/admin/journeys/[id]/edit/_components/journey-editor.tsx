@@ -153,7 +153,7 @@ export function JourneyEditor({
             <div className="rounded-md border border-dashed p-8 text-center">
               <p className="text-muted-foreground">
                 Ingen faser endnu. Tilføj en fase for at begynde at strukturere
-                rejsen.
+                forløbet.
               </p>
               <Button
                 variant="outline"

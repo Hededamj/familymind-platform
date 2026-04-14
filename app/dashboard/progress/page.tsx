@@ -37,7 +37,7 @@ export default async function ProgressPage() {
           Din fremgang
         </h1>
         <p className="mb-8 text-sm text-muted-foreground">
-          Du er på en fantastisk rejse, {displayName}
+          Du er på et fantastisk forløb, {displayName}
         </p>
 
         {/* All-time stats grid */}

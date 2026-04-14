@@ -36,10 +36,10 @@ export function JourneyActions({ journeyId, title }: JourneyActionsProps) {
     startTransition(async () => {
       try {
         await deleteJourneyAction(journeyId)
-        toast.success('Rejse slettet')
+        toast.success('Forløb slettet')
         setShowDeleteDialog(false)
       } catch {
-        toast.error('Kunne ikke slette rejse')
+        toast.error('Kunne ikke slette forløb')
       }
     })
   }
@@ -76,7 +76,7 @@ export function JourneyActions({ journeyId, title }: JourneyActionsProps) {
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Slet rejse</DialogTitle>
+            <DialogTitle>Slet forløb</DialogTitle>
             <DialogDescription>
               Er du sikker på, at du vil slette "{title}"? Alle
               faser, dage og indhold vil også blive slettet. Denne handling

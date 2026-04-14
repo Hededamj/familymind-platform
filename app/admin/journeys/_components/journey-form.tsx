@@ -111,7 +111,7 @@ export function JourneyForm({ mode, initialData, availableCourses = [] }: Journe
               ? parseInt(formData.estimatedDays, 10)
               : undefined,
           })
-          toast.success('Rejse oprettet')
+          toast.success('Forløb oprettet')
           router.push(`/admin/journeys/${result.id}/edit`)
         } else {
           await updateJourneyAction(initialData!.id, {
@@ -130,14 +130,14 @@ export function JourneyForm({ mode, initialData, availableCourses = [] }: Journe
             isActive: formData.isActive,
             productId: formData.productId,
           })
-          toast.success('Rejse opdateret')
+          toast.success('Forløb opdateret')
           router.refresh()
         }
       } catch (error) {
         toast.error(
           mode === 'create'
-            ? 'Kunne ikke oprette rejse'
-            : 'Kunne ikke opdatere rejse'
+            ? 'Kunne ikke oprette forløb'
+            : 'Kunne ikke opdatere forløb'
         )
         console.error(error)
       }
@@ -158,7 +158,7 @@ export function JourneyForm({ mode, initialData, availableCourses = [] }: Journe
                 id="title"
                 value={formData.title}
                 onChange={(e) => handleTitleChange(e.target.value)}
-                placeholder="F.eks. Søvnrejsen"
+                placeholder="F.eks. Søvnforløbet"
                 required
               />
             </div>
@@ -187,7 +187,7 @@ export function JourneyForm({ mode, initialData, availableCourses = [] }: Journe
                   description: e.target.value,
                 }))
               }
-              placeholder="Beskriv rejsen..."
+              placeholder="Beskriv forløbet..."
               rows={4}
             />
           </div>
@@ -201,7 +201,7 @@ export function JourneyForm({ mode, initialData, availableCourses = [] }: Journe
         <CardContent className="space-y-4">
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="targetAgeMin">Min. alder (måneder)</Label>
+              <Label htmlFor="targetAgeMin">Min. alder (år)</Label>
               <Input
                 id="targetAgeMin"
                 type="number"
@@ -217,7 +217,7 @@ export function JourneyForm({ mode, initialData, availableCourses = [] }: Journe
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="targetAgeMax">Maks. alder (måneder)</Label>
+              <Label htmlFor="targetAgeMax">Maks. alder (år)</Label>
               <Input
                 id="targetAgeMax"
                 type="number"
@@ -297,7 +297,7 @@ export function JourneyForm({ mode, initialData, availableCourses = [] }: Journe
               ? 'Opretter...'
               : 'Gemmer...'
             : mode === 'create'
-              ? 'Opret rejse'
+              ? 'Opret forløb'
               : 'Gem ændringer'}
         </Button>
         <Button

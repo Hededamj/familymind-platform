@@ -342,7 +342,7 @@ export default async function Home() {
             Klar til at komme i gang?
           </h2>
           <p className="mx-auto mt-4 max-w-md text-base text-white/80">
-            Begynd din rejse mod et tryggere og mere kærligt forældreskab.
+            Begynd dit forløb mod et tryggere og mere kærligt forældreskab.
             Det tager kun 2 minutter at oprette din konto.
           </p>
           <Button

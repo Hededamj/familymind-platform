@@ -26,9 +26,9 @@ function formatDate(date: Date): string {
 }
 
 function formatAgeRange(min: number | null, max: number | null): string {
-  if (min != null && max != null) return `${min}-${max} mdr.`
-  if (min != null) return `${min}+ mdr.`
-  if (max != null) return `0-${max} mdr.`
+  if (min != null && max != null) return `${min}-${max} år`
+  if (min != null) return `${min}+ år`
+  if (max != null) return `0-${max} år`
   return '-'
 }
 
@@ -51,21 +51,21 @@ export default async function JourneysListPage({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Rejser</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Forløb</h1>
           <p className="text-muted-foreground">
-            Administrer rejser med faser, dage og indhold
+            Administrer forløb med faser, dage og indhold
           </p>
         </div>
         <Button asChild>
           <Link href="/admin/journeys/new">
             <Plus className="mr-2 size-4" />
-            Opret rejse
+            Opret forløb
           </Link>
         </Button>
       </div>
 
       <Suspense fallback={null}>
-        <AdminSearch placeholder="Søg efter rejser..." />
+        <AdminSearch placeholder="Søg efter forløb..." />
       </Suspense>
 
       {journeys.length === 0 ? (
@@ -73,13 +73,13 @@ export default async function JourneysListPage({
           <p className="text-muted-foreground">
             {search
               ? `Ingen resultater for '${search}'`
-              : 'Ingen rejser endnu. Opret din første rejse for at komme i gang.'}
+              : 'Ingen forløb endnu. Opret dit første forløb for at komme i gang.'}
           </p>
           {!search && (
             <Button asChild className="mt-4">
               <Link href="/admin/journeys/new">
                 <Plus className="mr-2 size-4" />
-                Opret rejse
+                Opret forløb
               </Link>
             </Button>
           )}
