@@ -253,7 +253,7 @@ Implementeret som rene TypeScript-regler i `safety-net.ts`, unit-testet.
 | Regel | Grænse |
 |---|---|
 | Max dagligt forbrug (agent-initieret) | 300 kr før approval kræves |
-| Budget-ændring per kampagne | ±20% per dag, ±50% per uge |
+| Budget-ændring per kampagne | ±20% per dag, ±50% akkumuleret over rullende 7 dage |
 | Minimum data før beslutning | 3 dage **og** 1.000 impressions |
 | Må pause annoncer | Ja |
 | Må slette annoncer | Nej (kun pause) |
