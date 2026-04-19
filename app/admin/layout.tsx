@@ -6,6 +6,8 @@ import { AdminNav } from './_components/admin-nav'
 import { AdminMobileNav } from './_components/admin-mobile-nav'
 import { AdminBreadcrumbs } from '@/components/admin/admin-breadcrumbs'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminLayout({
   children,
 }: {
