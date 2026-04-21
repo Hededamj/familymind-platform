@@ -45,10 +45,12 @@ export function Topbar({ brandName, logoUrl }: Props) {
     })
   }, [])
 
-  // Close mobile menu on route change
-  useEffect(() => {
+  // Close mobile menu on route change — adjust state during render
+  const [prevPath, setPrevPath] = useState(pathname)
+  if (pathname !== prevPath) {
+    setPrevPath(pathname)
     setMobileOpen(false)
-  }, [pathname])
+  }
 
   // Don't show topbar on routes that use AppLayout (has its own shell)
   if (pathname?.startsWith('/admin')) return null

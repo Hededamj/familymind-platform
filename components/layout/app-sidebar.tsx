@@ -78,10 +78,12 @@ export function AppSidebar({ brandName, userName, userEmail, userRole }: Props) 
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [dropdownOpen])
 
-  // Close dropdown on route change
-  useEffect(() => {
+  // Close dropdown on route change — adjust state during render
+  const [prevPath, setPrevPath] = useState(pathname)
+  if (pathname !== prevPath) {
+    setPrevPath(pathname)
     setDropdownOpen(false)
-  }, [pathname])
+  }
 
   async function handleLogout() {
     const supabase = createClient()

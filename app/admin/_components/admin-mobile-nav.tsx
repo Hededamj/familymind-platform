@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Menu, X, ArrowLeft } from 'lucide-react'
@@ -10,10 +10,12 @@ export function AdminMobileNav({ brandName }: { brandName: string }) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
 
-  // Close on route change
-  useEffect(() => {
+  // Close on route change — adjust state during render (React docs: "Adjusting state when a prop changes")
+  const [prevPath, setPrevPath] = useState(pathname)
+  if (pathname !== prevPath) {
+    setPrevPath(pathname)
     setOpen(false)
-  }, [pathname])
+  }
 
   return (
     <>

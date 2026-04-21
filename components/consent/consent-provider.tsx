@@ -48,6 +48,7 @@ export function ConsentProvider({ children }: { children: ReactNode }) {
   const [hasResponded, setHasResponded] = useState(true) // true initially to prevent flash
   const [openSettings, setOpenSettings] = useState(false)
 
+  /* eslint-disable react-hooks/set-state-in-effect -- mount-only cookie read; SSR-safe because getConsentFromCookie guards on typeof document */
   useEffect(() => {
     const stored = getConsentFromCookie()
     if (stored) {
@@ -57,6 +58,7 @@ export function ConsentProvider({ children }: { children: ReactNode }) {
       setHasResponded(false)
     }
   }, [])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const updateConsent = useCallback((newConsent: Omit<ConsentState, 'necessary'>) => {
     const full: ConsentState = { necessary: true, ...newConsent }

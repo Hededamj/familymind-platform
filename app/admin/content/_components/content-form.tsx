@@ -662,21 +662,52 @@ function FilePicker({
   mediaType: string
   onSelect: (url: string) => void
 }) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg max-h-[70vh] flex flex-col">
+        {/* Inner mounts fresh each open — fetch runs once on mount, state resets naturally */}
+        {open && (
+          <FilePickerBody
+            folder={folder}
+            mediaType={mediaType}
+            onSelect={onSelect}
+          />
+        )}
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+function FilePickerBody({
+  folder,
+  mediaType,
+  onSelect,
+}: {
+  folder: string
+  mediaType: string
+  onSelect: (url: string) => void
+}) {
   const [files, setFiles] = useState<StorageFile[]>([])
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
 
   useEffect(() => {
-    if (open) {
-      setLoading(true)
-      setSearch('')
-      fetch(`/api/files?folder=${folder}`)
-        .then((res) => res.json())
-        .then((data) => setFiles(data.files ?? []))
-        .catch(() => toast.error('Kunne ikke hente filer'))
-        .finally(() => setLoading(false))
+    let cancelled = false
+    fetch(`/api/files?folder=${folder}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (!cancelled) setFiles(data.files ?? [])
+      })
+      .catch(() => {
+        if (!cancelled) toast.error('Kunne ikke hente filer')
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+    return () => {
+      cancelled = true
     }
-  }, [open, folder])
+  }, [folder])
 
   const filtered = search
     ? files.filter((f) => f.name.toLowerCase().includes(search.toLowerCase()))
@@ -685,61 +716,59 @@ function FilePicker({
   const Icon = mediaType === 'PDF' ? FileTextIcon : Headphones
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[70vh] flex flex-col">
-        <DialogHeader>
-          <DialogTitle>
-            Vælg {mediaType === 'PDF' ? 'PDF' : 'lydfil'} fra mediebiblioteket
-          </DialogTitle>
-        </DialogHeader>
+    <>
+      <DialogHeader>
+        <DialogTitle>
+          Vælg {mediaType === 'PDF' ? 'PDF' : 'lydfil'} fra mediebiblioteket
+        </DialogTitle>
+      </DialogHeader>
 
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Søg..."
-            className="pl-9"
-          />
-        </div>
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Søg..."
+          className="pl-9"
+        />
+      </div>
 
-        <div className="flex-1 overflow-y-auto min-h-0">
-          {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="size-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="py-12 text-center">
-              <p className="text-sm text-muted-foreground">
-                {search
-                  ? 'Ingen filer matcher søgningen'
-                  : 'Ingen filer uploadet endnu'}
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-1">
-              {filtered.map((file) => (
-                <button
-                  key={file.name}
-                  type="button"
-                  onClick={() => onSelect(file.url)}
-                  className="flex w-full items-center gap-3 rounded-lg p-2 text-left transition-colors hover:bg-muted/50"
-                >
-                  <Icon className="size-5 text-muted-foreground shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">
-                      {prettifyFileName(file.name)}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {formatFileSize(file.size)}
-                    </p>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
+      <div className="flex-1 overflow-y-auto min-h-0">
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="size-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="py-12 text-center">
+            <p className="text-sm text-muted-foreground">
+              {search
+                ? 'Ingen filer matcher søgningen'
+                : 'Ingen filer uploadet endnu'}
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-1">
+            {filtered.map((file) => (
+              <button
+                key={file.name}
+                type="button"
+                onClick={() => onSelect(file.url)}
+                className="flex w-full items-center gap-3 rounded-lg p-2 text-left transition-colors hover:bg-muted/50"
+              >
+                <Icon className="size-5 text-muted-foreground shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">
+                    {prettifyFileName(file.name)}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {formatFileSize(file.size)}
+                  </p>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </>
   )
 }
