@@ -26,7 +26,7 @@ export default async function EditContentPage({
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Rediger indhold</h1>
         <p className="text-muted-foreground">
-          Rediger "{contentUnit.title}"
+          Rediger &ldquo;{contentUnit.title}&rdquo;
         </p>
       </div>
       <ContentForm
