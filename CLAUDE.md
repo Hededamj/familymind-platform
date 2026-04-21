@@ -4,7 +4,7 @@ Context for AI coding agents (Claude Code, Copilot, etc.) working on this repo.
 
 ## What this is
 
-FamilyMind 2.0 — multi-product platform (courses, journeys, community, subscription) for Mette Hummel Academy. Single tenant in prod today; multi-tenant branding is scaffolded and actively in progress on `feature/tenant-abstraction`. Production domain: `mettehummel.dk` (we do **not** own familymind.dk — never hardcode it).
+FamilyMind 2.0 — multi-product platform (courses, journeys, community, subscription). Single tenant in prod today; multi-tenant branding is scaffolded and actively in progress on `feature/tenant-abstraction`. **Production lives only at `https://familymind-platform.vercel.app/`** — no custom domain. Always resolve URLs via `NEXT_PUBLIC_APP_URL` / tenant config, never hardcode (`familymind.dk` is not owned).
 
 ## Stack
 
@@ -43,7 +43,7 @@ CI (`.github/workflows/ci.yml`) runs typecheck + vitest + eslint on every PR to 
 ## Conventions that matter
 
 - **Service layer**: put DB access and business rules in `lib/services/*.service.ts`. Route handlers should be thin.
-- **Don't hardcode `familymind.dk`** — use `lib/app-url.ts` / tenant config. Production is `mettehummel.dk`.
+- **Don't hardcode domains** — use `lib/app-url.ts` / `NEXT_PUBLIC_APP_URL` / tenant config. `familymind.dk` is not owned.
 - **Tenant awareness (WIP)**: `Organization` model exists with `colorPrimary`, `colorAccent`, `logo`, `brandName`. `getTenantConfig()` injects CSS vars in `app/layout.tsx`. Most service queries do **not yet filter by `organizationId`** — add scoping when touching product/journey/content/room queries. See `project_familymind_white_label.md` in memory for audit.
 - **Danish timezone** for cron/scheduling logic (CET/CEST) — see `app/api/cron/engagement/route.ts`.
 - **Stripe**: use Stripe Connect account per `Organization` (`stripeAccountId`). Webhook signature verified in `app/api/webhooks/stripe/route.ts`.
