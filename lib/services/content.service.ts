@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { createContentUnitSchema, updateContentUnitSchema } from '@/lib/validators/content'
+import type { MediaType } from '@prisma/client'
 import type { z } from 'zod'
 
 type CreateContentInput = z.infer<typeof createContentUnitSchema>
@@ -56,7 +57,7 @@ export async function listContentUnits(filters?: {
 }) {
   return prisma.contentUnit.findMany({
     where: {
-      ...(filters?.mediaType && { mediaType: filters.mediaType as any }),
+      ...(filters?.mediaType && { mediaType: filters.mediaType as MediaType }),
       ...(filters?.tagSlug && {
         tags: { some: { tag: { slug: filters.tagSlug } } },
       }),

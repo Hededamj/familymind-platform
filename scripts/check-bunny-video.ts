@@ -8,16 +8,16 @@ async function main() {
     const details = await getVideoDetails(videoId)
     console.log(JSON.stringify(details, null, 2))
     console.log('Status 4 = finished processing')
-  } catch (e: any) {
-    console.error('Failed to get video details:', e.message)
+  } catch (e) {
+    console.error('Failed to get video details:', e instanceof Error ? e.message : e)
   }
 
   console.log('\n--- Playback URL ---')
   try {
     const url = await getSignedPlaybackUrl(videoId)
     console.log(url)
-  } catch (e: any) {
-    console.error('Failed to get playback URL:', e.message)
+  } catch (e) {
+    console.error('Failed to get playback URL:', e instanceof Error ? e.message : e)
   }
 
   console.log('\n--- Thumbnail URL ---')

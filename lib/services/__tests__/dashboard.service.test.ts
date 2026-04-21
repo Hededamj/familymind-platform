@@ -38,6 +38,7 @@ import { prisma } from '@/lib/prisma'
 import { getUserActiveJourney } from '../journey.service'
 import { getCheckInPrompt, getPersonalizedWelcome, getWeeklyFocus, getDashboardState } from '../dashboard.service'
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- deep-mock helper; Prisma's recursive type is impractical to reconstruct
 const mockedPrisma = prisma as any
 const mockedGetUserActiveJourney = getUserActiveJourney as ReturnType<typeof vi.fn>
 

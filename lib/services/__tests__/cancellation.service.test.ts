@@ -28,6 +28,7 @@ vi.mock('@/lib/stripe', () => ({
 import { cancelSubscription, pauseSubscription, listCancellations } from '../cancellation.service'
 import { prisma } from '@/lib/prisma'
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- deep-mock helper; Prisma's recursive type is impractical to reconstruct
 const mockedPrisma = prisma as any
 
 describe('cancelSubscription', () => {
