@@ -78,7 +78,7 @@ export function JourneyActions({ journeyId, title }: JourneyActionsProps) {
           <DialogHeader>
             <DialogTitle>Slet forløb</DialogTitle>
             <DialogDescription>
-              Er du sikker på, at du vil slette "{title}"? Alle
+              Er du sikker på, at du vil slette &ldquo;{title}&rdquo;? Alle
               faser, dage og indhold vil også blive slettet. Denne handling
               kan ikke fortrydes.
             </DialogDescription>

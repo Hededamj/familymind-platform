@@ -429,8 +429,8 @@ export function OnboardingManager({
           <DialogHeader>
             <DialogTitle>Slet spørgsmål</DialogTitle>
             <DialogDescription>
-              Er du sikker på, at du vil slette spørgsmålet "
-              {deleteTarget?.questionText}"? Alle tilhørende
+              Er du sikker på, at du vil slette spørgsmålet &ldquo;
+              {deleteTarget?.questionText}&rdquo;? Alle tilhørende
               svarmuligheder slettes også. Denne handling kan ikke fortrydes.
             </DialogDescription>
           </DialogHeader>

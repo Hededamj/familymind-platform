@@ -474,8 +474,8 @@ export function RecommendationsManager({
           <DialogHeader>
             <DialogTitle>Slet regel</DialogTitle>
             <DialogDescription>
-              Er du sikker på, at du vil slette reglen "
-              {deleteTarget?.name}"? Denne handling kan ikke fortrydes.
+              Er du sikker på, at du vil slette reglen &ldquo;
+              {deleteTarget?.name}&rdquo;? Denne handling kan ikke fortrydes.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

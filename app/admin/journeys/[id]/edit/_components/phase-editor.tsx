@@ -259,8 +259,8 @@ export function PhaseEditor({
           <DialogHeader>
             <DialogTitle>Slet fase</DialogTitle>
             <DialogDescription>
-              Er du sikker på, at du vil slette fasen "{phase.title}
-              "? Alle dage, indhold og handlinger i denne fase vil
+              Er du sikker på, at du vil slette fasen &ldquo;{phase.title}
+              &rdquo;? Alle dage, indhold og handlinger i denne fase vil
               også blive slettet.
             </DialogDescription>
           </DialogHeader>

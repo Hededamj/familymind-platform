@@ -349,8 +349,8 @@ export function CheckInsManager({ options }: CheckInsManagerProps) {
           <DialogHeader>
             <DialogTitle>Slet check-in mulighed</DialogTitle>
             <DialogDescription>
-              Er du sikker på, at du vil slette "{deleteTarget?.label}
-              "? Denne handling kan ikke fortrydes.
+              Er du sikker på, at du vil slette &ldquo;{deleteTarget?.label}
+              &rdquo;? Denne handling kan ikke fortrydes.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

@@ -109,8 +109,8 @@ export function DiscountActions({
           <DialogHeader>
             <DialogTitle>Slet rabatkode</DialogTitle>
             <DialogDescription>
-              Er du sikker på, at du vil slette rabatkoden "{code}
-              "? Denne handling kan ikke fortrydes.
+              Er du sikker på, at du vil slette rabatkoden &ldquo;{code}
+              &rdquo;? Denne handling kan ikke fortrydes.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

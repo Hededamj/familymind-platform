@@ -42,7 +42,7 @@ export default async function EditJourneyPage({
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Rediger forløb</h1>
         <p className="text-muted-foreground">
-          Rediger "{journey.title}"
+          Rediger &ldquo;{journey.title}&rdquo;
         </p>
       </div>
       <JourneyEditor journey={journey} allContentUnits={allContentUnits} availableCourses={availableCourses} />

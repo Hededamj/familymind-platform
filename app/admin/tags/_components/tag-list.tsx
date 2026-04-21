@@ -123,14 +123,14 @@ export function TagList({ tags }: TagListProps) {
             <DialogDescription>
               {deleteTarget && deleteTarget._count.contentUnits > 0 ? (
                 <>
-                  Tagget "{deleteTarget.name}" bruges af{' '}
+                  Tagget &ldquo;{deleteTarget.name}&rdquo; bruges af{' '}
                   {deleteTarget._count.contentUnits} indhold. Hvis du sletter
                   det, fjernes det fra alt tilknyttet indhold.
                 </>
               ) : (
                 <>
-                  Er du sikker på, at du vil slette tagget "
-                  {deleteTarget?.name}"? Denne handling kan ikke fortrydes.
+                  Er du sikker på, at du vil slette tagget &ldquo;
+                  {deleteTarget?.name}&rdquo;? Denne handling kan ikke fortrydes.
                 </>
               )}
             </DialogDescription>
