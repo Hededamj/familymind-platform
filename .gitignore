@@ -43,3 +43,16 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local tool state
+/.claude/settings.local.json
+/.claude/skills/
+/.claude/worktrees/
+/.superpowers/
+
+# stray reference screenshots dropped at repo root (public/, app/, docs/ unaffected)
+/*.png
+/*.jpg
+/*.jpeg
+/*.webp
+
