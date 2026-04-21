@@ -40,13 +40,8 @@ jobs:
       - name: Unit tests
         run: npx vitest run
 
-      # Lint currently reports ~45 pre-existing errors (React setState-in-effect,
-      # Cannot create components during render, no-unescaped-entities, a few
-      # no-explicit-any). Reporting-only until that debt is swept; then drop
-      # `continue-on-error` to make lint blocking.
-      - name: Lint (report only)
+      - name: Lint
         run: npx eslint .
-        continue-on-error: true
 
 # Note: `next build` is intentionally not run here. Vercel builds every PR as a
 # preview deploy, so duplicating it in CI would be wasted minutes. If we ever
