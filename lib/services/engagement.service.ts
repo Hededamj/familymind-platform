@@ -664,7 +664,7 @@ function computeCheckinStreak(dates: Date[]): number {
   today.setHours(0, 0, 0, 0)
 
   let streak = 0
-  let current = new Date(today)
+  const current = new Date(today)
 
   // Allow the streak to start from today or yesterday
   const todayStr = current.toISOString().slice(0, 10)

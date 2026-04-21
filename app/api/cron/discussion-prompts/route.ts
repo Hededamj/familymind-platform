@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
   }
 
   let posted = 0
-  let skipped = 0
+  const skipped = 0
   let failed = 0
 
   for (let i = 0; i < cohorts.length; i += BATCH_SIZE) {
