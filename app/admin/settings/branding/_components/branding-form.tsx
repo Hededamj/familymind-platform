@@ -70,6 +70,38 @@ type Testimonial = { name: string; quote: string; stars: number }
 type FaqItem = { question: string; answer: string }
 type FooterLink = { label: string; url: string }
 
+// ── Color input helper — hoisted so identity is stable across renders ──
+
+function ColorField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string
+  value: string
+  onChange: (v: string) => void
+}) {
+  return (
+    <div className="space-y-2">
+      <Label>{label}</Label>
+      <div className="flex items-center gap-2">
+        <input
+          type="color"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="h-10 w-12 cursor-pointer rounded border border-border p-0.5"
+        />
+        <Input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="#000000"
+          className="font-mono"
+        />
+      </div>
+    </div>
+  )
+}
+
 // ── Component ──
 
 export function BrandingForm({ org }: { org: OrgData }) {
@@ -205,37 +237,6 @@ export function BrandingForm({ org }: { org: OrgData }) {
         toast.error('Kunne ikke gemme')
       }
     })
-  }
-
-  // ── Color input helper ──
-  function ColorField({
-    label,
-    value,
-    onChange,
-  }: {
-    label: string
-    value: string
-    onChange: (v: string) => void
-  }) {
-    return (
-      <div className="space-y-2">
-        <Label>{label}</Label>
-        <div className="flex items-center gap-2">
-          <input
-            type="color"
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            className="h-10 w-12 cursor-pointer rounded border border-border p-0.5"
-          />
-          <Input
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            placeholder="#000000"
-            className="font-mono"
-          />
-        </div>
-      </div>
-    )
   }
 
   return (

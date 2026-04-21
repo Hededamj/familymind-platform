@@ -1,3 +1,4 @@
+import { createElement } from 'react'
 import Link from 'next/link'
 import * as LucideIcons from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
@@ -20,7 +21,9 @@ function getRoomIcon(iconName: string | null): LucideIcon {
 }
 
 export function RoomCard({ room }: RoomCardProps) {
-  const Icon = getRoomIcon(room.icon)
+  // createElement (not JSX) avoids react-hooks/static-components false-positive —
+  // getRoomIcon returns a reference to a stable pre-existing component, not a new one.
+  const iconElement = createElement(getRoomIcon(room.icon), { className: 'size-5' })
   const postCount = room._count.posts
 
   return (
@@ -30,7 +33,7 @@ export function RoomCard({ room }: RoomCardProps) {
     >
       <div className="flex items-center gap-3">
         <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-accent text-accent-foreground">
-          <Icon className="size-5" />
+          {iconElement}
         </div>
         <h2 className="font-serif text-lg text-foreground group-hover:text-accent-foreground">
           {room.name}
