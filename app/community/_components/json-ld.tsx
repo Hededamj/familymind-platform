@@ -1,4 +1,4 @@
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://familymind.dk'
+import { getAppUrl } from '@/lib/app-url'
 
 export function RoomJsonLd({
   room,
@@ -7,6 +7,7 @@ export function RoomJsonLd({
   room: { name: string; slug: string; description?: string | null }
   postCount: number
 }) {
+  const baseUrl = getAppUrl()
   const data = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
@@ -36,6 +37,7 @@ export function PostJsonLd({
   }
   roomSlug: string
 }) {
+  const baseUrl = getAppUrl()
   const data = {
     '@context': 'https://schema.org',
     '@type': 'DiscussionForumPosting',

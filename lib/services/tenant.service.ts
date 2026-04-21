@@ -23,7 +23,7 @@ const FALLBACK_TENANT: TenantConfig = {
   contactPhone: null,
   contactUrl: 'https://mettehummel.dk',
   emailFromName: 'FamilyMind',
-  emailFromEmail: 'noreply@familymind.dk',
+  emailFromEmail: null,
   heroHeading: null,
   heroSubheading: null,
   heroCtaText: null,

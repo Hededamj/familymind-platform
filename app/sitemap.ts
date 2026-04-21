@@ -1,9 +1,9 @@
 import { prisma } from '@/lib/prisma'
+import { getAppUrl } from '@/lib/app-url'
 import type { MetadataRoute } from 'next'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL || 'https://familymind.dk'
+  const baseUrl = getAppUrl()
 
   // Get community indexing thresholds
   const [minCharsSetting, minRepliesSetting] = await Promise.all([

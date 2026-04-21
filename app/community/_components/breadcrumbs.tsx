@@ -1,10 +1,10 @@
 import Link from 'next/link'
+import { getAppUrl } from '@/lib/app-url'
 
 type BreadcrumbItem = { label: string; href?: string }
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://familymind.dk'
-
 export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
+  const baseUrl = getAppUrl()
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',

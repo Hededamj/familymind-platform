@@ -315,7 +315,7 @@ export function BrandingForm({ org }: { org: OrgData }) {
                 id="websiteUrl"
                 value={websiteUrl}
                 onChange={(e) => setWebsiteUrl(e.target.value)}
-                placeholder="https://familymind.dk"
+                placeholder="https://dit-domæne.dk"
               />
             </div>
             <Button
@@ -376,7 +376,7 @@ export function BrandingForm({ org }: { org: OrgData }) {
                   type="email"
                   value={contactEmail}
                   onChange={(e) => setContactEmail(e.target.value)}
-                  placeholder="kontakt@familymind.dk"
+                  placeholder="kontakt@dit-domæne.dk"
                 />
               </div>
               <div className="space-y-2">
@@ -395,7 +395,7 @@ export function BrandingForm({ org }: { org: OrgData }) {
                 id="contactUrl"
                 value={contactUrl}
                 onChange={(e) => setContactUrl(e.target.value)}
-                placeholder="https://familymind.dk/kontakt"
+                placeholder="https://dit-domæne.dk/kontakt"
               />
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
@@ -415,7 +415,7 @@ export function BrandingForm({ org }: { org: OrgData }) {
                   type="email"
                   value={emailFromEmail}
                   onChange={(e) => setEmailFromEmail(e.target.value)}
-                  placeholder="noreply@familymind.dk"
+                  placeholder="noreply@dit-domæne.dk"
                 />
               </div>
             </div>

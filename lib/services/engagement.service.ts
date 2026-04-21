@@ -68,7 +68,16 @@ export async function sendTemplatedEmail(
 
   const resend = getResend()
   const fromName = org?.emailFromName || org?.brandName || 'FamilyMind'
-  const fromEmail = org?.emailFromEmail || process.env.RESEND_FROM_EMAIL?.match(/<(.+)>/)?.[1] || 'noreply@familymind.dk'
+  const fromEmail =
+    org?.emailFromEmail ||
+    process.env.RESEND_FROM_EMAIL?.match(/<(.+)>/)?.[1] ||
+    process.env.RESEND_FROM_EMAIL
+  if (!fromEmail) {
+    console.error(
+      '[engagement] sendTemplatedEmail: no sender email configured (tenant.emailFromEmail or RESEND_FROM_EMAIL) — refusing to send'
+    )
+    return null
+  }
   const fromAddress = `${fromName} <${fromEmail}>`
 
   const { data, error } = await resend.emails.send({

@@ -36,7 +36,7 @@ async function main() {
       colorBorder: '#E8E4DF',
       contactUrl: 'https://mettehummel.dk',
       emailFromName: 'FamilyMind',
-      emailFromEmail: 'noreply@familymind.dk',
+      emailFromEmail: process.env.SEED_EMAIL_FROM_EMAIL || null,
       heroHeading: 'Giv dit barn den bedste start',
       heroSubheading: 'Din strukturerede vej til et trygt og kærligt forældreskab — med viden der virker og værktøjer du kan bruge i dag.',
       heroCtaText: 'Prøv gratis',

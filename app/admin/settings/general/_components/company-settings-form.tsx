@@ -93,7 +93,7 @@ export function CompanySettingsForm({ settings }: Props) {
             type="email"
             value={formData.company_email}
             onChange={(e) => setFormData(prev => ({ ...prev, company_email: e.target.value }))}
-            placeholder="kontakt@familymind.dk"
+            placeholder="kontakt@dit-domæne.dk"
           />
           {errors.company_email && <p className="text-sm text-destructive">{errors.company_email}</p>}
         </div>
