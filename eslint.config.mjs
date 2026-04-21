@@ -12,6 +12,13 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Agent harness + worktree scratch space — not application code.
+    ".claude/**",
+    ".superpowers/**",
+    ".worktrees/**",
+    // Planning + docs are prose, not lint targets.
+    ".planning/**",
+    "docs/**",
   ]),
 ]);
 
