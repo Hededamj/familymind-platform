@@ -43,6 +43,10 @@ export function Topbar({ brandName, logoUrl }: Props) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setIsLoggedIn(!!session)
     })
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => setIsLoggedIn(!!session),
+    )
+    return () => subscription.unsubscribe()
   }, [])
 
   // Close mobile menu on route change — adjust state during render
