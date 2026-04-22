@@ -28,7 +28,11 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        # Using `npm install` (not `npm ci`) because the lockfile is
+        # regenerated on Windows, which drops Linux-specific optional deps
+        # (@emnapi, @rolldown/binding-wasm32-wasi). `npm install` is tolerant
+        # of platform drift. Revisit when a Linux/WSL env is standard.
+        run: npm install --no-audit --no-fund
 
       # Prisma client must be generated before typecheck/tests can import it.
       - name: Generate Prisma client
