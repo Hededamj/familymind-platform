@@ -3,7 +3,7 @@
 import { z } from 'zod'
 import { requireAdmin } from '@/lib/auth'
 import * as adminUserService from '@/lib/services/admin-user.service'
-import * as tagService from '@/lib/services/admin-tag.service'
+import * as tagService from '@/lib/services/tag.service'
 import {
   updateUserRoleSchema,
   grantAccessSchema,
