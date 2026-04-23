@@ -126,34 +126,34 @@ enum RetentionOfferType {
 // ──────────────────────────────────────────────
 
 model User {
-  id                  String   @id @default(uuid()) @db.Uuid
-  email               String   @unique
+  id                  String    @id @default(uuid()) @db.Uuid
+  email               String    @unique
   name                String?
-  role                UserRole @default(USER)
-  organizationId      String?  @db.Uuid
-  onboardingCompleted Boolean  @default(false)
-  hasSeenWelcome      Boolean  @default(false)
+  role                UserRole  @default(USER)
+  organizationId      String?   @db.Uuid
+  onboardingCompleted Boolean   @default(false)
+  hasSeenWelcome      Boolean   @default(false)
   lastActiveAt        DateTime?
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
-  organization    Organization?         @relation(fields: [organizationId], references: [id])
-  entitlements    Entitlement[]
-  contentProgress UserContentProgress[]
-  userJourneys    UserJourney[]
-  userProfile     UserProfile?
-  notifications   Notification[]
-  notificationLog UserNotificationLog[]
-  cohortMemberships  CohortMember[]
-  discussionPosts    DiscussionPost[]
-  discussionReplies  DiscussionReply[]
-  postReactions      PostReaction[]
-  cohortBans         CohortBan[]
-  contentReports     ContentReport[]
-  cookieConsents     CookieConsent[]
-  tags               UserTag[]
-  savedContent         SavedContent[]
-  cancellationSurveys  CancellationSurvey[]
+  organization        Organization?         @relation(fields: [organizationId], references: [id])
+  entitlements        Entitlement[]
+  contentProgress     UserContentProgress[]
+  userJourneys        UserJourney[]
+  userProfile         UserProfile?
+  notifications       Notification[]
+  notificationLog     UserNotificationLog[]
+  cohortMemberships   CohortMember[]
+  discussionPosts     DiscussionPost[]
+  discussionReplies   DiscussionReply[]
+  postReactions       PostReaction[]
+  cohortBans          CohortBan[]
+  contentReports      ContentReport[]
+  cookieConsents      CookieConsent[]
+  tags                UserTag[]
+  savedContent        SavedContent[]
+  cancellationSurveys CancellationSurvey[]
 
   @@index([lastActiveAt])
   @@index([organizationId, createdAt])
@@ -161,11 +161,11 @@ model User {
 }
 
 model Organization {
-  id                  String    @id @default(uuid()) @db.Uuid
-  name                String
-  slug                String    @unique
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // ── Stripe Connect ──
   stripeAccountId     String?   @unique
@@ -173,59 +173,59 @@ model Organization {
   stripeOnboardedAt   DateTime?
 
   // ── Brand ──
-  brandName       String    @default("FamilyMind")
-  tagline         String?
-  description     String?
-  logoUrl         String?
-  faviconUrl      String?
-  websiteUrl      String?
+  brandName   String  @default("FamilyMind")
+  tagline     String?
+  description String?
+  logoUrl     String?
+  faviconUrl  String?
+  websiteUrl  String?
 
   // ── Farver (hex) ──
-  colorPrimary           String  @default("#86A0A6")
-  colorPrimaryForeground String  @default("#1A1A1A")
-  colorAccent            String  @default("#E8715A")
-  colorSuccess           String  @default("#2A6B5A")
-  colorBackground        String  @default("#FAFAF8")
-  colorSand              String  @default("#F5F0EB")
-  colorForeground        String  @default("#1A1A1A")
-  colorBorder            String  @default("#E8E4DF")
+  colorPrimary           String @default("#86A0A6")
+  colorPrimaryForeground String @default("#1A1A1A")
+  colorAccent            String @default("#E8715A")
+  colorSuccess           String @default("#2A6B5A")
+  colorBackground        String @default("#FAFAF8")
+  colorSand              String @default("#F5F0EB")
+  colorForeground        String @default("#1A1A1A")
+  colorBorder            String @default("#E8E4DF")
 
   // ── Kontakt ──
-  contactEmail    String?
-  contactPhone    String?
-  contactUrl      String?
+  contactEmail String?
+  contactPhone String?
+  contactUrl   String?
 
   // ── Email ──
-  emailFromName   String?
-  emailFromEmail  String?
+  emailFromName  String?
+  emailFromEmail String?
 
   // ── Landing page hero ──
-  heroHeading     String?
-  heroSubheading  String?
-  heroCtaText     String?
-  heroCtaUrl      String?
+  heroHeading    String?
+  heroSubheading String?
+  heroCtaText    String?
+  heroCtaUrl     String?
 
   // ── Om-sektion ──
-  aboutHeading    String?
-  aboutName       String?
-  aboutBio        String?
-  aboutUrl        String?
-  aboutImageUrl   String?
+  aboutHeading  String?
+  aboutName     String?
+  aboutBio      String?
+  aboutUrl      String?
+  aboutImageUrl String?
 
   // ── Landing page JSON-sektioner ──
-  landingBenefits      Json?
-  landingSteps         Json?
-  landingFeatures      Json?
-  landingTestimonials  Json?
-  landingFaq           Json?
+  landingBenefits     Json?
+  landingSteps        Json?
+  landingFeatures     Json?
+  landingTestimonials Json?
+  landingFaq          Json?
 
   // ── Priser (display) ──
   subscriptionPriceDisplay  String?
   subscriptionPeriodDisplay String?
 
   // ── Footer ──
-  footerCopyright  String?
-  footerLinks      Json?
+  footerCopyright String?
+  footerLinks     Json?
 
   // ── Relations ──
   users        User[]
@@ -233,23 +233,23 @@ model Organization {
 }
 
 model ContentUnit {
-  id              String      @id @default(uuid()) @db.Uuid
+  id              String     @id @default(uuid()) @db.Uuid
   title           String
   description     String?
-  slug            String      @unique
+  slug            String     @unique
   mediaType       MediaType
   mediaUrl        String?
   bunnyVideoId    String?
   thumbnailUrl    String?
   durationMinutes Int?
-  difficulty      Difficulty  @default(INTRODUCTORY)
+  difficulty      Difficulty @default(INTRODUCTORY)
   ageMin          Float? // years (decimals allowed, e.g. 0.5 = 6 months)
   ageMax          Float? // years (decimals allowed, e.g. 0.5 = 6 months)
-  isFree          Boolean     @default(false)
-  bodyHtml        String?     // Rich text artikelindhold (HTML) — bruges når mediaType=TEXT
+  isFree          Boolean    @default(false)
+  bodyHtml        String? // Rich text artikelindhold (HTML) — bruges når mediaType=TEXT
   publishedAt     DateTime?
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
 
   tags               ContentUnitTag[]
   courseLessons      CourseLesson[]
@@ -259,13 +259,16 @@ model ContentUnit {
 }
 
 model ContentTag {
-  id   String @id @default(uuid()) @db.Uuid
-  name String @unique
-  slug String @unique
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @unique
+  slug      String   @unique
+  color     String   @default("#6B7280")
+  createdAt DateTime @default(now())
 
   contentUnits      ContentUnitTag[]
   onboardingOptions OnboardingOption[]
   communityRooms    CommunityRoomTag[]
+  users             UserTag[]
 }
 
 model ContentUnitTag {
@@ -279,17 +282,17 @@ model ContentUnitTag {
 }
 
 model Course {
-  id              String         @id @default(uuid()) @db.Uuid
+  id              String   @id @default(uuid()) @db.Uuid
   title           String
   description     String?
-  slug            String         @unique
+  slug            String   @unique
   coverImageUrl   String?
   landingPage     Json?
-  isActive        Boolean        @default(true)
-  showStandalone  Boolean        @default(false)
+  isActive        Boolean  @default(true)
+  showStandalone  Boolean  @default(false)
   stripeProductId String?
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   modules       CourseModule[]
   lessons       CourseLesson[]
@@ -303,16 +306,16 @@ model Course {
 }
 
 model Bundle {
-  id              String         @id @default(uuid()) @db.Uuid
+  id              String   @id @default(uuid()) @db.Uuid
   title           String
   description     String?
-  slug            String         @unique
+  slug            String   @unique
   coverImageUrl   String?
   landingPage     Json?
-  isActive        Boolean        @default(true)
+  isActive        Boolean  @default(true)
   stripeProductId String?
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   courses       BundleCourse[]
   priceVariants PriceVariant[]
@@ -336,23 +339,23 @@ model BundleCourse {
 }
 
 model PriceVariant {
-  id              String           @id @default(uuid()) @db.Uuid
-  courseId        String?          @db.Uuid
-  bundleId        String?          @db.Uuid
-  label           String
-  description     String?
-  amountCents     Int
-  currency        String           @default("DKK")
-  billingType     BillingType
-  interval        BillingInterval?
-  intervalCount   Int              @default(1)
-  trialDays       Int?
-  stripePriceId   String?
-  position        Int              @default(0)
-  isActive        Boolean          @default(true)
-  isHighlighted   Boolean          @default(false)
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  id            String           @id @default(uuid()) @db.Uuid
+  courseId      String?          @db.Uuid
+  bundleId      String?          @db.Uuid
+  label         String
+  description   String?
+  amountCents   Int
+  currency      String           @default("DKK")
+  billingType   BillingType
+  interval      BillingInterval?
+  intervalCount Int              @default(1)
+  trialDays     Int?
+  stripePriceId String?
+  position      Int              @default(0)
+  isActive      Boolean          @default(true)
+  isHighlighted Boolean          @default(false)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
 
   course       Course?       @relation(fields: [courseId], references: [id], onDelete: Cascade)
   bundle       Bundle?       @relation(fields: [bundleId], references: [id], onDelete: Cascade)
@@ -363,12 +366,12 @@ model PriceVariant {
 }
 
 model CourseLesson {
-  id             String  @id @default(uuid()) @db.Uuid
-  courseId       String  @db.Uuid
-  contentUnitId  String  @db.Uuid
-  moduleId       String? @db.Uuid
-  position       Int
-  isFreePreview  Boolean @default(false)
+  id            String  @id @default(uuid()) @db.Uuid
+  courseId      String  @db.Uuid
+  contentUnitId String  @db.Uuid
+  moduleId      String? @db.Uuid
+  position      Int
+  isFreePreview Boolean @default(false)
 
   course      Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
   contentUnit ContentUnit   @relation(fields: [contentUnitId], references: [id], onDelete: Cascade)
@@ -409,10 +412,10 @@ model Entitlement {
   createdAt               DateTime          @default(now())
   updatedAt               DateTime          @default(now()) @updatedAt
 
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  organization Organization? @relation(fields: [organizationId], references: [id])
-  course       Course?       @relation(fields: [courseId], references: [id])
-  bundle       Bundle?       @relation(fields: [bundleId], references: [id])
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization       Organization?       @relation(fields: [organizationId], references: [id])
+  course             Course?             @relation(fields: [courseId], references: [id])
+  bundle             Bundle?             @relation(fields: [bundleId], references: [id])
   priceVariant       PriceVariant?       @relation(fields: [priceVariantId], references: [id])
   cancellationSurvey CancellationSurvey?
 
@@ -425,20 +428,20 @@ model Entitlement {
 }
 
 model DiscountCode {
-  id                    String       @id @default(uuid()) @db.Uuid
-  code                  String       @unique
-  type                  DiscountType
-  value                 Int
-  maxUses               Int?
-  currentUses           Int          @default(0)
-  validFrom             DateTime     @default(now())
-  validUntil            DateTime?
-  applicableCourseId    String?      @db.Uuid
-  applicableBundleId    String?      @db.Uuid
-  isActive              Boolean      @default(true)
-  stripeCouponId        String?
-  duration              DiscountDuration @default(once)
-  durationInMonths      Int?
+  id                 String           @id @default(uuid()) @db.Uuid
+  code               String           @unique
+  type               DiscountType
+  value              Int
+  maxUses            Int?
+  currentUses        Int              @default(0)
+  validFrom          DateTime         @default(now())
+  validUntil         DateTime?
+  applicableCourseId String?          @db.Uuid
+  applicableBundleId String?          @db.Uuid
+  isActive           Boolean          @default(true)
+  stripeCouponId     String?
+  duration           DiscountDuration @default(once)
+  durationInMonths   Int?
 
   applicableCourse Course? @relation(fields: [applicableCourseId], references: [id])
   applicableBundle Bundle? @relation(fields: [applicableBundleId], references: [id])
@@ -743,15 +746,15 @@ model CookieConsent {
 // ──────────────────────────────────────────────
 
 model Cohort {
-  id            String   @id @default(uuid()) @db.Uuid
-  journeyId     String   @db.Uuid
-  name          String?
-  maxMembers    Int      @default(25)
-  isOpen        Boolean  @default(true)
-  startDate     DateTime @default(now())
-  createdAt     DateTime @default(now())
+  id         String   @id @default(uuid()) @db.Uuid
+  journeyId  String   @db.Uuid
+  name       String?
+  maxMembers Int      @default(25)
+  isOpen     Boolean  @default(true)
+  startDate  DateTime @default(now())
+  createdAt  DateTime @default(now())
 
-  journey Journey            @relation(fields: [journeyId], references: [id], onDelete: Cascade)
+  journey Journey          @relation(fields: [journeyId], references: [id], onDelete: Cascade)
   members CohortMember[]
   posts   DiscussionPost[]
   bans    CohortBan[]
@@ -785,22 +788,22 @@ model DiscussionPrompt {
 }
 
 model DiscussionPost {
-  id              String   @id @default(uuid()) @db.Uuid
-  cohortId        String?  @db.Uuid
-  roomId          String?  @db.Uuid
-  organizationId  String?  @db.Uuid
-  authorId        String   @db.Uuid
-  dayId           String?  @db.Uuid
-  promptId        String?  @db.Uuid
-  slug            String?  @unique
-  body            String
-  isPrompt        Boolean  @default(false)
-  isPinned        Boolean  @default(false)
-  isHidden        Boolean  @default(false)
-  isPublic        Boolean  @default(true)
-  isFeatured      Boolean  @default(false)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String   @id @default(uuid()) @db.Uuid
+  cohortId       String?  @db.Uuid
+  roomId         String?  @db.Uuid
+  organizationId String?  @db.Uuid
+  authorId       String   @db.Uuid
+  dayId          String?  @db.Uuid
+  promptId       String?  @db.Uuid
+  slug           String?  @unique
+  body           String
+  isPrompt       Boolean  @default(false)
+  isPinned       Boolean  @default(false)
+  isHidden       Boolean  @default(false)
+  isPublic       Boolean  @default(true)
+  isFeatured     Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   cohort    Cohort?           @relation(fields: [cohortId], references: [id], onDelete: Cascade)
   room      CommunityRoom?    @relation(fields: [roomId], references: [id], onDelete: Cascade)
@@ -826,8 +829,8 @@ model DiscussionReply {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  post      DiscussionPost @relation(fields: [postId], references: [id], onDelete: Cascade)
-  author    User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  post      DiscussionPost  @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author    User            @relation(fields: [authorId], references: [id], onDelete: Cascade)
   reactions PostReaction[]
   reports   ContentReport[] @relation("ReplyReports")
 
@@ -842,9 +845,9 @@ model PostReaction {
   replyId String? @db.Uuid
   emoji   String  @default("❤️")
 
-  user  User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  post  DiscussionPost?   @relation(fields: [postId], references: [id], onDelete: Cascade)
-  reply DiscussionReply?  @relation(fields: [replyId], references: [id], onDelete: Cascade)
+  user  User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post  DiscussionPost?  @relation(fields: [postId], references: [id], onDelete: Cascade)
+  reply DiscussionReply? @relation(fields: [replyId], references: [id], onDelete: Cascade)
 
   @@unique([userId, postId, emoji])
   @@unique([userId, replyId, emoji])
@@ -853,11 +856,11 @@ model PostReaction {
 }
 
 model CohortBan {
-  id        String   @id @default(uuid()) @db.Uuid
-  cohortId  String   @db.Uuid
-  userId    String   @db.Uuid
-  reason    String?
-  bannedAt  DateTime @default(now())
+  id       String   @id @default(uuid()) @db.Uuid
+  cohortId String   @db.Uuid
+  userId   String   @db.Uuid
+  reason   String?
+  bannedAt DateTime @default(now())
 
   cohort Cohort @relation(fields: [cohortId], references: [id], onDelete: Cascade)
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -867,21 +870,21 @@ model CohortBan {
 }
 
 model CommunityRoom {
-  id              String   @id @default(uuid()) @db.Uuid
-  organizationId  String?  @db.Uuid
-  name            String
-  slug            String   @unique
-  description     String?
-  icon            String?  // lucide icon name, e.g. "MessageCircle"
-  sortOrder       Int      @default(0)
-  isPublic        Boolean  @default(true)
-  isArchived      Boolean  @default(false)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String?  @db.Uuid
+  name           String
+  slug           String   @unique
+  description    String?
+  icon           String? // lucide icon name, e.g. "MessageCircle"
+  sortOrder      Int      @default(0)
+  isPublic       Boolean  @default(true)
+  isArchived     Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  posts           DiscussionPost[]
-  promptQueue     RoomPromptQueue[]
-  tags            CommunityRoomTag[]
+  posts       DiscussionPost[]
+  promptQueue RoomPromptQueue[]
+  tags        CommunityRoomTag[]
 
   @@index([isArchived, sortOrder])
 }
@@ -897,16 +900,16 @@ model CommunityRoomTag {
 }
 
 model RoomPromptQueue {
-  id              String   @id @default(uuid()) @db.Uuid
-  organizationId  String?  @db.Uuid
-  roomId          String   @db.Uuid
-  promptText      String
-  priority        Int      @default(0)
-  postedAt        DateTime?
-  isPaused        Boolean  @default(false)
-  createdAt       DateTime @default(now())
+  id             String    @id @default(uuid()) @db.Uuid
+  organizationId String?   @db.Uuid
+  roomId         String    @db.Uuid
+  promptText     String
+  priority       Int       @default(0)
+  postedAt       DateTime?
+  isPaused       Boolean   @default(false)
+  createdAt      DateTime  @default(now())
 
-  room            CommunityRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  room CommunityRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
   @@index([roomId, postedAt, isPaused])
 }
@@ -921,9 +924,9 @@ model ContentReport {
   resolvedAt DateTime?
   createdAt  DateTime     @default(now())
 
-  reporter User              @relation(fields: [reporterId], references: [id], onDelete: Cascade)
-  post     DiscussionPost?   @relation("PostReports", fields: [postId], references: [id], onDelete: Cascade)
-  reply    DiscussionReply?  @relation("ReplyReports", fields: [replyId], references: [id], onDelete: Cascade)
+  reporter User             @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  post     DiscussionPost?  @relation("PostReports", fields: [postId], references: [id], onDelete: Cascade)
+  reply    DiscussionReply? @relation("ReplyReports", fields: [replyId], references: [id], onDelete: Cascade)
 
   @@index([status, createdAt])
   @@index([postId])
@@ -931,16 +934,8 @@ model ContentReport {
 }
 
 // ──────────────────────────────────────────────
-// Admin Tagging Models
+// User Tagging (unified with ContentTag)
 // ──────────────────────────────────────────────
-
-model AdminTag {
-  id        String    @id @default(uuid()) @db.Uuid
-  name      String    @unique
-  color     String    @default("#6B7280")
-  createdAt DateTime  @default(now())
-  users     UserTag[]
-}
 
 model UserTag {
   id        String   @id @default(uuid()) @db.Uuid
@@ -948,8 +943,8 @@ model UserTag {
   tagId     String   @db.Uuid
   createdAt DateTime @default(now())
 
-  user User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tag  AdminTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  user User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tag  ContentTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@unique([userId, tagId])
   @@index([userId])
@@ -982,10 +977,10 @@ model CancellationSurvey {
   offeredPause    Boolean   @default(false)
   pauseAccepted   Boolean   @default(false)
 
-  user          User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  entitlement   Entitlement         @relation(fields: [entitlementId], references: [id])
-  primaryReason CancellationReason? @relation("PrimaryReason", fields: [primaryReasonId], references: [id])
-  tags          CancellationSurveyTag[]
+  user                User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entitlement         Entitlement               @relation(fields: [entitlementId], references: [id])
+  primaryReason       CancellationReason?       @relation("PrimaryReason", fields: [primaryReasonId], references: [id])
+  tags                CancellationSurveyTag[]
   retentionAcceptance RetentionOfferAcceptance?
 
   @@unique([userId, entitlementId])
@@ -1008,41 +1003,41 @@ model CancellationSurveyTag {
 // ──────────────────────────────────────────────
 
 model RetentionOffer {
-  id              String              @id @default(uuid()) @db.Uuid
-  organizationId  String?             @db.Uuid
-  name            String
-  offerType       RetentionOfferType
-  isActive        Boolean             @default(true)
-  priority        Int                 @default(0)
+  id             String             @id @default(uuid()) @db.Uuid
+  organizationId String?            @db.Uuid
+  name           String
+  offerType      RetentionOfferType
+  isActive       Boolean            @default(true)
+  priority       Int                @default(0)
 
-  maxUsesPerUser  Int                 @default(1)
-  cooldownDays    Int                 @default(365)
+  maxUsesPerUser Int @default(1)
+  cooldownDays   Int @default(365)
 
-  stripeCouponId  String?
-  durationMonths  Int?
+  stripeCouponId String?
+  durationMonths Int?
 
-  pauseMonths     Int?
+  pauseMonths Int?
 
-  supportUrl      String?
-  supportMessage  String?
+  supportUrl     String?
+  supportMessage String?
 
-  contentUrl      String?
-  contentMessage  String?
+  contentUrl     String?
+  contentMessage String?
 
-  createdAt       DateTime            @default(now())
-  updatedAt       DateTime            @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  triggers        RetentionOfferTrigger[]
-  acceptances     RetentionOfferAcceptance[]
+  triggers    RetentionOfferTrigger[]
+  acceptances RetentionOfferAcceptance[]
 
   @@index([organizationId, isActive, priority])
   @@index([offerType, isActive])
 }
 
 model RetentionOfferTrigger {
-  id                   String             @id @default(uuid()) @db.Uuid
-  offerId              String             @db.Uuid
-  cancellationReasonId String             @db.Uuid
+  id                   String @id @default(uuid()) @db.Uuid
+  offerId              String @db.Uuid
+  cancellationReasonId String @db.Uuid
 
   offer              RetentionOffer     @relation(fields: [offerId], references: [id], onDelete: Cascade)
   cancellationReason CancellationReason @relation(fields: [cancellationReasonId], references: [id])

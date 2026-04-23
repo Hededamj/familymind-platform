@@ -7,7 +7,7 @@ import {
   getUserActivity,
   getUserNotifications,
 } from '@/lib/services/admin-user.service'
-import { listTags } from '@/lib/services/admin-tag.service'
+import { listTags } from '@/lib/services/tag.service'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ArrowLeft } from 'lucide-react'
