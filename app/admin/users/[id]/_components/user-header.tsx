@@ -19,7 +19,7 @@ import {
 } from '../../actions'
 import { computeUserStatus } from '@/lib/compute-user-status'
 import type { getUserDetail } from '@/lib/services/admin-user.service'
-import type { listTags } from '@/lib/services/admin-tag.service'
+import type { listTags } from '@/lib/services/tag.service'
 
 type User = NonNullable<Awaited<ReturnType<typeof getUserDetail>>>
 type Tag = Awaited<ReturnType<typeof listTags>>[number]

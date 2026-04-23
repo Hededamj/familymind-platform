@@ -53,6 +53,7 @@ const navSections: NavSection[] = [
       { href: '/admin/content', label: 'Lektioner', icon: FileText, tooltip: 'Individuelle indholdsstykker — video, tekst, øvelser' },
       { href: '/admin/journeys', label: 'Forløb', icon: Map, tooltip: 'Dagbaserede forløb der guider brugeren igennem et tema' },
       { href: '/admin/discounts', label: 'Rabatkoder', icon: Ticket, tooltip: 'Procentuelle eller faste rabatter synkroniseret med Stripe' },
+      { href: '/admin/tags', label: 'Tags', icon: Tags, tooltip: 'Emne-tags der binder indhold, rum, onboarding og brugere sammen — grundlaget for anbefalinger og segmentering' },
     ],
   },
   {
@@ -60,7 +61,6 @@ const navSections: NavSection[] = [
     items: [
       { href: '/admin/users', label: 'Brugere', icon: Users, tooltip: 'Se og administrer alle registrerede brugere' },
       { href: '/admin/cohorts', label: 'Kohorter', icon: UsersRound, tooltip: 'Grupper af brugere der følger samme forløb samtidig' },
-      { href: '/admin/settings/tags', label: 'Segmentering', icon: Tags, tooltip: 'Tags til at kategorisere brugere — bruges til anbefalinger og filtrering' },
     ],
   },
   {

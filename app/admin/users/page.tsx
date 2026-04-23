@@ -1,6 +1,6 @@
 import { requireAdmin } from '@/lib/auth'
 import { listUsers, getUserStats } from '@/lib/services/admin-user.service'
-import { listTags } from '@/lib/services/admin-tag.service'
+import { listTags } from '@/lib/services/tag.service'
 import { prisma } from '@/lib/prisma'
 import { UserStats } from './_components/user-stats'
 import { UserFilters } from './_components/user-filters'

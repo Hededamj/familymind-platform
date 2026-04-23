@@ -1,18 +1,34 @@
 'use server'
 
+import { z } from 'zod'
 import { requireAdmin } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import * as tagService from '@/lib/services/tag.service'
+import { createTagSchema, updateTagSchema } from '@/lib/validators/tag'
 import { revalidatePath } from 'next/cache'
 
-export async function createTagAction(data: { name: string; slug: string }) {
+const uuidSchema = z.string().uuid()
+
+type CreateInput = z.input<typeof createTagSchema>
+type UpdateInput = z.input<typeof updateTagSchema>
+
+export async function createTagAction(data: CreateInput) {
   await requireAdmin()
-  const tag = await prisma.contentTag.create({ data })
+  const result = await tagService.createTag(data)
   revalidatePath('/admin/tags')
-  return tag
+  return result
+}
+
+export async function updateTagAction(id: string, data: UpdateInput) {
+  await requireAdmin()
+  const validId = uuidSchema.parse(id)
+  const result = await tagService.updateTag(validId, data)
+  revalidatePath('/admin/tags')
+  return result
 }
 
 export async function deleteTagAction(id: string) {
   await requireAdmin()
-  await prisma.contentTag.delete({ where: { id } })
+  const validId = uuidSchema.parse(id)
+  await tagService.deleteTag(validId)
   revalidatePath('/admin/tags')
 }
