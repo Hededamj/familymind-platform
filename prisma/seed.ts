@@ -152,14 +152,23 @@ async function main() {
     ),
   ])
 
-  // -- Dashboard Messages (5 states) --
-  await Promise.all([
-    prisma.dashboardMessage.upsert({ where: { stateKey: 'new_user' }, update: {}, create: { stateKey: 'new_user', heading: 'Velkommen til FamilyMind!', body: 'Vi har fundet nogle anbefalinger til dig baseret på din profil.', ctaLabel: 'Se anbefalinger', ctaUrl: '/browse' } }),
-    prisma.dashboardMessage.upsert({ where: { stateKey: 'active_journey' }, update: {}, create: { stateKey: 'active_journey', heading: 'Fortsæt dit forløb', body: 'Du er godt på vej. Fortsæt hvor du slap.', ctaLabel: 'Fortsæt', ctaUrl: '/dashboard' } }),
-    prisma.dashboardMessage.upsert({ where: { stateKey: 'active_journey_plus_courses' }, update: {}, create: { stateKey: 'active_journey_plus_courses', heading: 'Din dag venter', body: 'Fortsæt dit forløb og dine kurser nedenfor.', ctaLabel: 'Fortsæt', ctaUrl: '/dashboard' } }),
-    prisma.dashboardMessage.upsert({ where: { stateKey: 'no_journey_has_courses' }, update: {}, create: { stateKey: 'no_journey_has_courses', heading: 'Klar til et forløb?', body: 'Du følger kurser, men har du overvejet et struktureret forløb?', ctaLabel: 'Udforsk forløb', ctaUrl: '/browse' } }),
-    prisma.dashboardMessage.upsert({ where: { stateKey: 'completed_journey' }, update: {}, create: { stateKey: 'completed_journey', heading: 'Tillykke! 🎉', body: 'Du har gennemført dit forløb. Klar til det næste?', ctaLabel: 'Find dit næste forløb', ctaUrl: '/browse' } }),
-  ])
+  // -- Dashboard Messages (5 generic states; persona-specific variants
+  // are seeded separately via scripts/seed-persona-dashboard-messages.ts) --
+  const genericMessages = [
+    { stateKey: 'new_user', heading: 'Velkommen til FamilyMind!', body: 'Vi har fundet nogle anbefalinger til dig baseret på din profil.', ctaLabel: 'Se anbefalinger', ctaUrl: '/browse' },
+    { stateKey: 'active_journey', heading: 'Fortsæt dit forløb', body: 'Du er godt på vej. Fortsæt hvor du slap.', ctaLabel: 'Fortsæt', ctaUrl: '/dashboard' },
+    { stateKey: 'active_journey_plus_courses', heading: 'Din dag venter', body: 'Fortsæt dit forløb og dine kurser nedenfor.', ctaLabel: 'Fortsæt', ctaUrl: '/dashboard' },
+    { stateKey: 'no_journey_has_courses', heading: 'Klar til et forløb?', body: 'Du følger kurser, men har du overvejet et struktureret forløb?', ctaLabel: 'Udforsk forløb', ctaUrl: '/browse' },
+    { stateKey: 'completed_journey', heading: 'Tillykke! 🎉', body: 'Du har gennemført dit forløb. Klar til det næste?', ctaLabel: 'Find dit næste forløb', ctaUrl: '/browse' },
+  ]
+  for (const m of genericMessages) {
+    const existing = await prisma.dashboardMessage.findFirst({
+      where: { stateKey: m.stateKey, tagId: null },
+    })
+    if (!existing) {
+      await prisma.dashboardMessage.create({ data: m })
+    }
+  }
 
   // -- Email Templates (all types) --
   const emailTemplates = await Promise.all([

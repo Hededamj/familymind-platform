@@ -9,7 +9,8 @@ export default async function DashboardSettingsPage() {
   await requireAdmin()
 
   const messages = await prisma.dashboardMessage.findMany({
-    orderBy: { stateKey: 'asc' },
+    include: { tag: { select: { name: true, color: true, slug: true } } },
+    orderBy: [{ stateKey: 'asc' }, { tagId: 'asc' }],
   })
 
   return (

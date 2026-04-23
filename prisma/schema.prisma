@@ -269,6 +269,7 @@ model ContentTag {
   onboardingOptions OnboardingOption[]
   communityRooms    CommunityRoomTag[]
   users             UserTag[]
+  dashboardMessages DashboardMessage[]
 }
 
 model ContentUnitTag {
@@ -692,11 +693,17 @@ model CheckInOption {
 
 model DashboardMessage {
   id       String  @id @default(uuid()) @db.Uuid
-  stateKey String  @unique
+  stateKey String
+  tagId    String? @db.Uuid
   heading  String
   body     String
   ctaLabel String?
   ctaUrl   String?
+
+  tag ContentTag? @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([stateKey, tagId])
+  @@index([stateKey])
 }
 
 model Notification {

@@ -26,6 +26,7 @@ type DashboardMessage = {
   body: string
   ctaLabel: string | null
   ctaUrl: string | null
+  tag: { name: string; color: string; slug: string } | null
 }
 
 type DashboardMessagesManagerProps = {
@@ -93,11 +94,23 @@ export function DashboardMessagesManager({
             {editingId === msg.id ? (
               // Edit mode
               <div className="p-4 space-y-4">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <Badge variant="secondary">
                     {STATE_KEY_LABELS[msg.stateKey] ?? msg.stateKey}
                   </Badge>
                   <Badge variant="outline">{msg.stateKey}</Badge>
+                  {msg.tag ? (
+                    <Badge
+                      className="text-white"
+                      style={{ backgroundColor: msg.tag.color }}
+                    >
+                      {msg.tag.name}
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="text-muted-foreground">
+                      Generisk
+                    </Badge>
+                  )}
                 </div>
 
                 <div className="space-y-2">

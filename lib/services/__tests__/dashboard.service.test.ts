@@ -14,6 +14,7 @@ vi.mock('@/lib/prisma', () => ({
     },
     dashboardMessage: {
       findUnique: vi.fn(),
+      findFirst: vi.fn(),
     },
   },
 }))
@@ -118,7 +119,7 @@ describe('getPersonalizedWelcome', () => {
   })
 
   it('returns personalized message with both age group and challenge tag', async () => {
-    mockedPrisma.dashboardMessage.findUnique.mockResolvedValue({
+    mockedPrisma.dashboardMessage.findFirst.mockResolvedValue({
       stateKey: 'active_journey',
       heading: 'Hej med dig',
       body: 'Du er i gang med et forløb.',
@@ -138,7 +139,7 @@ describe('getPersonalizedWelcome', () => {
   })
 
   it('returns personalized message with age group only when no challenge tag', async () => {
-    mockedPrisma.dashboardMessage.findUnique.mockResolvedValue({
+    mockedPrisma.dashboardMessage.findFirst.mockResolvedValue({
       stateKey: 'new_user',
       heading: 'Velkommen',
       body: 'Start her.',
@@ -155,7 +156,7 @@ describe('getPersonalizedWelcome', () => {
   })
 
   it('returns personalized message with challenge tag only when no childAges', async () => {
-    mockedPrisma.dashboardMessage.findUnique.mockResolvedValue({
+    mockedPrisma.dashboardMessage.findFirst.mockResolvedValue({
       stateKey: 'new_user',
       heading: 'Velkommen',
       body: 'Start her.',
@@ -173,7 +174,7 @@ describe('getPersonalizedWelcome', () => {
   })
 
   it('returns raw DashboardMessage when no profile exists', async () => {
-    mockedPrisma.dashboardMessage.findUnique.mockResolvedValue({
+    mockedPrisma.dashboardMessage.findFirst.mockResolvedValue({
       stateKey: 'new_user',
       heading: 'Velkommen',
       body: 'Kom godt i gang.',
@@ -190,7 +191,7 @@ describe('getPersonalizedWelcome', () => {
   })
 
   it('returns default when no DashboardMessage found', async () => {
-    mockedPrisma.dashboardMessage.findUnique.mockResolvedValue(null)
+    mockedPrisma.dashboardMessage.findFirst.mockResolvedValue(null)
     mockedPrisma.userProfile.findUnique.mockResolvedValue(null)
 
     const result = await getPersonalizedWelcome('user1', 'new_user')
@@ -333,7 +334,7 @@ describe('getDashboardState', () => {
     mockedGetRecommendations.mockResolvedValue([])
     mockedPrisma.userJourney.findFirst.mockResolvedValue(null)
     mockedGetJourneyProgress.mockResolvedValue({ totalDays: 14, completedDays: 2, currentDayNumber: 3, percentComplete: 14, phases: [] })
-    mockedPrisma.dashboardMessage.findUnique.mockResolvedValue({
+    mockedPrisma.dashboardMessage.findFirst.mockResolvedValue({
       stateKey: 'active_journey',
       heading: 'God uge',
       body: 'Du er i gang.',
@@ -360,7 +361,7 @@ describe('getDashboardState', () => {
     mockedGetUserInProgressCourses.mockResolvedValue([])
     mockedGetRecommendations.mockResolvedValue([])
     mockedPrisma.userJourney.findFirst.mockResolvedValue(null)
-    mockedPrisma.dashboardMessage.findUnique.mockResolvedValue(null)
+    mockedPrisma.dashboardMessage.findFirst.mockResolvedValue(null)
     mockedPrisma.userProfile.findUnique.mockResolvedValue(null)
 
     const result = await getDashboardState('user1')
