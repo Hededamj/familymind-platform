@@ -81,13 +81,27 @@ export async function getPersonalizedWelcome(
   userId: string,
   stateKey: DashboardState
 ): Promise<{ heading: string; body: string; ctaLabel: string | null; ctaUrl: string | null }> {
-  const [dashboardMessage, profile] = await Promise.all([
-    prisma.dashboardMessage.findUnique({ where: { stateKey } }),
-    prisma.userProfile.findUnique({
-      where: { userId },
-      select: { childAges: true, primaryChallengeTagId: true },
-    }),
-  ])
+  const profile = await prisma.userProfile.findUnique({
+    where: { userId },
+    select: { childAges: true, primaryChallengeTagId: true },
+  })
+
+  // Prefer persona-specific variant; fall back to generic (tagId IS NULL).
+  const personaMessage = profile?.primaryChallengeTagId
+    ? await prisma.dashboardMessage.findUnique({
+        where: {
+          stateKey_tagId: {
+            stateKey,
+            tagId: profile.primaryChallengeTagId,
+          },
+        },
+      })
+    : null
+  const dashboardMessage =
+    personaMessage ??
+    (await prisma.dashboardMessage.findFirst({
+      where: { stateKey, tagId: null },
+    }))
 
   if (!dashboardMessage) {
     return { heading: 'Velkommen!', body: '', ctaLabel: null, ctaUrl: null }
@@ -102,22 +116,23 @@ export async function getPersonalizedWelcome(
     }
   }
 
-  // Build personalization context
+  // Build personalization context for generic fallback messages.
+  // Persona-specific messages already speak to the context, so skip the
+  // "Vi har fokus på X" suffix to avoid double-messaging.
   const childAges = Array.isArray(profile.childAges) && profile.childAges.length > 0
     ? (profile.childAges as number[])
     : null
 
   let tagName: string | null = null
-  if (profile.primaryChallengeTagId) {
+  if (profile.primaryChallengeTagId && !personaMessage) {
     const tag = await prisma.contentTag.findUnique({
       where: { id: profile.primaryChallengeTagId },
     })
     tagName = tag?.name ?? null
   }
 
-  // Append personalized context to body if we have data
   let personalizedBody = dashboardMessage.body
-  if (childAges || tagName) {
+  if (!personaMessage && (childAges || tagName)) {
     const parts: string[] = []
     if (tagName) parts.push(tagName)
     if (childAges) parts.push(`din ${getAgeGroupLabel(childAges)}`)
@@ -211,7 +226,7 @@ export async function getDashboardState(userId: string) {
   // Final parallel batch — message, personalized fields, and journeyProgress all together
   const [message, checkInPrompt, weeklyFocus, personalizedWelcome, journeyProgressResult] =
     await Promise.all([
-      prisma.dashboardMessage.findUnique({ where: { stateKey } }),
+      prisma.dashboardMessage.findFirst({ where: { stateKey, tagId: null } }),
       getCheckInPrompt(userId),
       getWeeklyFocus(userId),
       getPersonalizedWelcome(userId, stateKey),

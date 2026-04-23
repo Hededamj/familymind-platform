@@ -42,7 +42,7 @@ export async function getCheckInOptions() {
 }
 
 export async function getDashboardMessage(stateKey: string) {
-  return prisma.dashboardMessage.findUnique({ where: { stateKey } })
+  return prisma.dashboardMessage.findFirst({ where: { stateKey, tagId: null } })
 }
 
 export async function getRecommendationRules() {
