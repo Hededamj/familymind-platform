@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { getStripe } from '@/lib/stripe'
+import { getStripeAccountForUser } from '@/lib/services/stripe-connect.service'
 import { findOrCreateStripeCustomer } from '@/lib/services/stripe-customer.service'
 import { createCheckoutSchema } from '@/lib/validators/checkout'
 import type { z } from 'zod'
@@ -27,19 +28,10 @@ export async function createCheckoutSession(
 
   const isRecurring = variant.billingType === 'recurring'
 
-  const user = await prisma.user.findUniqueOrThrow({ where: { id: userId } })
+  await prisma.user.findUniqueOrThrow({ where: { id: userId } })
 
-  // Resolve tenant's Stripe Connect account (if any)
-  let stripeAccountId: string | undefined
-  if (user.organizationId) {
-    const org = await prisma.organization.findUnique({
-      where: { id: user.organizationId },
-      select: { stripeAccountId: true, stripeAccountStatus: true },
-    })
-    if (org?.stripeAccountId && org.stripeAccountStatus === 'active') {
-      stripeAccountId = org.stripeAccountId
-    }
-  }
+  // Resolve tenant's Stripe Connect account (undefined when not in use).
+  const stripeAccountId = await getStripeAccountForUser(userId)
 
   // Reuse a single Stripe Customer per user instead of creating a fresh one
   // for each checkout. Keeps subscription history, payment methods, and tax

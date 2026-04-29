@@ -18,6 +18,12 @@ vi.mock('@/lib/prisma', () => ({
     entitlement: {
       findFirst: vi.fn(),
     },
+    user: {
+      findUnique: vi.fn(),
+    },
+    organization: {
+      findUnique: vi.fn(),
+    },
   },
 }))
 
@@ -90,9 +96,11 @@ describe('cancelSubscription', () => {
 
     const result = await cancelSubscription({ userId: 'user-1', entitlementId: 'ent-1' })
 
-    expect(mockStripe.subscriptions.update).toHaveBeenCalledWith('sub_test123', {
-      cancel_at_period_end: true,
-    })
+    expect(mockStripe.subscriptions.update).toHaveBeenCalledWith(
+      'sub_test123',
+      { cancel_at_period_end: true },
+      undefined
+    )
     expect(mockedPrisma.cancellationSurvey.update).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({ cancelledAt: expect.any(Date) }),
@@ -159,7 +167,8 @@ describe('pauseSubscription', () => {
         pause_collection: expect.objectContaining({
           behavior: 'void',
         }),
-      })
+      }),
+      undefined
     )
 
     const callArgs = mockStripe.subscriptions.update.mock.calls[0][1]
