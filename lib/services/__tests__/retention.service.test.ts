@@ -254,7 +254,10 @@ describe('acceptOffer', () => {
     expect(stripe.subscriptions.update).toHaveBeenCalledWith(
       'sub_abc123',
       { discounts: [{ coupon: 'cpn_x' }] },
-      { stripeAccount: 'acct_123' }
+      expect.objectContaining({
+        stripeAccount: 'acct_123',
+        idempotencyKey: 'discount-apply:sub_abc123:cpn_x',
+      })
     )
   })
 

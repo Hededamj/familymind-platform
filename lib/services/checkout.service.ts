@@ -62,6 +62,11 @@ export async function createCheckoutSession(
       ...(isRecurring && variant.trialDays
         ? { subscription_data: { trial_period_days: variant.trialDays } }
         : {}),
+      // TODO(vat): enable Stripe Tax once revisor has confirmed B2C/B2B
+      // posture for DK MOMS. Adding `automatic_tax: { enabled: true }`
+      // here will compute and collect VAT based on the customer's
+      // billing address (which is now persisted on the reused Customer).
+      // Requires a configured Tax Origin in Stripe Dashboard.
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}${cancelPath}`,
       metadata: {

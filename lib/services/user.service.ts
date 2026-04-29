@@ -100,16 +100,16 @@ export async function deleteUserAccount(userId: string) {
 
   const stripe = getStripe()
   const stripeAccountId = await getStripeAccountForUser(userId)
-  const requestOpts: Stripe.RequestOptions | undefined = stripeAccountId
+  const baseOpts: Stripe.RequestOptions | undefined = stripeAccountId
     ? { stripeAccount: stripeAccountId }
     : undefined
   for (const entitlement of activeEntitlements) {
     if (entitlement.stripeSubscriptionId) {
       try {
-        await stripe.subscriptions.cancel(
-          entitlement.stripeSubscriptionId,
-          requestOpts
-        )
+        await stripe.subscriptions.cancel(entitlement.stripeSubscriptionId, {
+          ...baseOpts,
+          idempotencyKey: `delete-cancel:${entitlement.id}`,
+        })
       } catch (err) {
         // Abonnement kan allerede være annulleret — ignorer
         console.warn(
