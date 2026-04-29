@@ -1,5 +1,7 @@
+import type Stripe from 'stripe'
 import { prisma } from '@/lib/prisma'
 import { getStripe } from '@/lib/stripe'
+import { getStripeAccountForUser } from '@/lib/services/stripe-connect.service'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { updateProfileSchema } from '@/lib/validators/user'
 import type { z } from 'zod'
@@ -97,10 +99,17 @@ export async function deleteUserAccount(userId: string) {
   })
 
   const stripe = getStripe()
+  const stripeAccountId = await getStripeAccountForUser(userId)
+  const requestOpts: Stripe.RequestOptions | undefined = stripeAccountId
+    ? { stripeAccount: stripeAccountId }
+    : undefined
   for (const entitlement of activeEntitlements) {
     if (entitlement.stripeSubscriptionId) {
       try {
-        await stripe.subscriptions.cancel(entitlement.stripeSubscriptionId)
+        await stripe.subscriptions.cancel(
+          entitlement.stripeSubscriptionId,
+          requestOpts
+        )
       } catch (err) {
         // Abonnement kan allerede være annulleret — ignorer
         console.warn(

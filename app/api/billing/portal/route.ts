@@ -3,6 +3,7 @@ import type Stripe from 'stripe'
 import { getCurrentUser } from '@/lib/auth'
 import { getStripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
+import { getStripeAccountForUser } from '@/lib/services/stripe-connect.service'
 import { findOrCreateStripeCustomer } from '@/lib/services/stripe-customer.service'
 
 export async function POST() {
@@ -16,18 +17,7 @@ export async function POST() {
   // who pre-date the customer-reuse refactor and haven't been backfilled.
   let customerId: string | null = user.stripeCustomerId
 
-  // Resolve Connect account if the user belongs to an org with one wired up.
-  let stripeAccountId: string | undefined
-  if (user.organizationId) {
-    const org = await prisma.organization.findUnique({
-      where: { id: user.organizationId },
-      select: { stripeAccountId: true, stripeAccountStatus: true },
-    })
-    if (org?.stripeAccountId && org.stripeAccountStatus === 'active') {
-      stripeAccountId = org.stripeAccountId
-    }
-  }
-
+  const stripeAccountId = await getStripeAccountForUser(user.id)
   const requestOpts: Stripe.RequestOptions | undefined = stripeAccountId
     ? { stripeAccount: stripeAccountId }
     : undefined

@@ -1,5 +1,7 @@
+import type Stripe from 'stripe'
 import { prisma } from '@/lib/prisma'
 import { getStripe } from '@/lib/stripe'
+import { getStripeAccountForUser } from '@/lib/services/stripe-connect.service'
 
 export interface CancelSubscriptionInput {
   userId: string
@@ -34,7 +36,14 @@ export async function cancelSubscription(
 
   // 3. Idempotency: retrieve subscription from Stripe to check if already scheduled for cancel
   const stripe = getStripe()
-  const sub = await stripe.subscriptions.retrieve(entitlement.stripeSubscriptionId)
+  const stripeAccountId = await getStripeAccountForUser(userId)
+  const requestOpts: Stripe.RequestOptions | undefined = stripeAccountId
+    ? { stripeAccount: stripeAccountId }
+    : undefined
+  const sub = await stripe.subscriptions.retrieve(
+    entitlement.stripeSubscriptionId,
+    requestOpts
+  )
   const subData = sub as unknown as { cancel_at_period_end: boolean; current_period_end: number }
   const currentPeriodEnd = new Date(subData.current_period_end * 1000)
 
@@ -50,9 +59,11 @@ export async function cancelSubscription(
   }
 
   // 4. Call Stripe to schedule cancel at period end
-  const updated = await stripe.subscriptions.update(entitlement.stripeSubscriptionId, {
-    cancel_at_period_end: true,
-  })
+  const updated = await stripe.subscriptions.update(
+    entitlement.stripeSubscriptionId,
+    { cancel_at_period_end: true },
+    requestOpts
+  )
   const updatedData = updated as unknown as { current_period_end: number }
 
   // 5. Mark survey as having triggered a cancel
@@ -102,12 +113,20 @@ export async function pauseSubscription(
 
   // Call Stripe with pause_collection void behavior
   const stripe = getStripe()
-  await stripe.subscriptions.update(entitlement.stripeSubscriptionId, {
-    pause_collection: {
-      behavior: 'void',
-      resumes_at: resumesAtUnix,
-    },
-  } as Parameters<typeof stripe.subscriptions.update>[1])
+  const stripeAccountId = await getStripeAccountForUser(userId)
+  const requestOpts: Stripe.RequestOptions | undefined = stripeAccountId
+    ? { stripeAccount: stripeAccountId }
+    : undefined
+  await stripe.subscriptions.update(
+    entitlement.stripeSubscriptionId,
+    {
+      pause_collection: {
+        behavior: 'void',
+        resumes_at: resumesAtUnix,
+      },
+    } as Parameters<typeof stripe.subscriptions.update>[1],
+    requestOpts
+  )
 
   // Upsert survey pause flags (survey may not exist yet if user pauses before submitting full survey)
   await prisma.cancellationSurvey.upsert({

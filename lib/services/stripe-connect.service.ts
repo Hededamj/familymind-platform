@@ -154,6 +154,32 @@ export async function getActiveStripeAccount(
 }
 
 /**
+ * Resolve the Stripe Connect account id to use for a given user, or
+ * undefined if the user belongs to an org without an active Connect
+ * account (platform-account fallback). Use this when wiring the
+ * `stripeAccount` request option on Stripe API calls so the call
+ * targets the right account whether Connect is in play or not.
+ */
+export async function getStripeAccountForUser(
+  userId: string
+): Promise<string | undefined> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { organizationId: true },
+  })
+  if (!user?.organizationId) return undefined
+
+  const org = await prisma.organization.findUnique({
+    where: { id: user.organizationId },
+    select: { stripeAccountId: true, stripeAccountStatus: true },
+  })
+
+  return org?.stripeAccountId && org.stripeAccountStatus === 'active'
+    ? org.stripeAccountId
+    : undefined
+}
+
+/**
  * Resolve Stripe account status fra account-objekt.
  */
 function resolveAccountStatus(account: Stripe.Account): string {
