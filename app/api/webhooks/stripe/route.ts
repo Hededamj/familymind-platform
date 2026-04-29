@@ -9,6 +9,23 @@ import {
   pauseEntitlements,
   updateEntitlementStatus,
 } from '@/lib/services/entitlement.service'
+import { sendTemplatedEmail } from '@/lib/services/engagement.service'
+
+/**
+ * Look up the user that owns a Stripe subscription via our Entitlement
+ * mirror. Returns null if no Entitlement exists for the subscription
+ * (e.g. webhook fires before checkout.session.completed has been
+ * recorded on our side).
+ */
+async function getUserIdForSubscription(
+  stripeSubscriptionId: string
+): Promise<string | null> {
+  const ent = await prisma.entitlement.findFirst({
+    where: { stripeSubscriptionId },
+    select: { userId: true },
+  })
+  return ent?.userId ?? null
+}
 
 export async function POST(req: Request) {
   const body = await req.text()
@@ -143,6 +160,19 @@ export async function POST(req: Request) {
       // PAST_DUE → ACTIVE on its own.
       if (typeof subscriptionRef === 'string') {
         await updateEntitlementStatus(subscriptionRef, 'PAST_DUE')
+        const userId = await getUserIdForSubscription(subscriptionRef)
+        if (userId) {
+          await sendTemplatedEmail(userId, 'payment_failed')
+        }
+      }
+      break
+    }
+
+    case 'customer.subscription.trial_will_end': {
+      const subscription = event.data.object as Stripe.Subscription
+      const userId = await getUserIdForSubscription(subscription.id)
+      if (userId) {
+        await sendTemplatedEmail(userId, 'trial_ending')
       }
       break
     }
@@ -204,6 +234,29 @@ export async function POST(req: Request) {
           )
           await syncAccountStatus(account.id)
         }
+      }
+      break
+    }
+
+    case 'account.application.deauthorized': {
+      // Fired when a connected account disconnects our platform from
+      // their Stripe Dashboard. The event payload contains the account
+      // id at .account (not on .data.object since the object is the
+      // application). Stripe also revokes our keys so we can't query
+      // them anymore — just zero out the local record.
+      const accountId = (event as unknown as { account?: string }).account
+      if (typeof accountId === 'string') {
+        await prisma.organization.updateMany({
+          where: { stripeAccountId: accountId },
+          data: {
+            stripeAccountId: null,
+            stripeAccountStatus: 'not_connected',
+            stripeOnboardedAt: null,
+          },
+        })
+        console.log(
+          `Connect account ${accountId} deauthorized — org reset to not_connected`
+        )
       }
       break
     }
