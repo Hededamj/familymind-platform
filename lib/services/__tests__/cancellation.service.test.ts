@@ -17,6 +17,7 @@ vi.mock('@/lib/prisma', () => ({
     },
     entitlement: {
       findFirst: vi.fn(),
+      updateMany: vi.fn(),
     },
     user: {
       findUnique: vi.fn(),

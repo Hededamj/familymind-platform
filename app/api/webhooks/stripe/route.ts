@@ -6,6 +6,7 @@ import { getStripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 import {
   createEntitlement,
+  pauseEntitlements,
   updateEntitlementStatus,
 } from '@/lib/services/entitlement.service'
 
@@ -97,11 +98,26 @@ export async function POST(req: Request) {
 
     case 'customer.subscription.updated': {
       const subscription = event.data.object as Stripe.Subscription
-      if (subscription.status === 'active') {
+      const pause = (subscription as unknown as {
+        pause_collection?: { resumes_at?: number | null } | null
+      }).pause_collection
+
+      // Pause takes precedence over status — Stripe keeps `status: 'active'`
+      // while pause_collection is set, but we want our entitlement to reflect
+      // that the user isn't being charged.
+      if (pause) {
+        const resumesAt = pause.resumes_at
+          ? new Date(pause.resumes_at * 1000)
+          : new Date(8640000000000000) // far-future sentinel: paused indefinitely
+        await pauseEntitlements(subscription.id, resumesAt)
+      } else if (subscription.status === 'active' || subscription.status === 'trialing') {
         await updateEntitlementStatus(subscription.id, 'ACTIVE')
+      } else if (subscription.status === 'past_due') {
+        await updateEntitlementStatus(subscription.id, 'PAST_DUE')
       } else if (
         subscription.status === 'canceled' ||
-        subscription.status === 'unpaid'
+        subscription.status === 'unpaid' ||
+        subscription.status === 'incomplete_expired'
       ) {
         await updateEntitlementStatus(subscription.id, 'CANCELLED')
       }
@@ -120,6 +136,57 @@ export async function POST(req: Request) {
         invoice.parent?.subscription_details?.subscription ?? null
       console.error(
         `Payment failed for invoice ${invoice.id}, subscription: ${subscriptionRef}`
+      )
+      // Mark entitlements PAST_DUE so dashboard / gating can react. Stripe
+      // will retry per the dunning schedule and emit subscription.updated
+      // back to active when payment succeeds — the .updated handler clears
+      // PAST_DUE → ACTIVE on its own.
+      if (typeof subscriptionRef === 'string') {
+        await updateEntitlementStatus(subscriptionRef, 'PAST_DUE')
+      }
+      break
+    }
+
+    case 'charge.refunded': {
+      const charge = event.data.object as Stripe.Charge
+      if (typeof charge.payment_intent !== 'string') break
+
+      // Only revoke for full refunds. Partial refunds keep access.
+      if (charge.amount_refunded < charge.amount) break
+
+      // Correlate charge → checkout session → entitlement. We don't store
+      // payment_intent on Entitlement, so we ask Stripe for the session.
+      const sessions = await getStripe().checkout.sessions.list({
+        payment_intent: charge.payment_intent,
+        limit: 1,
+      })
+      const sessionId = sessions.data[0]?.id
+      if (!sessionId) {
+        console.log(
+          `Refund ${charge.id}: no checkout session for payment_intent ${charge.payment_intent}`
+        )
+        break
+      }
+
+      const entitlement = await prisma.entitlement.findUnique({
+        where: { stripeCheckoutSessionId: sessionId },
+      })
+      if (!entitlement) {
+        console.log(`Refund ${charge.id}: no entitlement for session ${sessionId}`)
+        break
+      }
+
+      await prisma.entitlement.update({
+        where: { id: entitlement.id },
+        data: { status: 'CANCELLED', cancelledAt: new Date() },
+      })
+      break
+    }
+
+    case 'payment_intent.payment_failed': {
+      const intent = event.data.object as Stripe.PaymentIntent
+      console.error(
+        `Payment intent ${intent.id} failed: ${intent.last_payment_error?.message ?? 'unknown'}`
       )
       break
     }
