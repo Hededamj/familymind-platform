@@ -59,11 +59,13 @@ export async function cancelSubscription(
     return { cancelAtPeriodEnd: true, currentPeriodEnd }
   }
 
-  // 4. Call Stripe to schedule cancel at period end
+  // 4. Call Stripe to schedule cancel at period end. Idempotency key
+  // ties the request to the entitlement so a double-click or retry
+  // collapses to one Stripe-side operation.
   const updated = await stripe.subscriptions.update(
     entitlement.stripeSubscriptionId,
     { cancel_at_period_end: true },
-    requestOpts
+    { ...requestOpts, idempotencyKey: `cancel:${entitlementId}` }
   )
   const updatedData = updated as unknown as { current_period_end: number }
 
@@ -126,7 +128,7 @@ export async function pauseSubscription(
         resumes_at: resumesAtUnix,
       },
     } as Parameters<typeof stripe.subscriptions.update>[1],
-    requestOpts
+    { ...requestOpts, idempotencyKey: `pause:${entitlementId}:${months}` }
   )
 
   // Mirror the pause in our DB so the dashboard, analytics and gating

@@ -1,9 +1,15 @@
 import { NextResponse } from 'next/server'
 import { getStripe } from '@/lib/stripe'
 
-const PRICE_PUBLIC = 'price_1TNZ6YJVxLzS0GFc18xsZ1XN'
-const PRICE_MEMBER = 'price_1TNZQfJVxLzS0GFcvfGB5yyg'
-const FAMILYMIND_PRODUCT_ID = 'course_182187'
+// Stripe price IDs for the Kokkedal-specific checkout flow. Defaults are
+// the live IDs that have always been in source; environment variables let
+// us swap them per environment (or fix breakage if a price is archived).
+const PRICE_PUBLIC =
+  process.env.STRIPE_KOKKEDAL_PRICE_PUBLIC ?? 'price_1TNZ6YJVxLzS0GFc18xsZ1XN'
+const PRICE_MEMBER =
+  process.env.STRIPE_KOKKEDAL_PRICE_MEMBER ?? 'price_1TNZQfJVxLzS0GFcvfGB5yyg'
+const FAMILYMIND_PRODUCT_ID =
+  process.env.STRIPE_KOKKEDAL_FAMILYMIND_PRODUCT_ID ?? 'course_182187'
 
 const SUCCESS_URL = 'https://mettehummel.dk/kokkedal/tak?session_id={CHECKOUT_SESSION_ID}'
 const CANCEL_URL = 'https://mettehummel.dk/kokkedal'

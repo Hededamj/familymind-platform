@@ -111,7 +111,10 @@ async function applyDiscountOffer(
   await stripe.subscriptions.update(
     stripeSubscriptionId,
     { discounts: [{ coupon: stripeCouponId }] } as Parameters<typeof stripe.subscriptions.update>[1],
-    stripeAccountId ? { stripeAccount: stripeAccountId } : undefined
+    {
+      ...(stripeAccountId ? { stripeAccount: stripeAccountId } : {}),
+      idempotencyKey: `discount-apply:${stripeSubscriptionId}:${stripeCouponId}`,
+    }
   )
 }
 
@@ -145,7 +148,10 @@ async function reverseCancelAtPeriodEnd(
   await stripe.subscriptions.update(
     stripeSubscriptionId,
     { cancel_at_period_end: false } as Parameters<typeof stripe.subscriptions.update>[1],
-    stripeAccountId ? { stripeAccount: stripeAccountId } : undefined
+    {
+      ...(stripeAccountId ? { stripeAccount: stripeAccountId } : {}),
+      idempotencyKey: `reverse-cancel:${stripeSubscriptionId}`,
+    }
   )
 }
 

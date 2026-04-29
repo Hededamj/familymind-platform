@@ -100,7 +100,7 @@ describe('cancelSubscription', () => {
     expect(mockStripe.subscriptions.update).toHaveBeenCalledWith(
       'sub_test123',
       { cancel_at_period_end: true },
-      undefined
+      expect.objectContaining({ idempotencyKey: 'cancel:ent-1' })
     )
     expect(mockedPrisma.cancellationSurvey.update).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -169,7 +169,7 @@ describe('pauseSubscription', () => {
           behavior: 'void',
         }),
       }),
-      undefined
+      expect.objectContaining({ idempotencyKey: 'pause:ent-1:2' })
     )
 
     const callArgs = mockStripe.subscriptions.update.mock.calls[0][1]
