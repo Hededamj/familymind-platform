@@ -97,13 +97,43 @@ export async function revokeEntitlement(id: string) {
 
 export async function updateEntitlementStatus(
   stripeSubscriptionId: string,
-  status: 'ACTIVE' | 'EXPIRED' | 'CANCELLED'
+  status: 'ACTIVE' | 'PAUSED' | 'PAST_DUE' | 'EXPIRED' | 'CANCELLED'
+) {
+  // Build only the fields that should change for this status. Leaving the
+  // rest undefined means Prisma won't touch them — important so reactivating
+  // an entitlement (status → ACTIVE) clears pausedUntil but doesn't wipe
+  // an existing cancelledAt timestamp set on a prior CANCELLED transition.
+  const data: {
+    status: typeof status
+    cancelledAt?: Date | null
+    pausedUntil?: Date | null
+  } = { status }
+
+  if (status === 'CANCELLED') {
+    data.cancelledAt = new Date()
+  }
+  if (status === 'ACTIVE') {
+    // Resuming from a PAUSED/PAST_DUE state — clear the pause marker.
+    data.pausedUntil = null
+  }
+
+  return prisma.entitlement.updateMany({
+    where: { stripeSubscriptionId },
+    data,
+  })
+}
+
+/**
+ * Mark all entitlements for a subscription as PAUSED with a known resume
+ * date. Called from `pauseSubscription` and from the `subscription.updated`
+ * webhook when Stripe transitions the subscription into pause_collection.
+ */
+export async function pauseEntitlements(
+  stripeSubscriptionId: string,
+  pausedUntil: Date
 ) {
   return prisma.entitlement.updateMany({
     where: { stripeSubscriptionId },
-    data: {
-      status,
-      cancelledAt: status === 'CANCELLED' ? new Date() : undefined,
-    },
+    data: { status: 'PAUSED', pausedUntil },
   })
 }

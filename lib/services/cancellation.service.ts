@@ -1,6 +1,7 @@
 import type Stripe from 'stripe'
 import { prisma } from '@/lib/prisma'
 import { getStripe } from '@/lib/stripe'
+import { pauseEntitlements } from '@/lib/services/entitlement.service'
 import { getStripeAccountForUser } from '@/lib/services/stripe-connect.service'
 
 export interface CancelSubscriptionInput {
@@ -127,6 +128,13 @@ export async function pauseSubscription(
     } as Parameters<typeof stripe.subscriptions.update>[1],
     requestOpts
   )
+
+  // Mirror the pause in our DB so the dashboard, analytics and gating
+  // logic see status=PAUSED instead of relying on the now-irrelevant
+  // ACTIVE flag. The webhook handler also picks up subscription.updated
+  // events, but writing here keeps local state consistent without an
+  // RTT to Stripe → us → webhook.
+  await pauseEntitlements(entitlement.stripeSubscriptionId, resumesAt)
 
   // Upsert survey pause flags (survey may not exist yet if user pauses before submitting full survey)
   await prisma.cancellationSurvey.upsert({
