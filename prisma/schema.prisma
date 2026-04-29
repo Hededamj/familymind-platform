@@ -134,6 +134,10 @@ model User {
   onboardingCompleted Boolean   @default(false)
   hasSeenWelcome      Boolean   @default(false)
   lastActiveAt        DateTime?
+  // Stripe Customer for the platform (or default org). Multi-tenant Connect
+  // setups will need a (userId, orgId) -> customerId join table; until then
+  // this column is sufficient.
+  stripeCustomerId    String?   @unique
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 

@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { getStripe } from '@/lib/stripe'
+import { findOrCreateStripeCustomer } from '@/lib/services/stripe-customer.service'
 import { createCheckoutSchema } from '@/lib/validators/checkout'
 import type { z } from 'zod'
 
@@ -40,6 +41,11 @@ export async function createCheckoutSession(
     }
   }
 
+  // Reuse a single Stripe Customer per user instead of creating a fresh one
+  // for each checkout. Keeps subscription history, payment methods, and tax
+  // location consolidated in the customer's billing portal.
+  const customerId = await findOrCreateStripeCustomer(userId, { stripeAccountId })
+
   let discountCouponId: string | undefined
   let discountCodeId: string | undefined
 
@@ -58,7 +64,7 @@ export async function createCheckoutSession(
   const session = await stripe.checkout.sessions.create(
     {
       mode: isRecurring ? 'subscription' : 'payment',
-      customer_email: user.email,
+      customer: customerId,
       line_items: [{ price: variant.stripePriceId, quantity: 1 }],
       ...(discountCouponId ? { discounts: [{ coupon: discountCouponId }] } : {}),
       ...(isRecurring && variant.trialDays
