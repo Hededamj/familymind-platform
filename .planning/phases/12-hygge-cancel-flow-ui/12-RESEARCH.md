@@ -296,7 +296,7 @@ All copy matches mockup tone exactly. Listed here as the canonical reference.
 - **Heading:** "Lad os fikse det først"
 - **Body:** "Tekniske problemer er altid vores skyld — og vi vil gerne gøre det godt igen. Skriv til os, og vi hjælper dig inden du beslutter dig."
 - **Support card:** ✉️ icon / "Skriv til vores support" / "Vi svarer inden for 24 timer på hverdage"
-- **Primary CTA:** "Kontakt support" (links to `offerConfig.supportUrl` — fallback `mailto:support@familymind.dk`)
+- **Primary CTA:** "Kontakt support" (links to `offerConfig.supportUrl` — fallback `mailto:support@familymind.nu`)
 - **Decline link:** "Nej tak, jeg vil gerne opsige alligevel"
 
 ### Step 3D — Content
@@ -526,7 +526,7 @@ Phase 12 is pure UI. Service layer is already tested in Phases 10–11. Testing 
 3. **Support contact flow**
    - What we know: `offerConfig.supportUrl` links to a support URL
    - What's unclear: Does clicking "Kontakt support" open a new tab, mailto, or an in-app form?
-   - Recommendation: Use `<a href={supportUrl || 'mailto:support@familymind.dk'} target="_blank">` — simplest, no in-app chat complexity
+   - Recommendation: Use `<a href={supportUrl || 'mailto:support@familymind.nu'} target="_blank">` — simplest, no in-app chat complexity
 
 ---
 

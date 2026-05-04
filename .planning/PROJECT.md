@@ -82,13 +82,13 @@ Forældre skal have en smooth, native-lignende mobiloplevelse der gør det nemt 
 - Konkurrent-analyse viser høj quality bar for mobile UX (se mobil side konkurrent.jpg)
 - Audit identificerede ~23 issues: 4 kritiske, 5 høje, 14 medium/lav
 - Eksisterende kode er generelt fornuftigt struktureret men mangler mobile polish
-- Domæne: mettehummel.dk (Simply hosting), deploy: Vercel
+- Domæne: familymind.nu, deploy: Vercel
 - Tech: Next.js 16, React 19, Tailwind 4, shadcn/ui, Supabase, Prisma
 
 ## Constraints
 
 - **Budget**: Hobby Vercel plan, gratis Supabase tier — hold det billigt
-- **Domæne**: mettehummel.dk (ikke familymind.dk)
+- **Domæne**: familymind.nu (vi ejer ikke familymind.dk)
 - **Sprog**: Dansk UI, dansk indhold
 - **Browser**: Primært Safari iOS + Chrome Android
 - **Eksisterende**: Ingen breaking changes til admin-panel eller data-model
@@ -100,7 +100,7 @@ Forældre skal have en smooth, native-lignende mobiloplevelse der gør det nemt 
 | Webapp over native app | Budget, hurtigere iteration, én codebase | — Pending |
 | Tailwind 4 + shadcn/ui | Allerede i brug, god mobile-first workflow | ✓ Good |
 | Supabase Auth + Prisma ORM | Allerede i brug, service-layer pattern | ✓ Good |
-| mettehummel.dk som afsender-domæne | Ejer ikke familymind.dk | ✓ Good |
+| familymind.nu som platform-domæne | White-label SaaS, eget brand-domæne (.dk var optaget) | ✓ Good |
 | MobilePay via Vipps Recurring API v3 (ikke Stripe) | Stripe understøtter ikke MobilePay recurring | ✓ v1.3 |
 | Integreret i FamilyMind monorepo (ikke standalone) | Deler User/Entitlement-modeller, ingen datasync | ✓ v1.3 |
 | Ingen split payments på MobilePay | Forretning deler ikke indkomst med instruktører | ✓ v1.3 |
