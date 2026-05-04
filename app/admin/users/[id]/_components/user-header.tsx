@@ -1,9 +1,20 @@
 'use client'
 
-import { useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import {
   Select,
   SelectContent,
@@ -11,9 +22,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { X } from 'lucide-react'
+import { Pencil, X } from 'lucide-react'
 import {
   updateUserRoleAction,
+  updateUserProfileAction,
   addTagToUsersAction,
   removeTagFromUsersAction,
 } from '../../actions'
@@ -48,12 +60,41 @@ export function UserHeader({
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
+  const [isSavingProfile, startProfileTransition] = useTransition()
+
+  const [editOpen, setEditOpen] = useState(false)
+  const [editName, setEditName] = useState(user.name ?? '')
+  const [editEmail, setEditEmail] = useState(user.email)
 
   const status = computeUserStatus(user)
   const config = statusConfig[status]
 
   const userTagIds = new Set(user.tags.map((ut) => ut.tag.id))
   const availableTags = allTags.filter((t) => !userTagIds.has(t.id))
+
+  function openEditDialog() {
+    setEditName(user.name ?? '')
+    setEditEmail(user.email)
+    setEditOpen(true)
+  }
+
+  function handleSaveProfile() {
+    startProfileTransition(async () => {
+      try {
+        await updateUserProfileAction(user.id, {
+          name: editName.trim() || null,
+          email: editEmail.trim(),
+        })
+        toast.success('Bruger opdateret')
+        setEditOpen(false)
+        router.refresh()
+      } catch (err) {
+        toast.error(
+          err instanceof Error ? err.message : 'Kunne ikke opdatere bruger'
+        )
+      }
+    })
+  }
 
   function handleRoleChange(newRole: string) {
     startTransition(async () => {
@@ -97,9 +138,21 @@ export function UserHeader({
     <div className="space-y-4">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            {user.name ?? 'Anonym bruger'}
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-3xl font-bold tracking-tight">
+              {user.name ?? 'Anonym bruger'}
+            </h1>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={openEditDialog}
+              aria-label="Rediger navn og email"
+              className="size-7"
+            >
+              <Pencil className="size-4" />
+            </Button>
+          </div>
           <p className="text-muted-foreground">
             {user.email} &middot; Oprettet {formatDate(user.createdAt)}
           </p>
@@ -168,6 +221,58 @@ export function UserHeader({
           </Select>
         )}
       </div>
+
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Rediger bruger</DialogTitle>
+            <DialogDescription>
+              Opdaterer navn og email. Email-ændringen synkroniseres til
+              Supabase auth.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-name">Navn</Label>
+              <Input
+                id="edit-name"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                placeholder="Fulde navn"
+                disabled={isSavingProfile}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-email">Email</Label>
+              <Input
+                id="edit-email"
+                type="email"
+                value={editEmail}
+                onChange={(e) => setEditEmail(e.target.value)}
+                placeholder="navn@familymind.nu"
+                disabled={isSavingProfile}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setEditOpen(false)}
+              disabled={isSavingProfile}
+            >
+              Annuller
+            </Button>
+            <Button
+              type="button"
+              onClick={handleSaveProfile}
+              disabled={isSavingProfile}
+            >
+              {isSavingProfile ? 'Gemmer...' : 'Gem'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
