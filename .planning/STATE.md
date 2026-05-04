@@ -150,7 +150,7 @@ Carried from v1.0:
 
 ### Pending Todos
 
-None yet.
+- 2026-04-29: Verify Resend domain for transactional emails (tooling) — `.planning/todos/pending/2026-04-29-verify-resend-domain-for-transactional-emails.md`
 
 ### Blockers/Concerns
 
