@@ -12,7 +12,7 @@ files:
 Resend afviser p.t. alle email-sendinger med fejlen:
 
 ```
-The mettehummel.dk domain is not verified.
+The familymind.nu domain is not verified.
 Please, add and verify your domain on https://resend.com/domains
 ```
 
@@ -32,8 +32,8 @@ Opdaget under e2e-test 2026-04-29 efter Stripe-audit-PRs (#17–#21).
 ## Solution
 
 1. Gå til https://resend.com/domains
-2. Tilføj `mettehummel.dk` (eller subdomain `mail.mettehummel.dk`)
-3. Tilføj DNS-records Resend giver (SPF, DKIM, DMARC) hos DNS-provider for mettehummel.dk
+2. Tilføj `familymind.nu` (eller subdomain `mail.familymind.nu`)
+3. Tilføj DNS-records Resend giver (SPF, DKIM, DMARC) hos DNS-provider for familymind.nu
 4. Vent 5–30 min på propagation, klik "Verify"
 
 **Verifikation efter verifikation:**

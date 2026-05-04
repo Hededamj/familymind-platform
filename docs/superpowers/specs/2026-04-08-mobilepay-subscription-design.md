@@ -460,7 +460,7 @@ Under `/admin/analytics` tilføjes:
 3. Opret test-credentials i sandbox
 4. Byg + test mod sandbox
 5. Ansøg om production-credentials
-6. Opsæt production webhook URL: `https://familymind.dk/api/webhooks/mobilepay`
+6. Opsæt production webhook URL: `https://familymind.nu/api/webhooks/mobilepay`
 7. Sæt credentials i Vercel env + Organization-row for FamilyMind
 8. Go-live med feature flag
 
