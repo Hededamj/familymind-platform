@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/tabs'
 import { toast } from 'sonner'
 import { Plus, Trash2 } from 'lucide-react'
+import { ImageUploader } from '@/components/image-uploader'
 import { updateBrandingAction, updateLandingJsonAction } from '../actions'
 
 // ── Types ──
@@ -291,24 +292,16 @@ export function BrandingForm({ org }: { org: OrgData }) {
               />
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="logoUrl">Logo URL</Label>
-                <Input
-                  id="logoUrl"
-                  value={logoUrl}
-                  onChange={(e) => setLogoUrl(e.target.value)}
-                  placeholder="https://..."
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="faviconUrl">Favicon URL</Label>
-                <Input
-                  id="faviconUrl"
-                  value={faviconUrl}
-                  onChange={(e) => setFaviconUrl(e.target.value)}
-                  placeholder="https://..."
-                />
-              </div>
+              <ImageUploader
+                label="Logo"
+                value={logoUrl || null}
+                onChange={(url) => setLogoUrl(url ?? '')}
+              />
+              <ImageUploader
+                label="Favicon"
+                value={faviconUrl || null}
+                onChange={(url) => setFaviconUrl(url ?? '')}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="websiteUrl">Website URL</Label>
