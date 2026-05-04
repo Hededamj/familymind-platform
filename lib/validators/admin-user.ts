@@ -14,6 +14,11 @@ export const updateUserRoleSchema = z.object({
   role: z.enum(['USER', 'ADMIN']),
 })
 
+export const updateUserProfileSchema = z.object({
+  name: z.string().trim().max(120).nullable(),
+  email: z.string().trim().toLowerCase().email('Ugyldig email'),
+})
+
 export const grantAccessSchema = z.object({
   userId: z.string().uuid(),
   courseId: z.string().uuid().optional(),

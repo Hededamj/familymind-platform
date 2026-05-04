@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
 import type { z } from 'zod'
 import { userListFiltersSchema } from '@/lib/validators/admin-user'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 type UserListFilters = z.infer<typeof userListFiltersSchema>
 
@@ -262,6 +263,47 @@ export async function updateUserRole(
   return prisma.user.update({
     where: { id: userId },
     data: { role },
+  })
+}
+
+// ---------------------------------------------------------------------------
+// 4b. updateUserProfile — change name and/or email (kept in sync with Supabase auth)
+// ---------------------------------------------------------------------------
+
+export async function updateUserProfile(
+  userId: string,
+  data: { name: string | null; email: string }
+) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { email: true },
+  })
+  if (!user) throw new Error('Bruger ikke fundet')
+
+  const emailChanged = data.email !== user.email
+
+  if (emailChanged) {
+    const conflict = await prisma.user.findUnique({
+      where: { email: data.email },
+      select: { id: true },
+    })
+    if (conflict && conflict.id !== userId) {
+      throw new Error('Email er allerede i brug af en anden bruger')
+    }
+
+    // Supabase auth must be updated first — if it fails we abort with no DB change.
+    // email_confirm: true skips the user-confirmation flow since admin is the actor.
+    const supabase = createAdminClient()
+    const { error } = await supabase.auth.admin.updateUserById(userId, {
+      email: data.email,
+      email_confirm: true,
+    })
+    if (error) throw new Error(`Supabase: ${error.message}`)
+  }
+
+  return prisma.user.update({
+    where: { id: userId },
+    data: { name: data.name, email: data.email },
   })
 }
 

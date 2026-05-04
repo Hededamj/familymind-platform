@@ -6,6 +6,7 @@ import * as adminUserService from '@/lib/services/admin-user.service'
 import * as tagService from '@/lib/services/tag.service'
 import {
   updateUserRoleSchema,
+  updateUserProfileSchema,
   grantAccessSchema,
   bulkEmailSchema,
 } from '@/lib/validators/admin-user'
@@ -27,6 +28,19 @@ export async function updateUserRoleAction(
   }
 
   const result = await adminUserService.updateUserRole(validUserId, validated.role)
+  revalidatePath('/admin/users')
+  revalidatePath(`/admin/users/${validUserId}`)
+  return result
+}
+
+export async function updateUserProfileAction(
+  userId: string,
+  data: z.input<typeof updateUserProfileSchema>
+) {
+  await requireAdmin()
+  const validUserId = uuidSchema.parse(userId)
+  const validated = updateUserProfileSchema.parse(data)
+  const result = await adminUserService.updateUserProfile(validUserId, validated)
   revalidatePath('/admin/users')
   revalidatePath(`/admin/users/${validUserId}`)
   return result
