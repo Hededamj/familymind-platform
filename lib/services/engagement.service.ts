@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { getResend } from '@/lib/resend'
+import { getGreetingName } from '@/lib/format-name'
 import type { InAppNotificationType } from '@prisma/client'
 
 // ---------------------------------------------------------------------------
@@ -44,9 +45,13 @@ export async function sendTemplatedEmail(
     return null
   }
 
-  // Interpolate variables into subject and body
+  // Interpolate variables into subject and body.
+  // userName is the FIRST NAME (used for greetings like "Hej {{userName}}").
+  // userFullName is the full name as stored, for the rare template that needs it.
+  const greetingName = getGreetingName(user.name, user.email)
   const vars: Record<string, string> = {
-    userName: user.name || user.email.split('@')[0],
+    userName: greetingName,
+    userFullName: user.name || greetingName,
     brandName: org?.brandName || 'FamilyMind',
     appUrl: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
     unsubscribeUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/settings`,
