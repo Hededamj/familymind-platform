@@ -63,7 +63,7 @@ export function ImageUploader({ value, onChange, label = 'Cover-billede' }: Imag
       <input
         ref={inputRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp,image/gif"
+        accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml,image/x-icon,.ico"
         onChange={handleChange}
         className="hidden"
       />
