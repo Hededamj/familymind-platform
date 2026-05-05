@@ -127,6 +127,20 @@ enum RetentionOfferType {
 // Core Models
 // ──────────────────────────────────────────────
 
+/// Small image blobs stored directly in Postgres rather than on a CDN.
+/// Used for avatars, logos, favicons, and course/bundle covers — anything
+/// where the per-image traffic is low enough that DB storage and Vercel
+/// egress are cheaper than the operational cost of an external object store.
+/// See app/api/assets/[id]/route.ts for the serve endpoint.
+model Asset {
+  id        String   @id @default(uuid()) @db.Uuid
+  bytes     Bytes
+  mime      String
+  etag      String   @unique
+  byteSize  Int
+  createdAt DateTime @default(now())
+}
+
 model User {
   id                  String    @id @default(uuid()) @db.Uuid
   email               String    @unique
