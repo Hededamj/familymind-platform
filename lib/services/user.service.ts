@@ -65,6 +65,13 @@ export async function updateProfile(
   return prisma.user.update({ where: { id: userId }, data: validated })
 }
 
+export async function updateUserAvatar(userId: string, avatarUrl: string | null) {
+  return prisma.user.update({
+    where: { id: userId },
+    data: { avatarUrl },
+  })
+}
+
 export async function getUserById(id: string) {
   return prisma.user.findUnique({ where: { id } })
 }
