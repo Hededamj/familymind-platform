@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -32,6 +33,7 @@ type Props = {
   userName: string
   userEmail: string
   userRole: string
+  userAvatarUrl: string | null
 }
 
 const navItems = [
@@ -50,7 +52,13 @@ function getInitials(name: string): string {
     .toUpperCase()
 }
 
-export function AppSidebar({ brandName, userName, userEmail, userRole }: Props) {
+export function AppSidebar({
+  brandName,
+  userName,
+  userEmail,
+  userRole,
+  userAvatarUrl,
+}: Props) {
   const pathname = usePathname()
   const router = useRouter()
   const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -173,8 +181,19 @@ export function AppSidebar({ brandName, userName, userEmail, userRole }: Props) 
             title={userName}
           >
             {/* Avatar */}
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] text-white text-sm font-semibold">
-              {getInitials(userName)}
+            <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--primary)] text-white text-sm font-semibold">
+              {userAvatarUrl ? (
+                <Image
+                  src={userAvatarUrl}
+                  alt={userName}
+                  width={40}
+                  height={40}
+                  className="size-full object-cover"
+                  unoptimized
+                />
+              ) : (
+                <span>{getInitials(userName)}</span>
+              )}
             </div>
             <div className="min-w-0 flex-1 hidden lg:block">
               <p className="truncate text-sm font-medium text-[var(--foreground)]">

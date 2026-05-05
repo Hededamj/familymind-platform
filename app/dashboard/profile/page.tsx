@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import {
   User,
   Bell,
@@ -46,10 +47,21 @@ export default async function ProfilePage() {
       <div className="mx-auto w-full max-w-lg">
         {/* Avatar + user info */}
         <div className="flex flex-col items-center text-center">
-          <div className="flex size-16 items-center justify-center rounded-full bg-primary">
-            <span className="text-xl font-semibold text-primary-foreground">
-              {initials}
-            </span>
+          <div className="flex size-16 items-center justify-center overflow-hidden rounded-full bg-primary">
+            {user.avatarUrl ? (
+              <Image
+                src={user.avatarUrl}
+                alt={displayName}
+                width={64}
+                height={64}
+                className="size-full object-cover"
+                unoptimized
+              />
+            ) : (
+              <span className="text-xl font-semibold text-primary-foreground">
+                {initials}
+              </span>
+            )}
           </div>
           <h1 className="mt-3 font-serif text-xl">{displayName}</h1>
           <p className="mt-1 text-sm text-muted-foreground">{user.email}</p>
