@@ -38,18 +38,18 @@ function intervalLabel(
   interval: string | null,
   intervalCount: number
 ): string {
-  if (billingType === 'ONE_TIME') return 'Engangsbetaling'
+  if (billingType === 'one_time') return 'Engangsbetaling'
   if (!interval) return ''
   const unit =
-    interval === 'MONTH'
+    interval === 'month'
       ? intervalCount === 1
         ? 'måned'
         : 'måneder'
-      : interval === 'YEAR'
+      : interval === 'year'
         ? intervalCount === 1
           ? 'år'
           : 'år'
-        : interval === 'WEEK'
+        : interval === 'week'
           ? 'uge'
           : 'dag'
   return intervalCount === 1 ? `pr. ${unit}` : `hver ${intervalCount} ${unit}`
