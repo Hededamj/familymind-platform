@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Calm dashboard — sketch 001</title>
+<link rel="stylesheet" href="../themes/default.css">
+<style>
+  /* Sketch toolbar */
+  .toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    padding: var(--space-3) var(--space-6);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+  }
+  .toolbar-title {
+    font-family: var(--font-serif);
+    font-size: var(--text-base);
+    color: var(--color-text-muted);
+  }
+  .toolbar-title strong {
+    color: var(--color-text);
+    font-weight: 500;
+  }
+  .tabs { display: flex; gap: var(--space-1); }
+  .tab {
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-full);
+    border: 1px solid transparent;
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .tab:hover { background: var(--color-sand); color: var(--color-text); }
+  .tab.active {
+    background: var(--color-text);
+    color: var(--color-surface);
+  }
+  .tab .star { color: #F4B73D; margin-right: 4px; }
+
+  /* Mocked sidebar to give realistic frame */
+  .app {
+    display: flex;
+    min-height: 100vh;
+  }
+  .sidebar {
+    width: 240px;
+    background: var(--color-sand);
+    border-right: 1px solid var(--color-border);
+    padding: var(--space-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+  .sidebar-brand {
+    font-family: var(--font-serif);
+    font-size: var(--text-xl);
+    margin-bottom: var(--space-4);
+  }
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    text-decoration: none;
+    font-size: var(--text-sm);
+    opacity: 0.6;
+  }
+  .sidebar-item.active {
+    background: var(--color-surface);
+    opacity: 1;
+    font-weight: 500;
+  }
+  .sidebar-item .dot {
+    width: 18px; height: 18px; border-radius: 50%; background: var(--color-text); opacity: 0.3;
+  }
+  .sidebar-item.active .dot { background: var(--color-primary); opacity: 1; }
+  .sidebar-spacer { flex: 1; }
+  .sidebar-user {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+  }
+  .avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: var(--color-primary-fg);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 500; font-size: var(--text-sm);
+  }
+
+  .main {
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  /* Variant container */
+  .variant { display: none; padding: var(--space-12) var(--space-8); }
+  .variant.active { display: block; }
+  .variant-inner {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  /* Common bits */
+  .greeting-name {
+    font-family: var(--font-serif);
+    font-size: var(--text-3xl);
+    font-weight: 400;
+    line-height: 1.1;
+    margin: 0 0 var(--space-2) 0;
+  }
+  .greeting-sub {
+    color: var(--color-text-muted);
+    font-size: var(--text-base);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  /* Hero card */
+  .hero-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-10);
+    box-shadow: var(--shadow-sm);
+    margin-top: var(--space-10);
+  }
+  .hero-eyebrow {
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-primary);
+    font-weight: 600;
+    margin: 0 0 var(--space-3) 0;
+  }
+  .hero-title {
+    font-family: var(--font-serif);
+    font-size: var(--text-2xl);
+    line-height: 1.25;
+    margin: 0 0 var(--space-3) 0;
+    font-weight: 400;
+  }
+  .hero-text {
+    color: var(--color-text-muted);
+    margin: 0 0 var(--space-6) 0;
+    line-height: 1.55;
+  }
+  .progress-row {
+    display: flex;
+    gap: 6px;
+    margin: 0 0 var(--space-6) 0;
+  }
+  .progress-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--color-border);
+  }
+  .progress-dot.done { background: var(--color-success); }
+  .progress-dot.now { background: var(--color-primary); }
+  .progress-meta {
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+    margin-left: auto;
+    align-self: center;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    background: var(--color-text);
+    color: var(--color-surface);
+    border: none;
+    padding: var(--space-3) var(--space-6);
+    border-radius: var(--radius-md);
+    font-size: var(--text-base);
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    min-height: 44px;
+  }
+  .btn:hover { background: #2a2a2a; }
+  .btn-block { width: 100%; }
+  .btn-ghost { background: transparent; color: var(--color-text-muted); }
+  .btn-ghost:hover { background: var(--color-sand); color: var(--color-text); }
+
+  /* Status pills */
+  .pill-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+  }
+  .pill {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
+    text-decoration: none;
+    color: var(--color-text);
+    transition: all 0.15s;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+  .pill:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-sm);
+  }
+  .pill-label {
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .pill-value {
+    font-family: var(--font-serif);
+    font-size: var(--text-2xl);
+    line-height: 1.1;
+    font-weight: 400;
+  }
+  .pill-meta {
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+  }
+
+  /* Variant B — quiet library */
+  .quiet-section {
+    margin-top: var(--space-12);
+  }
+  .quiet-heading {
+    font-family: var(--font-serif);
+    font-size: var(--text-lg);
+    font-weight: 400;
+    margin: 0 0 var(--space-4) 0;
+    color: var(--color-text);
+  }
+  .quiet-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+  }
+  .quiet-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    text-decoration: none;
+    color: var(--color-text);
+    transition: all 0.15s;
+  }
+  .quiet-card:hover { box-shadow: var(--shadow-sm); }
+  .quiet-thumb {
+    width: 56px; height: 56px;
+    border-radius: var(--radius-md);
+    background: var(--color-sand);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-serif);
+    font-size: var(--text-xl);
+    color: var(--color-primary);
+  }
+  .quiet-title { font-size: var(--text-sm); font-weight: 500; line-height: 1.3; }
+  .quiet-progress {
+    margin-top: 6px;
+    height: 3px;
+    background: var(--color-border);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .quiet-progress-fill {
+    height: 100%;
+    background: var(--color-primary);
+  }
+  .quiet-progress-meta {
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+    margin-top: 4px;
+  }
+
+  /* Variant C — minimal */
+  .minimal-card {
+    background: linear-gradient(135deg, var(--color-sand) 0%, var(--color-sand-dark) 100%);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-12);
+    text-align: center;
+    margin-top: var(--space-8);
+  }
+  .minimal-icon {
+    width: 56px; height: 56px;
+    background: var(--color-surface);
+    border-radius: 50%;
+    margin: 0 auto var(--space-5) auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-xs);
+    font-size: var(--text-xl);
+    color: var(--color-primary);
+  }
+
+  /* Old dashboard reference */
+  .old-stack { display: flex; flex-direction: column; gap: var(--space-4); margin-top: var(--space-8); }
+  .old-section {
+    background: var(--color-surface);
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+  }
+  .old-section strong { color: var(--color-text); display: block; margin-bottom: 4px; }
+
+  @media (max-width: 720px) {
+    .sidebar { display: none; }
+    .variant { padding: var(--space-6) var(--space-4); }
+    .pill-row { grid-template-columns: 1fr; }
+    .quiet-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="toolbar-title">
+    Sketch 001 · <strong>Calm dashboard</strong>
+  </div>
+  <div class="tabs">
+    <button class="tab active" data-target="A">A · Single-focus</button>
+    <button class="tab" data-target="B">B · Hero + bibliotek</button>
+    <button class="tab" data-target="C">C · Minimal</button>
+    <button class="tab" data-target="OLD">D · Nuværende (ref)</button>
+  </div>
+</div>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="sidebar-brand">FamilyMind</div>
+    <a class="sidebar-item active" href="#"><span class="dot"></span>Hjem</a>
+    <a class="sidebar-item" href="#"><span class="dot"></span>Fællesskab</a>
+    <a class="sidebar-item" href="#"><span class="dot"></span>Mine forløb</a>
+    <a class="sidebar-item" href="#"><span class="dot"></span>Opdag</a>
+    <div class="sidebar-spacer"></div>
+    <div class="sidebar-user">
+      <div class="avatar">MH</div>
+      <div>
+        <div style="font-size: var(--text-sm); font-weight: 500;">Mette</div>
+        <div style="font-size: var(--text-xs); color: var(--color-text-muted);">mette@…</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <!-- ─────────────────────── VARIANT A — SINGLE-FOCUS ─────────────────────── -->
+    <section class="variant active" data-variant="A">
+      <div class="variant-inner">
+        <h1 class="greeting-name">Hej Mette</h1>
+        <p class="greeting-sub">Én rolig morgen — her er din næste lille ting.</p>
+
+        <article class="hero-card">
+          <p class="hero-eyebrow">DAGENS FOKUS</p>
+          <h2 class="hero-title">Lyt: Når dit barn ikke vil i skole</h2>
+          <p class="hero-text">
+            En kort lydguide om at møde modstand med ro — og finde ud af hvad
+            der ligger under. 7 minutter.
+          </p>
+          <div class="progress-row" aria-label="Fremgang i Skoleværing">
+            <span class="progress-dot done"></span>
+            <span class="progress-dot done"></span>
+            <span class="progress-dot now"></span>
+            <span class="progress-dot"></span>
+            <span class="progress-dot"></span>
+            <span class="progress-dot"></span>
+            <span class="progress-dot"></span>
+            <span class="progress-meta">3 af 7 i Skoleværing</span>
+          </div>
+          <a href="#" class="btn btn-block">Fortsæt →</a>
+        </article>
+
+        <div class="pill-row">
+          <a class="pill" href="#">
+            <span class="pill-label">Forløb</span>
+            <span class="pill-value">1</span>
+            <span class="pill-meta">Skoleværing · 43 %</span>
+          </a>
+          <a class="pill" href="#">
+            <span class="pill-label">Rejse</span>
+            <span class="pill-value">12 / 30</span>
+            <span class="pill-meta">Næste check-in i morgen</span>
+          </a>
+          <a class="pill" href="#">
+            <span class="pill-label">Fællesskab</span>
+            <span class="pill-value">2</span>
+            <span class="pill-meta">nye indlæg i Skoleværing</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────────────────────── VARIANT B — HERO + BIBLIOTEK ─────────────────────── -->
+    <section class="variant" data-variant="B">
+      <div class="variant-inner">
+        <h1 class="greeting-name">Hej Mette</h1>
+        <p class="greeting-sub">Hvor vil du gerne fortsætte?</p>
+
+        <article class="hero-card">
+          <p class="hero-eyebrow">DAGENS FOKUS</p>
+          <h2 class="hero-title">Lyt: Når dit barn ikke vil i skole</h2>
+          <p class="hero-text">
+            En kort lydguide om at møde modstand med ro — og finde ud af hvad
+            der ligger under. 7 minutter.
+          </p>
+          <a href="#" class="btn btn-block">Fortsæt →</a>
+        </article>
+
+        <section class="quiet-section">
+          <h2 class="quiet-heading">Mine forløb</h2>
+          <div class="quiet-grid">
+            <a class="quiet-card" href="#">
+              <div class="quiet-thumb">S</div>
+              <div style="min-width: 0; flex: 1;">
+                <div class="quiet-title">Skoleværing</div>
+                <div class="quiet-progress"><div class="quiet-progress-fill" style="width: 43%"></div></div>
+                <div class="quiet-progress-meta">3 af 7 lektioner</div>
+              </div>
+            </a>
+            <a class="quiet-card" href="#">
+              <div class="quiet-thumb">R</div>
+              <div style="min-width: 0; flex: 1;">
+                <div class="quiet-title">Rolige morgener</div>
+                <div class="quiet-progress"><div class="quiet-progress-fill" style="width: 0%"></div></div>
+                <div class="quiet-progress-meta">Ikke startet</div>
+              </div>
+            </a>
+          </div>
+        </section>
+
+        <section class="quiet-section">
+          <h2 class="quiet-heading">Fællesskab</h2>
+          <div class="quiet-grid">
+            <a class="quiet-card" href="#">
+              <div class="quiet-thumb" style="background: var(--color-success-soft); color: var(--color-success);">2</div>
+              <div>
+                <div class="quiet-title">Skoleværing</div>
+                <div class="quiet-progress-meta">nye indlæg siden i går</div>
+              </div>
+            </a>
+            <a class="quiet-card" href="#">
+              <div class="quiet-thumb" style="background: var(--color-sand); color: var(--color-text-muted);">·</div>
+              <div>
+                <div class="quiet-title">Søvn 0–3 år</div>
+                <div class="quiet-progress-meta">Rolig uge</div>
+              </div>
+            </a>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <!-- ─────────────────────── VARIANT C — MINIMAL ─────────────────────── -->
+    <section class="variant" data-variant="C">
+      <div class="variant-inner">
+        <h1 class="greeting-name">Hej Mette</h1>
+        <p class="greeting-sub">Det her vil hjælpe i dag.</p>
+
+        <article class="minimal-card">
+          <div class="minimal-icon">♪</div>
+          <p class="hero-eyebrow" style="margin: 0 0 var(--space-2) 0;">DAGENS FOKUS · 7 MIN</p>
+          <h2 class="hero-title" style="font-size: var(--text-2xl); max-width: 460px; margin: 0 auto var(--space-4);">
+            Når dit barn ikke vil i skole
+          </h2>
+          <p class="hero-text" style="max-width: 420px; margin: 0 auto var(--space-8);">
+            En kort lydguide om at møde modstand med ro — og finde ud af hvad
+            der ligger under.
+          </p>
+          <a href="#" class="btn">Fortsæt</a>
+        </article>
+
+        <div style="margin-top: var(--space-12); text-align: center;">
+          <a href="#" class="btn btn-ghost" style="font-size: var(--text-sm);">
+            Mit univers — forløb, rejse, fællesskab →
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────────────────────── REFERENCE — NUVÆRENDE ─────────────────────── -->
+    <section class="variant" data-variant="OLD">
+      <div class="variant-inner">
+        <h1 class="greeting-name">Hej Mette</h1>
+        <p class="greeting-sub">9 sektioner stablet på hinanden — sådan ser det ud nu.</p>
+        <div class="old-stack">
+          <div class="old-section"><strong>1 · Velkomst-dialog (modal)</strong>Vises kun første gang</div>
+          <div class="old-section"><strong>2 · Greeting + navn</strong>"Hej Mette"</div>
+          <div class="old-section"><strong>3 · Personaliseret undertekst</strong>Kontekst om hvem brugeren er</div>
+          <div class="old-section"><strong>4 · Community-pills</strong>Genveje til rum</div>
+          <div class="old-section"><strong>5 · Daglig check-in</strong>Hvordan har du det?</div>
+          <div class="old-section"><strong>6 · Ugens fokus / journey-dag</strong>Den aktive rejse</div>
+          <div class="old-section"><strong>7 · Completed journey banner</strong>Hvis nyligt fuldført</div>
+          <div class="old-section"><strong>8 · Admin-besked</strong>Beskeder fra Mette</div>
+          <div class="old-section"><strong>9 · Mine forløb</strong>Op til 3 kort + "Se alle"</div>
+          <div class="old-section"><strong>10 · Anbefalinger</strong>Personlige forslag</div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+  // Tab switcher
+  document.querySelectorAll('.tab').forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const target = tab.dataset.target;
+      document.querySelectorAll('.tab').forEach((t) => t.classList.toggle('active', t === tab));
+      document.querySelectorAll('.variant').forEach((v) => {
+        v.classList.toggle('active', v.dataset.variant === target);
+      });
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+/* FamilyMind theme — mirrors app/globals.css tokens so sketches render as the real app would */
+:root {
+  /* Brand palette */
+  --color-bg: #FAFAF8;
+  --color-surface: #FFFFFF;
+  --color-sand: #F5F0EB;
+  --color-sand-dark: #EDE6DF;
+  --color-border: #E8E4DF;
+  --color-text: #1A1A1A;
+  --color-text-muted: #6B7280;
+
+  --color-primary: #86A0A6;        /* Dæmpet nordisk blågrøn */
+  --color-primary-fg: #FFFFFF;
+  --color-accent: #E8715A;         /* Coral — used sparingly */
+  --color-accent-fg: #FFFFFF;
+  --color-success: #2A6B5A;
+  --color-success-soft: rgba(42, 107, 90, 0.1);
+
+  /* Typography */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-serif: "Source Serif 4", "Source Serif Pro", ui-serif, Georgia, serif;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+
+  /* Spacing — generous, calm */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+
+  /* Shapes */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* Shadows — soft, never sharp */
+  --shadow-xs: 0 1px 2px rgba(20, 20, 20, 0.04);
+  --shadow-sm: 0 2px 8px rgba(20, 20, 20, 0.04);
+  --shadow-md: 0 6px 20px rgba(20, 20, 20, 0.06);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  background: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "rlig" 1, "calt" 1;
+}
+
+.font-serif {
+  font-family: var(--font-serif);
+}
