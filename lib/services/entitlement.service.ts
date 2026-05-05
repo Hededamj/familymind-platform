@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { getCourseProgress } from './progress.service'
 
 const activeEntitlementFilter = {
   status: 'ACTIVE' as const,
@@ -33,6 +34,82 @@ export async function getUserEntitlements(userId: string) {
     where: { userId, ...activeEntitlementFilter },
     include: { course: true, bundle: true, priceVariant: true },
   })
+}
+
+/**
+ * Returns all active courses the user has access to — direct course
+ * entitlements and courses unlocked via bundle entitlements — each enriched
+ * with progress and the granting bundle (if any). Used by Mine forløb and
+ * the dashboard summary.
+ */
+export async function getUserAccessibleCourses(userId: string) {
+  const entitlements = await prisma.entitlement.findMany({
+    where: { userId, ...activeEntitlementFilter },
+    include: {
+      course: true,
+      bundle: {
+        include: {
+          courses: {
+            include: { course: true },
+            orderBy: { position: 'asc' },
+          },
+        },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+  })
+
+  type CourseRow = NonNullable<(typeof entitlements)[number]['course']>
+  type BundleRow = NonNullable<(typeof entitlements)[number]['bundle']>
+
+  const byCourseId = new Map<
+    string,
+    {
+      course: CourseRow
+      grantedAt: Date
+      grantedVia: { kind: 'course' } | { kind: 'bundle'; bundle: BundleRow }
+    }
+  >()
+
+  for (const ent of entitlements) {
+    if (ent.course && ent.course.isActive) {
+      const existing = byCourseId.get(ent.course.id)
+      if (!existing || ent.createdAt > existing.grantedAt) {
+        byCourseId.set(ent.course.id, {
+          course: ent.course,
+          grantedAt: ent.createdAt,
+          grantedVia: { kind: 'course' },
+        })
+      }
+      continue
+    }
+    if (ent.bundle) {
+      for (const bc of ent.bundle.courses) {
+        if (!bc.course.isActive) continue
+        const existing = byCourseId.get(bc.course.id)
+        // Direct course entitlements win over bundle ones.
+        if (existing && existing.grantedVia.kind === 'course') continue
+        if (!existing || ent.createdAt > existing.grantedAt) {
+          byCourseId.set(bc.course.id, {
+            course: bc.course,
+            grantedAt: ent.createdAt,
+            grantedVia: { kind: 'bundle', bundle: ent.bundle },
+          })
+        }
+      }
+    }
+  }
+
+  const rows = Array.from(byCourseId.values())
+  const enriched = await Promise.all(
+    rows.map(async (row) => {
+      const progress = await getCourseProgress(userId, row.course.id)
+      return { ...row, progress }
+    })
+  )
+
+  enriched.sort((a, b) => b.grantedAt.getTime() - a.grantedAt.getTime())
+  return enriched
 }
 
 export async function hasAccessToCourse(
