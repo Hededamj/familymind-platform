@@ -7,6 +7,16 @@ import { ArrowLeft, User, CreditCard, LogOut } from 'lucide-react'
 import { ManageSubscriptionButton } from './_components/manage-subscription-button'
 import { LogoutButton } from './_components/logout-button'
 import { DeleteAccountSection } from './_components/delete-account-section'
+import { AvatarUploader } from './_components/avatar-uploader'
+
+function getInitials(displayName: string): string {
+  return displayName
+    .split(' ')
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
+}
 
 export default async function SettingsPage() {
   const user = await requireAuth()
@@ -39,25 +49,26 @@ export default async function SettingsPage() {
             <h2 className="font-serif text-lg">Om dig</h2>
           </div>
           <div className="rounded-2xl border border-border bg-white p-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                    Navn
-                  </p>
-                  <p className="mt-0.5 font-medium">
-                    {user.name || 'Ikke angivet'}
-                  </p>
-                </div>
+            <div className="space-y-5">
+              <AvatarUploader
+                initialUrl={user.avatarUrl}
+                initials={getInitials(user.name || user.email.split('@')[0])}
+              />
+              <div className="border-t border-border" />
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                  Navn
+                </p>
+                <p className="mt-0.5 font-medium">
+                  {user.name || 'Ikke angivet'}
+                </p>
               </div>
               <div className="border-t border-border" />
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                    E-mail
-                  </p>
-                  <p className="mt-0.5 font-medium">{user.email}</p>
-                </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                  E-mail
+                </p>
+                <p className="mt-0.5 font-medium">{user.email}</p>
               </div>
             </div>
           </div>

@@ -21,6 +21,7 @@ export async function AppLayout({ children }: { children: React.ReactNode }) {
         userName={displayName}
         userEmail={user.email}
         userRole={user.role}
+        userAvatarUrl={user.avatarUrl}
       />
       <div className="flex min-h-screen min-w-0 flex-1 flex-col">
         <AppTopbar brandName={tenant.brandName} />
